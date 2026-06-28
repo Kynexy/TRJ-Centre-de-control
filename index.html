@@ -1,122 +1,66 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TRJ - Centre de Contrôle</title>
-
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRJ - Centre de Contrôle</title>
+<link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
 <header class="topbar">
-    <h1>🤖 TRJ Centre de Contrôle</h1>
-    <div class="status">
-        <span>🕒 <span id="heure">08:00</span></span>
-        <span>📅 <span id="date">Chargement...</span></span>
-    </div>
+<h1>🤖 TRJ Centre de Contrôle</h1>
+<div class="status">
+<span>🕒 <span id="heure">08:00</span></span>
+<span>📅 <span id="date">Chargement...</span></span>
+</div>
 </header>
 
 <main>
-
 <section class="card webcams">
-
 <h2>🎥 Webcams de Tahiti</h2>
 
 <div class="camera-grid">
-
-  <video controls autoplay muted playsinline width="100%">
-    <source src="https://mia.rtsp.me/B1xDMkCnBwZrXLajDeQMwQ/1782644100/hls/rAkeNeGF.m3u8?ip=103.129.120.42" type="application/x-mpegURL">
-  </video>
-
+<video id="faaaCam" controls autoplay muted playsinline width="100%"></video>
 </div>
 
 </section>
 
 <section class="card conditions">
-
 <h2>🌦 Conditions</h2>
-
-<div class="placeholder">
-Météo • Vent • Houle • Pluie
-</div>
-
+<div class="placeholder">Météo • Vent • Houle • Pluie</div>
 </section>
 
 <section class="card circulation">
-
 <h2>🚦 Circulation</h2>
-
-<div class="placeholder">
-Niveau du trafic + webcams routières
-</div>
-
+<div class="placeholder">Niveau du trafic + webcams routières</div>
 </section>
 
 <section class="card planning">
-
 <h2>📅 Planning</h2>
-
-<div class="placeholder">
-Google Agenda
-</div>
-
+<div class="placeholder">Google Agenda</div>
 </section>
 
 <section class="card messenger">
-
 <h2>💬 Messenger TRJ</h2>
-
-<button class="btn">
-Ouvrir Messenger
-</button>
-
+<button class="btn">Ouvrir Messenger</button>
 </section>
 
 <section class="card pause">
-
 <h2>🎮 Pause</h2>
-
 <div class="games">
-
 <button>Snake</button>
-
 <button>2048</button>
-
 <button>YouTube</button>
-
 <button>Musique</button>
-
 </div>
-
 </section>
-
 </main>
 
-<div class="aurel">
+<div class="aurel">💙</div>
 
-💙
-
-</div>
-
-<script src="script.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script src="script.js"></script>
 
-<script>
-const video = document.querySelector("video");
-
-if (Hls.isSupported()) {
-  const hls = new Hls();
-  hls.loadSource("https://mia.rtsp.me/B1xDMkCnBwZrXLajDeQMwQ/1782644100/hls/rAkeNeGF.m3u8?ip=103.129.120.42");
-  hls.attachMedia(video);
-  hls.on(Hls.Events.MANIFEST_PARSED, function () {
-    video.play();
-  });
-} else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-  video.src = "https://mia.rtsp.me/B1xDMkCnBwZrXLajDeQMwQ/1782644100/hls/rAkeNeGF.m3u8?ip=103.129.120.42";
-  video.play();
-}
-</script>
 </body>
 </html>
