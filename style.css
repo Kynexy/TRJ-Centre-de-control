@@ -175,4 +175,36 @@ transform:scale(1);
 
 }
 
+}.webcam-grid{
+
+display:grid;
+
+grid-template-columns:1fr 1fr;
+
+gap:15px;
+
+margin-top:15px;
+
+}
+
+.webcam-card{
+
+background:#0b2b54;
+
+border-radius:15px;
+
+height:120px;
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+font-size:18px;
+
+font-weight:bold;
+
+border:2px solid rgba(255,255,255,.15);
+
 }
