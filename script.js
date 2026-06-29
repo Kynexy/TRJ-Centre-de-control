@@ -1,12 +1,25 @@
-const video = document.getElementById("faaaCam");
+const webcams = [
+{
+    id: "mooreaCam",
+    url: "https://s81.ipcamlive.com/streams/51xt7nglz8hosntvvy/stream.m3u8"
+},
+{
+    id: "faaaCam",
+    url: "https://s60.ipcamlive.com/streams/3c12q8dvxkowcem5j/stream.m3u8"
+}
+];
 
-if (video) {
+webcams.forEach(cam => {
+
+    const video = document.getElementById(cam.id);
+
+    if (!video) return;
 
     if (Hls.isSupported()) {
 
         const hls = new Hls();
 
-        hls.loadSource("https://mia.rtsp.me/B1xDMkCnBwZrXLajDeQMwQ/1782644100/hls/rAkeNeGF.m3u8?ip=103.129.120.42");
+        hls.loadSource(cam.url);
 
         hls.attachMedia(video);
 
@@ -16,10 +29,10 @@ if (video) {
 
     } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
 
-        video.src = "https://mia.rtsp.me/B1xDMkCnBwZrXLajDeQMwQ/1782644100/hls/rAkeNeGF.m3u8?ip=103.129.120.42";
+        video.src = cam.url;
 
         video.play();
 
     }
 
-}
+});
