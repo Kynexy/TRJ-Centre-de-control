@@ -2,157 +2,112 @@
 <html lang="fr">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRJ - Centre de Contrôle</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <link rel="stylesheet" href="style.css">
+<title>TRJ - Centre de Contrôle</title>
+
+<link rel="stylesheet" href="style.css">
+
 </head>
 
 <body>
 
 <header class="topbar">
 
-    <h1>☁️ Aurel - Centre de Contrôle TRJ</h1>
+<h1>☁️ Aurel - Centre de Contrôle TRJ</h1>
 
-    <div class="status">
-        <span>🕒 <span id="heure">--:--</span></span>
-        <span>📅 <span id="date">Chargement...</span></span>
-    </div>
+<div class="status">
+<span>🕒 <span id="heure">--:--</span></span>
+<span>📅 <span id="date">Chargement...</span></span>
+</div>
 
 </header>
 
 <main>
 
-<!-- ==================== WEBCAMS ==================== -->
+<section class="card">
 
-<section class="card webcams">
-
-<h2>🎥 Webcams de Tahiti</h2>
-
-<div class="camera-grid">
-
-<div class="webcam-card">
-
-<h3>🌴 Vue sur Moorea</h3>
+<h2>🎥 Webcam Aéroport Faaa</h2>
 
 <video
-id="mooreaCam"
-controls
+id="faaaCam"
 autoplay
 muted
 playsinline
-width="100%">
-</video>
-
-</div>
-
-<div class="webcam-card">
-
-<h3>🏙️ Vue sur Papeete</h3>
-
-<video
-id="papeeteCam"
 controls
-autoplay
-muted
-playsinline
-width="100%">
+style="
+width:100%;
+max-width:100%;
+display:block;
+border-radius:18px;
+background:#000;
+">
 </video>
-
-</div>
-
-</div>
 
 </section>
-
-<!-- ==================== METEO ==================== -->
 
 <section class="card">
 
 <h2>🌦 Conditions météo</h2>
 
 <div class="placeholder">
-
 Météo • Vent • Houle • Pluie
-
 </div>
 
 </section>
-
-<!-- ==================== CIRCULATION ==================== -->
 
 <section class="card">
 
 <h2>🚦 Circulation</h2>
 
 <div class="placeholder">
-
 Trafic routier
-
 </div>
 
 </section>
-
-<!-- ==================== PLANNING ==================== -->
 
 <section class="card">
 
 <h2>📅 Planning</h2>
 
 <div class="placeholder">
-
 Google Agenda
-
 </div>
 
 </section>
-
-<!-- ==================== MESSENGER ==================== -->
 
 <section class="card">
 
 <h2>💬 Messenger TRJ</h2>
 
 <button class="btn">
-
 Ouvrir Messenger
-
 </button>
 
 </section>
-
-<!-- ==================== PAUSE ==================== -->
 
 <section class="card">
 
 <h2>🎮 Pause</h2>
 
 <div class="games">
-
 <button>Snake</button>
 <button>2048</button>
 <button>YouTube</button>
 <button>Musique</button>
-
 </div>
 
 </section>
 
 </main>
 
-<!-- ==================== AUREL ==================== -->
-
 <div class="aurel">
-
 ☁️
-
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-
 <script src="script.js"></script>
 
 </body>
-
 </html>

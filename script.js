@@ -1,38 +1,27 @@
-const webcams = [
-{
-    id: "mooreaCam",
-    url: "https://s81.ipcamlive.com/streams/51xt7nglz8hosntvvy/stream.m3u8"
-},
-{
-    id: "papeeteCam",
-    url: "https://s60.ipcamlive.com/streams/3c12q8dvxkowcem5j/stream.m3u8"
-}
-];
+const video = document.getElementById("faaaCam");
 
-webcams.forEach((cam) => {
+if (video) {
 
-    const video = document.getElementById(cam.id);
-
-    if (!video) return;
+    const stream = "https://s60.ipcamlive.com/streams/3c12q8dvxkowcem5j/stream.m3u8";
 
     if (Hls.isSupported()) {
 
-        const hls = new Hls();
+        const hls = new Hls({
+            autoStartLoad: true,
+            startLevel: -1
+        });
 
-        hls.loadSource(cam.url);
-
+        hls.loadSource(stream);
         hls.attachMedia(video);
 
         hls.on(Hls.Events.MANIFEST_PARSED, function () {
-            video.play();
+            video.play().catch(() => {});
         });
 
     } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
 
-        video.src = cam.url;
-
-        video.play();
+        video.src = stream;
+        video.play().catch(() => {});
 
     }
-
-});
+}
