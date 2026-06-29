@@ -1,48 +1,56 @@
-/* ===========================
-   AUREL - CENTRE DE CONTRÔLE
-   STYLE.CSS
-=========================== */
+/* =====================================
+   AUREL - TABLEAU DE BORD TRJ
+===================================== */
 
 *{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:Arial,Helvetica,sans-serif;
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,Helvetica,sans-serif;
 }
 
 body{
-    background:#081a34;
-    color:#fff;
-    padding:20px;
+
+background:#081a34;
+color:white;
+padding:18px;
+
 }
 
 /* ===========================
-   BARRE DU HAUT
+   HEADER
 =========================== */
 
 .topbar{
-    background:#103b73;
-    border-radius:20px;
-    padding:25px;
-    margin-bottom:20px;
 
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:20px;
+background:linear-gradient(135deg,#103b73,#18539d);
+border-radius:22px;
+padding:24px;
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+flex-wrap:wrap;
+gap:15px;
+
+margin-bottom:20px;
+
+box-shadow:0 10px 25px rgba(0,0,0,.35);
+
 }
 
 .topbar h1{
-    font-size:2.2rem;
-    line-height:1.15;
+
+font-size:2rem;
+
 }
 
 .status{
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    font-size:18px;
-    opacity:.95;
+
+display:flex;
+gap:20px;
+font-size:18px;
+
 }
 
 /* ===========================
@@ -50,79 +58,143 @@ body{
 =========================== */
 
 main{
-    display:flex;
-    flex-direction:column;
-    gap:20px;
+
+display:flex;
+flex-direction:column;
+gap:20px;
+
 }
 
 .card{
-    background:#123d74;
-    border-radius:22px;
-    padding:22px;
-    box-shadow:0 10px 30px rgba(0,0,0,.35);
+
+background:#123d74;
+border-radius:22px;
+padding:22px;
+
+box-shadow:0 10px 25px rgba(0,0,0,.30);
+
 }
 
 .card h2{
-    margin-bottom:18px;
-    font-size:1.8rem;
+
+margin-bottom:18px;
+font-size:1.5rem;
+
+color:#9fd2ff;
+
 }
 
 /* ===========================
-   WEBCAMS
+   WEBCAM
 =========================== */
 
 video{
 
-    width:100%;
-    display:block;
+width:100%;
+aspect-ratio:16/9;
 
-    border-radius:18px;
+background:black;
 
-    background:#000;
+border-radius:18px;
 
-    overflow:hidden;
+display:block;
 
-    object-fit:cover;
-
-    aspect-ratio:16/9;
-
-    box-shadow:0 8px 20px rgba(0,0,0,.35);
-
-}
-
-.webcam-info{
-
-    margin-top:10px;
-
-    text-align:center;
-
-    font-size:15px;
-
-    opacity:.8;
+object-fit:cover;
 
 }
 
 /* ===========================
-   BLOCS VIDES
+   METEO
 =========================== */
 
-.placeholder{
+#weather{
 
-    height:150px;
+display:flex;
+flex-direction:column;
+gap:14px;
 
-    border:2px dashed rgba(255,255,255,.20);
+}
 
-    border-radius:18px;
+.meteo-ligne{
 
-    display:flex;
+display:flex;
+justify-content:space-between;
 
-    justify-content:center;
+padding:12px 15px;
 
-    align-items:center;
+background:rgba(255,255,255,.06);
 
-    font-size:19px;
+border-radius:12px;
 
-    opacity:.8;
+font-size:18px;
+
+}
+
+/* ===========================
+   TRAFIC
+=========================== */
+
+#traffic{
+
+display:flex;
+flex-direction:column;
+gap:15px;
+
+}
+
+.traffic-status{
+
+font-size:34px;
+font-weight:bold;
+text-align:center;
+
+}
+
+.traffic-detail{
+
+text-align:center;
+
+font-size:18px;
+
+opacity:.9;
+
+}
+
+/* ===========================
+   PLANNING
+=========================== */
+
+#planning{
+
+min-height:90px;
+
+background:rgba(255,255,255,.05);
+
+border-radius:15px;
+
+padding:15px;
+
+font-size:18px;
+
+}
+
+/* ===========================
+   RAPPORT
+=========================== */
+
+#rapport{
+
+min-height:120px;
+
+background:rgba(255,255,255,.05);
+
+border-radius:15px;
+
+padding:18px;
+
+line-height:1.6;
+
+font-size:18px;
 
 }
 
@@ -130,71 +202,56 @@ video{
    BOUTONS
 =========================== */
 
-.btn{
+.quick-grid{
 
-    width:100%;
+display:grid;
 
-    background:#2d9cff;
+grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
 
-    color:#fff;
-
-    border:none;
-
-    border-radius:14px;
-
-    padding:16px;
-
-    font-size:18px;
-
-    cursor:pointer;
-
-    transition:.25s;
+gap:15px;
 
 }
 
-.btn:hover{
+.quick-grid button{
 
-    background:#46a9ff;
+padding:18px;
+
+border:none;
+
+border-radius:14px;
+
+background:#2d9cff;
+
+color:white;
+
+font-size:17px;
+
+cursor:pointer;
+
+transition:.25s;
+
+}
+
+.quick-grid button:hover{
+
+background:#4cb0ff;
+transform:translateY(-2px);
 
 }
 
 /* ===========================
-   JEUX
+   FOOTER
 =========================== */
 
-.games{
+.footer{
 
-    display:grid;
+text-align:center;
 
-    grid-template-columns:repeat(2,1fr);
+padding:25px;
 
-    gap:15px;
+opacity:.7;
 
-}
-
-.games button{
-
-    padding:15px;
-
-    font-size:18px;
-
-    background:#1e63b6;
-
-    color:white;
-
-    border:none;
-
-    border-radius:14px;
-
-    cursor:pointer;
-
-    transition:.2s;
-
-}
-
-.games button:hover{
-
-    background:#2f7fe0;
+font-size:14px;
 
 }
 
@@ -204,55 +261,41 @@ video{
 
 .aurel{
 
-    position:fixed;
+position:fixed;
 
-    right:20px;
+right:20px;
 
-    bottom:20px;
+bottom:20px;
 
-    width:70px;
+width:70px;
 
-    height:70px;
+height:70px;
 
-    border-radius:50%;
+border-radius:50%;
 
-    background:#2da8ff;
+background:#29a8ff;
 
-    display:flex;
+display:flex;
 
-    justify-content:center;
+justify-content:center;
 
-    align-items:center;
+align-items:center;
 
-    font-size:34px;
+font-size:34px;
 
-    box-shadow:0 0 30px #2da8ff;
+box-shadow:0 0 25px #29a8ff;
 
-    animation:pulse 2s infinite;
+animation:pulse 2s infinite;
 
-    cursor:pointer;
+cursor:pointer;
 
 }
 
 @keyframes pulse{
 
-0%{
-
-transform:scale(1);
-
-}
-
-50%{
-
-transform:scale(1.08);
-
-}
-
-100%{
-
-transform:scale(1);
-
-}
+0%{transform:scale(1);}
+50%{transform:scale(1.08);}
+100%{transform:scale(1);}
 
 }
 
@@ -260,7 +303,7 @@ transform:scale(1);
    MOBILE
 =========================== */
 
-@media (max-width:768px){
+@media(max-width:768px){
 
 body{
 
@@ -270,25 +313,23 @@ padding:12px;
 
 .topbar{
 
-padding:18px;
-
 flex-direction:column;
-
 align-items:flex-start;
 
 }
 
 .topbar h1{
 
-font-size:1.7rem;
+font-size:1.6rem;
 
 }
 
 .status{
 
-font-size:16px;
-
+flex-direction:column;
 gap:6px;
+
+font-size:16px;
 
 }
 
@@ -300,29 +341,33 @@ padding:18px;
 
 .card h2{
 
-font-size:1.45rem;
+font-size:1.3rem;
 
 }
 
-.games{
+.meteo-ligne{
+
+font-size:16px;
+
+}
+
+.quick-grid{
 
 grid-template-columns:1fr;
+
+}
+
+.quick-grid button{
+
+font-size:18px;
 
 }
 
 .aurel{
 
 width:60px;
-
 height:60px;
-
 font-size:28px;
-
-}
-
-video{
-
-border-radius:16px;
 
 }
 
