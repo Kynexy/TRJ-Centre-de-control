@@ -1,5 +1,5 @@
 /* =====================================
-   AUREL - TABLEAU DE BORD TRJ
+        AUREL - TABLEAU DE BORD TRJ
 ===================================== */
 
 *{
@@ -11,269 +11,144 @@ font-family:Arial,Helvetica,sans-serif;
 
 body{
 
-background:#081a34;
+background:#07182d;
 color:white;
-padding:18px;
+
+padding:16px;
 
 }
 
 /* ===========================
-   HEADER
+HEADER
 =========================== */
 
 .topbar{
 
-background:linear-gradient(135deg,#103b73,#18539d);
+background:linear-gradient(135deg,#123d74,#1c5fb6);
+
+padding:22px;
+
 border-radius:22px;
-padding:24px;
 
 display:flex;
+
 justify-content:space-between;
+
 align-items:center;
+
 flex-wrap:wrap;
-gap:15px;
 
 margin-bottom:20px;
 
-box-shadow:0 10px 25px rgba(0,0,0,.35);
+box-shadow:0 10px 30px rgba(0,0,0,.35);
 
 }
 
-.topbar h1{
+.title h1{
 
 font-size:2rem;
+
+margin-bottom:4px;
+
+}
+
+.title p{
+
+opacity:.8;
 
 }
 
 .status{
 
 display:flex;
+
 gap:20px;
+
 font-size:18px;
 
 }
 
 /* ===========================
-   CONTENU
+MAIN
 =========================== */
 
 main{
 
 display:flex;
+
 flex-direction:column;
-gap:20px;
+
+gap:22px;
 
 }
+
+/* ===========================
+CARDS
+=========================== */
 
 .card{
 
 background:#123d74;
+
 border-radius:22px;
+
 padding:22px;
 
-box-shadow:0 10px 25px rgba(0,0,0,.30);
+box-shadow:0 8px 25px rgba(0,0,0,.30);
+
+transition:.25s;
+
+}
+
+.card:hover{
+
+transform:translateY(-2px);
 
 }
 
 .card h2{
 
 margin-bottom:18px;
-font-size:1.5rem;
 
-color:#9fd2ff;
+color:#9fd4ff;
 
 }
 
 /* ===========================
-   WEBCAM
+WEBCAM
 =========================== */
 
-video{
+.webcam video{
 
 width:100%;
-aspect-ratio:16/9;
 
-background:black;
+aspect-ratio:16/9;
 
 border-radius:18px;
 
-display:block;
+background:black;
 
 object-fit:cover;
 
 }
 
 /* ===========================
-   METEO
+METEO
 =========================== */
 
-#weather{
+.weather{
 
-display:flex;
-flex-direction:column;
-gap:14px;
+background:linear-gradient(135deg,#1955a8,#2570d5);
 
 }
 
-.meteo-ligne{
+#radar{
 
-display:flex;
-justify-content:space-between;
+height:220px;
 
-padding:12px 15px;
+background:#0f2f58;
 
-background:rgba(255,255,255,.06);
-
-border-radius:12px;
-
-font-size:18px;
-
-}
-
-/* ===========================
-   TRAFIC
-=========================== */
-
-#traffic{
-
-display:flex;
-flex-direction:column;
-gap:15px;
-
-}
-
-.traffic-status{
-
-font-size:34px;
-font-weight:bold;
-text-align:center;
-
-}
-
-.traffic-detail{
-
-text-align:center;
-
-font-size:18px;
-
-opacity:.9;
-
-}
-
-/* ===========================
-   PLANNING
-=========================== */
-
-#planning{
-
-min-height:90px;
-
-background:rgba(255,255,255,.05);
-
-border-radius:15px;
-
-padding:15px;
-
-font-size:18px;
-
-}
-
-/* ===========================
-   RAPPORT
-=========================== */
-
-#rapport{
-
-min-height:120px;
-
-background:rgba(255,255,255,.05);
-
-border-radius:15px;
-
-padding:18px;
-
-line-height:1.6;
-
-font-size:18px;
-
-}
-
-/* ===========================
-   BOUTONS
-=========================== */
-
-.quick-grid{
-
-display:grid;
-
-grid-template-columns:repeat(auto-fit,minmax(170px,1fr));
-
-gap:15px;
-
-}
-
-.quick-grid button{
-
-padding:18px;
-
-border:none;
-
-border-radius:14px;
-
-background:#2d9cff;
-
-color:white;
-
-font-size:17px;
-
-cursor:pointer;
-
-transition:.25s;
-
-}
-
-.quick-grid button:hover{
-
-background:#4cb0ff;
-transform:translateY(-2px);
-
-}
-
-/* ===========================
-   FOOTER
-=========================== */
-
-.footer{
-
-text-align:center;
-
-padding:25px;
-
-opacity:.7;
-
-font-size:14px;
-
-}
-
-/* ===========================
-   AUREL
-=========================== */
-
-.aurel{
-
-position:fixed;
-
-right:20px;
-
-bottom:20px;
-
-width:70px;
-
-height:70px;
-
-border-radius:50%;
-
-background:#29a8ff;
+border-radius:16px;
 
 display:flex;
 
@@ -281,13 +156,347 @@ justify-content:center;
 
 align-items:center;
 
-font-size:34px;
+margin-bottom:18px;
 
-box-shadow:0 0 25px #29a8ff;
+font-size:22px;
 
-animation:pulse 2s infinite;
+}
+
+#weather{
+
+background:rgba(255,255,255,.08);
+
+border-radius:14px;
+
+padding:18px;
+
+min-height:100px;
+
+}
+
+/* ===========================
+CIRCULATION
+=========================== */
+
+.traffic{
+
+background:linear-gradient(135deg,#19553a,#27864e);
+
+}
+
+#traffic{
+
+font-size:26px;
+
+text-align:center;
+
+padding:30px;
+
+}
+
+/* ===========================
+PROSPECTS
+=========================== */
+
+.prospects{
+
+text-align:center;
+
+background:linear-gradient(135deg,#2941c7,#4f69ff);
+
+}
+
+#prospectGauge{
+
+width:160px;
+
+height:160px;
+
+border-radius:50%;
+
+background:white;
+
+color:#2958c9;
+
+margin:auto;
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+font-size:56px;
+
+font-weight:bold;
+
+box-shadow:0 0 30px rgba(255,255,255,.25);
+
+}
+
+.prospectText{
+
+margin-top:18px;
+
+font-size:22px;
+
+}
+
+/* ===========================
+MESSENGER
+=========================== */
+
+.messenger{
+
+background:linear-gradient(135deg,#0084ff,#4ea8ff);
+
+}
+
+#messengerCard{
+
+background:white;
+
+color:#222;
+
+padding:20px;
+
+border-radius:18px;
+
+min-height:120px;
+
+}
+
+/* ===========================
+YOUTUBE
+=========================== */
+
+.youtube{
+
+background:#181818;
+
+}
+
+.youtube input{
+
+width:100%;
+
+padding:15px;
+
+border:none;
+
+border-radius:12px;
+
+margin-bottom:12px;
+
+font-size:16px;
+
+}
+
+.youtube button{
+
+width:100%;
+
+padding:15px;
+
+border:none;
+
+border-radius:12px;
+
+background:#ff0000;
+
+color:white;
+
+font-size:18px;
+
+margin-bottom:15px;
 
 cursor:pointer;
+
+}
+
+#youtubeResults{
+
+background:#2a2a2a;
+
+padding:18px;
+
+border-radius:12px;
+
+min-height:120px;
+
+margin-bottom:15px;
+
+}
+
+#youtubePlayer{
+
+background:black;
+
+aspect-ratio:16/9;
+
+border-radius:16px;
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+font-size:22px;
+
+}
+
+/* ===========================
+SALLE DE PAUSE
+=========================== */
+
+.pause{
+
+background:linear-gradient(135deg,#6b39b8,#8f5ce4);
+
+}
+
+.games{
+
+display:grid;
+
+grid-template-columns:repeat(2,1fr);
+
+gap:16px;
+
+}
+
+.game{
+
+background:white;
+
+color:#222;
+
+padding:25px;
+
+border-radius:18px;
+
+text-align:center;
+
+font-size:22px;
+
+cursor:pointer;
+
+transition:.25s;
+
+}
+
+.game:hover{
+
+transform:scale(1.03);
+
+}
+
+/* ===========================
+NEWS
+=========================== */
+
+.news{
+
+background:#1f425f;
+
+}
+
+#news{
+
+background:rgba(255,255,255,.07);
+
+padding:20px;
+
+border-radius:16px;
+
+min-height:100px;
+
+}
+
+/* ===========================
+PHOTO
+=========================== */
+
+.gallery{
+
+background:#30455d;
+
+}
+
+#photoJour{
+
+aspect-ratio:16/9;
+
+background:#1d2a3d;
+
+border-radius:16px;
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+}
+
+/* ===========================
+RAPPORT
+=========================== */
+
+.rapport{
+
+background:linear-gradient(135deg,#0b2b4e,#164b82);
+
+}
+
+#rapport{
+
+background:rgba(255,255,255,.07);
+
+padding:20px;
+
+border-radius:16px;
+
+line-height:1.7;
+
+min-height:150px;
+
+}
+
+/* ===========================
+AUREL
+=========================== */
+
+.aurel{
+
+position:fixed;
+
+bottom:22px;
+
+right:22px;
+
+width:78px;
+
+height:78px;
+
+border-radius:50%;
+
+background:#2ca9ff;
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+font-size:38px;
+
+box-shadow:0 0 30px #2ca9ff;
+
+cursor:pointer;
+
+animation:pulse 2s infinite;
 
 }
 
@@ -300,74 +509,56 @@ cursor:pointer;
 }
 
 /* ===========================
-   MOBILE
+MOBILE
 =========================== */
 
 @media(max-width:768px){
 
 body{
 
-padding:12px;
+padding:10px;
 
 }
 
 .topbar{
 
 flex-direction:column;
+
 align-items:flex-start;
-
-}
-
-.topbar h1{
-
-font-size:1.6rem;
 
 }
 
 .status{
 
 flex-direction:column;
-gap:6px;
 
-font-size:16px;
-
-}
-
-.card{
-
-padding:18px;
+gap:8px;
 
 }
 
-.card h2{
-
-font-size:1.3rem;
-
-}
-
-.meteo-ligne{
-
-font-size:16px;
-
-}
-
-.quick-grid{
+.games{
 
 grid-template-columns:1fr;
 
 }
 
-.quick-grid button{
+#prospectGauge{
 
-font-size:18px;
+width:130px;
+
+height:130px;
+
+font-size:44px;
 
 }
 
 .aurel{
 
-width:60px;
-height:60px;
-font-size:28px;
+width:64px;
+
+height:64px;
+
+font-size:30px;
 
 }
 

@@ -14,22 +14,37 @@
 
 <body>
 
+<!-- ========================= -->
+<!-- HEADER -->
+<!-- ========================= -->
+
 <header class="topbar">
 
-<h1>☁️ Aurel - Tableau de bord TRJ</h1>
+<div class="title">
+
+<h1>☁️ Aurel</h1>
+
+<p>Centre de contrôle TRJ</p>
+
+</div>
 
 <div class="status">
-<span>🕒 <span id="heure">--:--</span></span>
-<span>📅 <span id="date">Chargement...</span></span>
+
+<div>🕒 <span id="heure">--:--</span></div>
+
+<div>📅 <span id="date">Chargement...</span></div>
+
 </div>
 
 </header>
 
 <main>
 
-<!-- ================= WEBCAM ================= -->
+<!-- ========================= -->
+<!-- WEBCAM -->
+<!-- ========================= -->
 
-<section class="card">
+<section class="card webcam">
 
 <h2>🎥 Webcam Aéroport Faaa</h2>
 
@@ -43,60 +58,150 @@ controls>
 
 </section>
 
-<!-- ================= METEO ================= -->
+<!-- ========================= -->
+<!-- METEO -->
+<!-- ========================= -->
 
-<section class="card">
+<section class="card weather">
 
 <h2>🌦 Conditions météo</h2>
 
+<div id="radar">
+
+Carte radar Tahiti
+
+</div>
+
 <div id="weather">
 
-<div class="meteo-ligne">
-🌡 Température :
-<span id="temperature">--°C</span>
-</div>
-
-<div class="meteo-ligne">
-☁️ Conditions :
-<span id="conditions">Chargement...</span>
-</div>
-
-<div class="meteo-ligne">
-💨 Vent :
-<span id="vent">-- km/h</span>
-</div>
-
-<div class="meteo-ligne">
-🌧 Pluie :
-<span id="pluie">-- %</span>
-</div>
-
-<div class="meteo-ligne">
-🌊 Houle :
-<span id="houle">-- m</span>
-</div>
+Chargement météo...
 
 </div>
 
 </section>
 
-<!-- ================= CIRCULATION ================= -->
+<!-- ========================= -->
+<!-- CIRCULATION -->
+<!-- ========================= -->
 
-<section class="card">
+<section class="card traffic">
 
 <h2>🚦 Circulation</h2>
 
 <div id="traffic">
 
-<div class="traffic-status">
-
-🟢 Fluide
+Chargement...
 
 </div>
 
-<div class="traffic-detail">
+</section>
 
-Chargement des informations...
+<!-- ========================= -->
+<!-- PROSPECTS -->
+<!-- ========================= -->
+
+<section class="card prospects">
+
+<h2>📈 Prospects</h2>
+
+<div id="prospectGauge">
+
+0
+
+</div>
+
+<div class="prospectText">
+
+Aujourd'hui
+
+</div>
+
+</section>
+
+<!-- ========================= -->
+<!-- MESSENGER -->
+<!-- ========================= -->
+
+<section class="card messenger">
+
+<h2>💬 Messenger TRJ</h2>
+
+<div id="messengerCard">
+
+Photo du groupe
+
+<br><br>
+
+Dernier message...
+
+</div>
+
+</section>
+
+<!-- ========================= -->
+<!-- YOUTUBE -->
+<!-- ========================= -->
+
+<section class="card youtube">
+
+<h2>▶️ YouTube</h2>
+
+<input
+type="text"
+id="youtubeSearch"
+placeholder="Rechercher une vidéo">
+
+<button id="searchYoutube">
+
+Rechercher
+
+</button>
+
+<div id="youtubeResults">
+
+Résultats...
+
+</div>
+
+<div id="youtubePlayer">
+
+Lecteur vidéo
+
+</div>
+
+</section>
+
+<!-- ========================= -->
+<!-- SALLE DE PAUSE -->
+<!-- ========================= -->
+
+<section class="card pause">
+
+<h2>🎮 Salle de pause</h2>
+
+<div class="games">
+
+<div class="game">
+
+🐍 Snake
+
+</div>
+
+<div class="game">
+
+🧩 2048
+
+</div>
+
+<div class="game">
+
+♟️ Échecs
+
+</div>
+
+<div class="game">
+
+🎯 Sudoku
 
 </div>
 
@@ -104,47 +209,43 @@ Chargement des informations...
 
 </section>
 
-<!-- ================= PLANNING ================= -->
+<!-- ========================= -->
+<!-- ACTUALITE -->
+<!-- ========================= -->
 
-<section class="card">
+<section class="card news">
 
-<h2>📅 Planning du jour</h2>
+<h2>📰 Actualité du jour</h2>
 
-<div id="planning">
+<div id="news">
 
-Aucun rendez-vous aujourd'hui.
-
-</div>
-
-</section>
-
-<!-- ================= ACCES RAPIDES ================= -->
-
-<section class="card">
-
-<h2>⚡ Accès rapides</h2>
-
-<div class="quick-grid">
-
-<button>➕ Nouveau devis</button>
-
-<button>📅 Nouveau RDV</button>
-
-<button>👤 Nouveau contact</button>
-
-<button>📄 Factures</button>
-
-<button>📋 Prospects</button>
-
-<button>👥 Équipe</button>
+Chargement...
 
 </div>
 
 </section>
 
-<!-- ================= RAPPORT AUREL ================= -->
+<!-- ========================= -->
+<!-- PHOTO TRJ -->
+<!-- ========================= -->
 
-<section class="card">
+<section class="card gallery">
+
+<h2>📸 Photo du jour</h2>
+
+<div id="photoJour">
+
+Photo TRJ
+
+</div>
+
+</section>
+
+<!-- ========================= -->
+<!-- AUREL -->
+<!-- ========================= -->
+
+<section class="card rapport">
 
 <h2>🤖 Aurel au rapport</h2>
 
@@ -152,23 +253,11 @@ Aucun rendez-vous aujourd'hui.
 
 Bonjour Patron.
 
-En attente du rapport du jour...
-
 </div>
 
 </section>
 
 </main>
-
-<footer>
-
-<div class="footer">
-
-TRJ © 2026 • Centre de contrôle Aurel
-
-</div>
-
-</footer>
 
 <div class="aurel">
 

@@ -1,118 +1,227 @@
-// ===============================
+// =====================================
 // AUREL - TABLEAU DE BORD TRJ
-// SCRIPT.JS
-// ===============================
+// SCRIPT.JS V2
+// =====================================
 
-// ===============================
-// WEBCAM FAAA
-// ===============================
+console.log("☁️ Démarrage d'Aurel...");
 
-const webcam = {
-    id: "faaaCam",
-    stream: "https://s60.ipcamlive.com/streams/3c12q8dvxkowcem5j/stream.m3u8"
-};
-
-// ===============================
+// =====================================
 // HORLOGE
-// ===============================
+// =====================================
 
-function updateClock() {
+function updateClock(){
 
     const now = new Date();
 
-    const heure = now.toLocaleTimeString("fr-FR", {
-        hour: "2-digit",
-        minute: "2-digit"
+    document.getElementById("heure").textContent =
+    now.toLocaleTimeString("fr-FR",{
+        hour:"2-digit",
+        minute:"2-digit"
     });
 
-    const date = now.toLocaleDateString("fr-FR", {
-        weekday: "long",
-        day: "numeric",
-        month: "long",
-        year: "numeric"
+    document.getElementById("date").textContent =
+    now.toLocaleDateString("fr-FR",{
+        weekday:"long",
+        day:"numeric",
+        month:"long",
+        year:"numeric"
     });
-
-    document.getElementById("heure").textContent = heure;
-    document.getElementById("date").textContent = date;
 
 }
 
 updateClock();
-setInterval(updateClock, 1000);
 
-// ===============================
-// WEBCAM
-// ===============================
+setInterval(updateClock,1000);
 
-function chargerCamera() {
+// =====================================
+// WEBCAM FAAA
+// =====================================
 
-    const video = document.getElementById(webcam.id);
+const webcam="https://s60.ipcamlive.com/streams/3c12q8dvxkowcem5j/stream.m3u8";
 
-    if (!video) return;
+function chargerWebcam(){
 
-    if (Hls.isSupported()) {
+    const video=document.getElementById("faaaCam");
 
-        const hls = new Hls({
-            autoStartLoad: true,
-            startLevel: -1
-        });
+    if(!video) return;
 
-        hls.loadSource(webcam.stream);
+    if(Hls.isSupported()){
+
+        const hls=new Hls();
+
+        hls.loadSource(webcam);
+
         hls.attachMedia(video);
 
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-            video.play().catch(() => {});
+        hls.on(Hls.Events.MANIFEST_PARSED,function(){
+
+            video.play().catch(()=>{});
+
         });
 
-        hls.on(Hls.Events.ERROR, (event, data) => {
-            console.log("Erreur Webcam :", data);
-        });
+    }
 
-    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+    else if(video.canPlayType("application/vnd.apple.mpegurl")){
 
-        video.src = webcam.stream;
-        video.play().catch(() => {});
+        video.src=webcam;
+
+        video.play().catch(()=>{});
 
     }
 
 }
 
-chargerCamera();
+chargerWebcam();
 
-// ===============================
-// METEO (temporaire)
-// ===============================
+// =====================================
+// METEO (Temporaire)
+// =====================================
 
-document.getElementById("temperature").textContent = "--°C";
-document.getElementById("conditions").textContent = "Connexion...";
-document.getElementById("vent").textContent = "-- km/h";
-document.getElementById("pluie").textContent = "-- %";
-document.getElementById("houle").textContent = "-- m";
+function chargerMeteo(){
 
-// ===============================
-// TRAFIC (temporaire)
-// ===============================
+    document.getElementById("weather").innerHTML=`
 
-document.querySelector(".traffic-status").textContent = "🟢 Fluide";
-document.querySelector(".traffic-detail").textContent = "En attente des données de circulation.";
+        🌡 Température : -- °C<br><br>
 
-// ===============================
-// PLANNING (temporaire)
-// ===============================
+        ☀️ Conditions : Chargement...<br><br>
 
-document.getElementById("planning").innerHTML = `
-Aucun rendez-vous aujourd'hui.
-`;
+        💧 Pluie : -- %<br><br>
 
-// ===============================
+        🕒 Prévisions heure par heure...
+
+    `;
+
+}
+
+chargerMeteo();
+
+// =====================================
+// CIRCULATION
+// =====================================
+
+function chargerCirculation(){
+
+    document.getElementById("traffic").innerHTML=`
+
+        🟢 Trafic fluide
+
+    `;
+
+}
+
+chargerCirculation();
+
+// =====================================
+// PROSPECTS
+// =====================================
+
+function chargerProspects(){
+
+    document.getElementById("prospectGauge").textContent="0";
+
+}
+
+chargerProspects();
+
+// =====================================
+// MESSENGER
+// =====================================
+
+function chargerMessenger(){
+
+    document.getElementById("messengerCard").innerHTML=`
+
+        💬 Groupe TRJ
+
+        <br><br>
+
+        Aucun nouveau message.
+
+    `;
+
+}
+
+chargerMessenger();
+
+// =====================================
+// YOUTUBE
+// =====================================
+
+document.getElementById("searchYoutube").addEventListener("click",function(){
+
+    const recherche=document.getElementById("youtubeSearch").value;
+
+    document.getElementById("youtubeResults").innerHTML=`
+
+        Recherche :
+
+        <br><br>
+
+        <b>${recherche}</b>
+
+        <br><br>
+
+        (Connexion YouTube à venir)
+
+    `;
+
+});
+
+// =====================================
+// ACTUALITES
+// =====================================
+
+function chargerNews(){
+
+    document.getElementById("news").innerHTML=`
+
+        Les actualités seront affichées ici.
+
+    `;
+
+}
+
+chargerNews();
+
+// =====================================
+// PHOTO DU JOUR
+// =====================================
+
+function chargerPhoto(){
+
+    document.getElementById("photoJour").innerHTML=`
+
+        📸 Photo du jour TRJ
+
+    `;
+
+}
+
+chargerPhoto();
+
+// =====================================
 // RAPPORT AUREL
-// ===============================
+// =====================================
 
-document.getElementById("rapport").innerHTML = `
-Bonjour Patron.<br><br>
-✔ Webcam opérationnelle.<br>
-✔ Tableau de bord chargé.<br>
-⏳ En attente de la météo, du trafic et du planning.
-`;
+function rapport(){
 
-console.log("☁️ Aurel opérationnel.");
+    document.getElementById("rapport").innerHTML=`
+
+        Bonjour Patron.<br><br>
+
+        ✔ Webcam opérationnelle.<br><br>
+
+        ✔ Tableau de bord chargé.<br><br>
+
+        ⏳ En attente de la météo, de la circulation,
+        des prospects et des données en direct.
+
+    `;
+
+}
+
+rapport();
+
+// =====================================
+
+console.log("✅ Tableau de bord prêt.");
