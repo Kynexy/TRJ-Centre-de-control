@@ -4,12 +4,12 @@ const webcams = [
     url: "https://s81.ipcamlive.com/streams/51xt7nglz8hosntvvy/stream.m3u8"
 },
 {
-    id: "faaaCam",
+    id: "papeeteCam",
     url: "https://s60.ipcamlive.com/streams/3c12q8dvxkowcem5j/stream.m3u8"
 }
 ];
 
-webcams.forEach(cam => {
+webcams.forEach((cam) => {
 
     const video = document.getElementById(cam.id);
 
