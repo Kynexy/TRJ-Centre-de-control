@@ -5,6 +5,7 @@
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#07182d">
 
 <title>Kynex CRM TRJ</title>
 
@@ -34,6 +35,7 @@ font-family:Arial,Helvetica,sans-serif;
 body{
 background:var(--bg);
 color:var(--text);
+min-height:100vh;
 padding:16px;
 }
 
@@ -48,9 +50,15 @@ button{
 cursor:pointer;
 }
 
+a{
+color:inherit;
+text-decoration:none;
+}
+
 .crm-shell{
 max-width:1480px;
 margin:0 auto;
+padding-bottom:94px;
 }
 
 .topbar{
@@ -177,7 +185,8 @@ color:var(--blue-soft);
 margin-bottom:14px;
 }
 
-.hero p{
+.hero p,
+.card-copy{
 color:var(--muted);
 line-height:1.5;
 }
@@ -189,19 +198,31 @@ gap:10px;
 }
 
 .primary-btn,
-.ghost-btn{
+.ghost-btn,
+.icon-btn{
 border:0;
 border-radius:13px;
 padding:13px;
 color:white;
+min-height:44px;
 }
 
 .primary-btn{
 background:var(--blue);
 }
 
-.ghost-btn{
+.ghost-btn,
+.icon-btn{
 background:rgba(255,255,255,.12);
+}
+
+.icon-btn{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+gap:8px;
+min-width:46px;
+font-weight:700;
 }
 
 .grid{
@@ -227,6 +248,7 @@ margin-bottom:12px;
 
 .metric strong{
 font-size:34px;
+line-height:1;
 }
 
 .metric small{
@@ -240,6 +262,12 @@ line-height:1.4;
 display:grid;
 grid-template-columns:1.15fr .85fr;
 gap:22px;
+}
+
+.tri-grid{
+display:grid;
+grid-template-columns:repeat(3,minmax(0,1fr));
+gap:16px;
 }
 
 .toolbar{
@@ -261,6 +289,10 @@ min-width:170px;
 
 .toolbar input::placeholder{
 color:rgba(255,255,255,.55);
+}
+
+.toolbar select option{
+color:#0f2f58;
 }
 
 .list{
@@ -291,6 +323,13 @@ line-height:1.5;
 color:var(--muted);
 }
 
+.row-actions{
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+justify-content:flex-end;
+}
+
 .tag{
 display:inline-flex;
 align-items:center;
@@ -302,22 +341,123 @@ font-size:13px;
 white-space:nowrap;
 }
 
-.tag.ready{
+.tag.ready,
+.state-ready{
 color:var(--green);
 }
 
-.tag.warn{
+.tag.warn,
+.state-warn{
 color:var(--orange);
 }
 
-.tag.blocked{
+.tag.blocked,
+.state-blocked{
 color:var(--red);
 }
 
-.pipeline{
+.tag.info{
+color:var(--blue-soft);
+}
+
+.job-card,
+.message-card,
+.quote-card,
+.team-card,
+.stat-card{
+background:rgba(255,255,255,.08);
+border:1px solid rgba(255,255,255,.09);
+border-radius:18px;
+padding:16px;
+}
+
+.job-card{
 display:grid;
-grid-template-columns:repeat(4,minmax(170px,1fr));
+grid-template-columns:1fr auto;
+gap:14px;
+align-items:start;
+}
+
+.job-card h3,
+.quote-card h3,
+.team-card h3{
+font-size:18px;
+margin-bottom:7px;
+}
+
+.job-meta,
+.message-card p,
+.quote-card p,
+.team-card p,
+.stat-card p{
+color:var(--muted);
+font-size:14px;
+line-height:1.45;
+}
+
+.job-signals{
+display:flex;
+gap:8px;
+flex-wrap:wrap;
+margin-top:12px;
+}
+
+.client-profile{
+display:grid;
+grid-template-columns:.85fr 1.15fr;
+gap:16px;
+}
+
+.profile-panel{
+background:rgba(255,255,255,.08);
+border:1px solid rgba(255,255,255,.08);
+border-radius:18px;
+padding:18px;
+}
+
+.profile-panel strong{
+display:block;
+font-size:24px;
+margin-bottom:8px;
+}
+
+.profile-line{
+display:flex;
+justify-content:space-between;
 gap:12px;
+padding:10px 0;
+border-bottom:1px solid var(--line);
+color:var(--muted);
+font-size:14px;
+}
+
+.profile-line:last-child{
+border-bottom:0;
+}
+
+.photo-strip{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:10px;
+margin-top:12px;
+}
+
+.photo-tile{
+aspect-ratio:1.2;
+border-radius:14px;
+background:linear-gradient(135deg,rgba(44,169,255,.36),rgba(255,255,255,.1));
+border:1px solid rgba(255,255,255,.12);
+display:flex;
+align-items:end;
+padding:10px;
+font-size:12px;
+color:var(--blue-soft);
+}
+
+.quote-board{
+display:grid;
+grid-template-columns:repeat(3,minmax(190px,1fr));
+gap:14px;
 overflow:auto;
 padding-bottom:2px;
 }
@@ -336,22 +476,45 @@ color:var(--blue-soft);
 margin-bottom:12px;
 }
 
-.deal{
-background:rgba(255,255,255,.1);
-border-radius:14px;
-padding:13px;
+.message-card{
+display:grid;
+grid-template-columns:auto 1fr auto;
+gap:12px;
+align-items:center;
+}
+
+.avatar{
+width:42px;
+height:42px;
+border-radius:50%;
+background:var(--blue);
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:800;
+box-shadow:0 0 18px rgba(44,169,255,.45);
+}
+
+.stat-card strong{
+display:block;
+font-size:34px;
+line-height:1;
 margin-bottom:10px;
 }
 
-.deal strong{
-display:block;
-margin-bottom:7px;
+.progress{
+height:9px;
+border-radius:999px;
+background:rgba(255,255,255,.12);
+overflow:hidden;
+margin-top:14px;
 }
 
-.deal span{
-font-size:13px;
-color:var(--muted);
-line-height:1.4;
+.progress span{
+display:block;
+height:100%;
+background:var(--blue);
+border-radius:inherit;
 }
 
 .empty{
@@ -361,26 +524,6 @@ border-radius:16px;
 padding:18px;
 color:var(--muted);
 line-height:1.5;
-}
-
-.table{
-width:100%;
-border-collapse:collapse;
-overflow:hidden;
-border-radius:16px;
-}
-
-.table th,
-.table td{
-padding:13px;
-border-bottom:1px solid var(--line);
-text-align:left;
-font-size:14px;
-}
-
-.table th{
-color:var(--blue-soft);
-font-weight:700;
 }
 
 .drawer{
@@ -394,7 +537,7 @@ background:#0f2f58;
 border:1px solid rgba(255,255,255,.12);
 border-radius:22px;
 box-shadow:0 18px 50px rgba(0,0,0,.45);
-z-index:10;
+z-index:20;
 padding:22px;
 overflow:auto;
 }
@@ -434,9 +577,55 @@ padding:12px;
 color:white;
 }
 
+.form select option{
+color:#0f2f58;
+}
+
 .form textarea{
 min-height:92px;
 resize:vertical;
+}
+
+.aurel-cloud{
+position:fixed;
+right:18px;
+bottom:18px;
+z-index:15;
+width:min(335px,calc(100vw - 36px));
+background:linear-gradient(135deg,rgba(44,169,255,.96),rgba(22,75,130,.96));
+border:1px solid rgba(255,255,255,.24);
+border-radius:24px;
+box-shadow:0 18px 45px rgba(0,0,0,.38),0 0 34px rgba(44,169,255,.35);
+padding:15px;
+display:grid;
+grid-template-columns:auto 1fr;
+gap:12px;
+align-items:center;
+}
+
+.aurel-orb{
+width:54px;
+height:54px;
+border-radius:50%;
+background:#9fd4ff;
+color:#07182d;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:900;
+font-size:24px;
+box-shadow:0 0 24px rgba(255,255,255,.55);
+}
+
+.aurel-cloud strong{
+display:block;
+margin-bottom:5px;
+}
+
+.aurel-cloud p{
+font-size:13px;
+line-height:1.4;
+color:rgba(255,255,255,.82);
 }
 
 .footer-note{
@@ -448,7 +637,8 @@ line-height:1.5;
 @media(max-width:1050px){
 .layout,
 .hero,
-.module-grid{
+.module-grid,
+.client-profile{
 grid-template-columns:1fr;
 }
 
@@ -461,7 +651,8 @@ display:grid;
 grid-template-columns:repeat(2,minmax(0,1fr));
 }
 
-.grid{
+.grid,
+.tri-grid{
 grid-template-columns:repeat(2,minmax(0,1fr));
 }
 }
@@ -482,7 +673,9 @@ padding:18px;
 .status,
 .quick-actions,
 .grid,
-.nav{
+.tri-grid,
+.nav,
+.quote-board{
 grid-template-columns:1fr;
 }
 
@@ -497,13 +690,21 @@ flex-direction:column;
 width:100%;
 }
 
-.row{
+.row,
+.job-card,
+.message-card{
 grid-template-columns:1fr;
 }
 
-.pipeline{
-grid-template-columns:1fr;
-overflow:visible;
+.row-actions{
+justify-content:flex-start;
+}
+
+.aurel-cloud{
+left:10px;
+right:10px;
+bottom:10px;
+width:auto;
 }
 }
 
@@ -518,7 +719,7 @@ overflow:visible;
 <header class="topbar">
 <div class="title">
 <h1>Kynex CRM</h1>
-<p>Production commerciale TRJ</p>
+<p>Production commerciale et terrain TRJ</p>
 </div>
 <div class="status">
 <div class="pill" id="crmSourceStatus">Source Glide : prete</div>
@@ -531,17 +732,18 @@ overflow:visible;
 <aside class="sidebar">
 <div class="brand-mark">K</div>
 <nav class="nav" id="crmNav">
-<button class="active" data-view="dashboard">Vue du jour</button>
-<button data-view="pipeline">Pipeline</button>
+<button class="active" data-view="home">Accueil</button>
+<button data-view="today">Aujourd'hui</button>
+<button data-view="jobs">Chantiers</button>
 <button data-view="clients">Clients</button>
-<button data-view="planning">Planning</button>
-<button data-view="devis">Devis</button>
-<button data-view="operations">Operations</button>
-<button data-view="documents">Documents</button>
-<button data-view="settings">Connexions</button>
+<button data-view="quotes">Devis</button>
+<button data-view="team">Equipe</button>
+<button data-view="messenger">Messenger</button>
+<button data-view="stats">Statistiques</button>
+<button data-view="aurel">Aurel</button>
 </nav>
 <div class="sidebar-note">
-CRM independant du Cockpit Scroll V1. Les donnees peuvent etre alimentees par Glide via window.KYNEX_CRM_DATA.
+CRM HTML V1 termine : structure autonome, donnees fictives de demonstration et points de connexion Glide via window.KYNEX_CRM_DATA.
 </div>
 </aside>
 
@@ -549,14 +751,14 @@ CRM independant du Cockpit Scroll V1. Les donnees peuvent etre alimentees par Gl
 
 <section class="hero">
 <div>
-<h2 id="viewTitle">Vue du jour</h2>
-<p id="viewSubtitle">Suivre les prospects, les rendez-vous, les devis et les chantiers sans quitter l'environnement Kynex.</p>
+<h2 id="viewTitle">Accueil</h2>
+<p id="viewSubtitle">Bonjour Patron. Le CRM est pret pour piloter la journee, les chantiers, les clients et les devis sans quitter l'environnement Kynex.</p>
 </div>
 <div class="quick-actions">
-<button class="primary-btn" data-action="open-drawer" data-kind="prospect">Nouveau prospect</button>
-<button class="ghost-btn" data-action="open-drawer" data-kind="appointment">Nouveau RDV</button>
-<button class="ghost-btn" data-action="open-drawer" data-kind="quote">Nouveau devis</button>
-<button class="ghost-btn" data-action="open-drawer" data-kind="photo">Photo chantier</button>
+<button class="primary-btn" data-action="open-drawer" data-kind="job">Commencer</button>
+<button class="ghost-btn" data-action="open-drawer" data-kind="client">Nouveau client</button>
+<button class="ghost-btn" data-action="open-drawer" data-kind="quote">Creer un devis</button>
+<button class="ghost-btn" data-view-shortcut="aurel">Bouton Aurel</button>
 </div>
 </section>
 
@@ -565,10 +767,9 @@ CRM independant du Cockpit Scroll V1. Les donnees peuvent etre alimentees par Gl
 <section id="crmView"></section>
 
 <section class="card">
-<h2>Socle ERP</h2>
+<h2>Connexion Glide</h2>
 <p class="footer-note">
-Modules prevus : clients, prospects, rendez-vous, devis, factures, equipe, prestations, photos, documents, paiements et parametres.
-Chaque module possede son etat, ses donnees et son rendu afin de pouvoir evoluer sans casser les autres.
+Chaque carte est rendue depuis un objet de donnees normalise. Glide pourra remplacer progressivement les donnees fictives sans changer la structure HTML.
 </p>
 </section>
 
@@ -581,15 +782,16 @@ Chaque module possede son etat, ses donnees et son rendu afin de pouvoir evoluer
 <aside class="drawer" id="crmDrawer" aria-hidden="true">
 <div class="drawer-header">
 <h2 id="drawerTitle">Nouvelle action</h2>
-<button class="ghost-btn" id="closeDrawer">Fermer</button>
+<button class="ghost-btn" id="closeDrawer" type="button">Fermer</button>
 </div>
 <form class="form" id="crmForm">
 <label>
 Type
 <select id="formType">
-<option value="prospect">Prospect</option>
-<option value="appointment">Rendez-vous</option>
+<option value="job">Chantier</option>
+<option value="client">Client</option>
 <option value="quote">Devis</option>
+<option value="message">Message</option>
 <option value="photo">Photo chantier</option>
 </select>
 </label>
@@ -614,68 +816,81 @@ Notes
 </form>
 </aside>
 
+<aside class="aurel-cloud" aria-label="Aurel">
+<div class="aurel-orb">A</div>
+<div>
+<strong>Aurel</strong>
+<p id="aurelCloudText">Je suis present. Pas encore intelligent, mais pret a recevoir les donnees Glide.</p>
+</div>
+</aside>
+
 <script>
 
 const CRM_TABLES = [
+    "summary",
+    "today",
+    "jobs",
     "clients",
-    "prospects",
-    "appointments",
     "quotes",
-    "invoices",
     "team",
-    "services",
-    "photos",
-    "documents",
-    "payments",
-    "settings"
+    "messages",
+    "stats",
+    "aurel"
 ];
 
+const CRM_OBJECT_TABLES = ["summary", "stats", "aurel"];
+
 const CRM_STATE = {
-    view: "dashboard",
+    view: "home",
     data: getInitialData(),
     draftQueue: []
 };
 
 const CRM_VIEWS = {
-    dashboard: {
-        title: "Vue du jour",
-        subtitle: "Les priorites commerciales et operationnelles en un coup d'oeil.",
-        render: renderDashboard
+    home: {
+        title: "Accueil",
+        subtitle: "Bonjour Patron. Resume de la journee, priorites et acces rapide a Aurel.",
+        render: renderHome
     },
-    pipeline: {
-        title: "Pipeline",
-        subtitle: "Transformer les demandes en rendez-vous, devis puis chantiers.",
-        render: renderPipeline
+    today: {
+        title: "Aujourd'hui",
+        subtitle: "Les chantiers du jour avec depart, priorite, temps estime et lancement terrain.",
+        render: renderToday
+    },
+    jobs: {
+        title: "Chantiers",
+        subtitle: "Liste des chantiers, recherche, etat couleur, telephone, GPS et photos.",
+        render: renderJobs
     },
     clients: {
         title: "Clients",
-        subtitle: "Base client prete pour synchronisation Glide.",
+        subtitle: "Coordonnees, historique, notes, photos et devis associes.",
         render: renderClients
     },
-    planning: {
-        title: "Planning",
-        subtitle: "Rendez-vous et interventions du jour.",
-        render: renderPlanning
-    },
-    devis: {
+    quotes: {
         title: "Devis",
-        subtitle: "Suivi des devis, statuts et montants.",
+        subtitle: "Devis en attente, acceptes, refuses et creation de devis.",
         render: renderQuotes
     },
-    operations: {
-        title: "Operations",
-        subtitle: "Equipe, prestations, photos et suivi chantier.",
-        render: renderOperations
+    team: {
+        title: "Equipe",
+        subtitle: "Presents, absents, en chantier et temps de travail.",
+        render: renderTeam
     },
-    documents: {
-        title: "Documents",
-        subtitle: "Documents, factures, paiements et signatures.",
-        render: renderDocuments
+    messenger: {
+        title: "Messenger",
+        subtitle: "Derniers messages, notifications et reponses rapides.",
+        render: renderMessenger
     },
-    settings: {
-        title: "Connexions",
-        subtitle: "Controle des tables necessaires pour brancher Glide.",
-        render: renderSettings
+    stats: {
+        title: "Statistiques",
+        subtitle: "CA du mois, devis envoyes, taux d'acceptation et chantiers termines.",
+        render: renderStats
+    },
+    aurel: {
+        title: "Aurel",
+        subtitle: "Le nuage bleu toujours visible. Present, pas encore intelligent.",
+        render: renderAurel
     }
 };
 
@@ -695,13 +910,162 @@ function initCrm() {
 function getInitialData() {
 
     const source = window.KYNEX_CRM_DATA || {};
+    const fallback = getDemoData();
     const data = {};
 
     CRM_TABLES.forEach((table) => {
-        data[table] = Array.isArray(source[table]) ? source[table] : [];
+        const expectsObject = CRM_OBJECT_TABLES.includes(table);
+
+        if (!expectsObject && Array.isArray(source[table])) {
+            data[table] = source[table];
+            return;
+        }
+
+        if (expectsObject && source[table] && typeof source[table] === "object" && !Array.isArray(source[table])) {
+            data[table] = source[table];
+            return;
+        }
+
+        data[table] = fallback[table];
     });
 
     return data;
+
+}
+
+function getDemoData() {
+
+    return {
+        summary: {
+            patronName: "Patron",
+            dayResume: "3 chantiers a suivre, 2 devis a relancer, equipe terrain operationnelle.",
+            aurelText: "Je garde le cockpit CRM visible. La vraie intelligence arrivera apres la connexion Glide."
+        },
+        today: [
+            {
+                id: "job-1",
+                title: "Toiture Paea",
+                client: "Famille M.",
+                start: "07:30",
+                departure: "06:55",
+                priority: "Haute",
+                estimate: "3h30",
+                address: "Paea - PK 21",
+                status: "ready",
+                phone: "+689 87 00 00 01",
+                gps: "https://maps.google.com/?q=Paea"
+            },
+            {
+                id: "job-2",
+                title: "Controle fuite Punaauia",
+                client: "SCI Vai",
+                start: "11:15",
+                departure: "10:45",
+                priority: "Moyenne",
+                estimate: "1h20",
+                address: "Punaauia",
+                status: "warn",
+                phone: "+689 87 00 00 02",
+                gps: "https://maps.google.com/?q=Punaauia"
+            },
+            {
+                id: "job-3",
+                title: "Photos fin chantier",
+                client: "Mairie",
+                start: "15:00",
+                departure: "14:20",
+                priority: "Basse",
+                estimate: "45 min",
+                address: "Papeete",
+                status: "ready",
+                phone: "+689 87 00 00 03",
+                gps: "https://maps.google.com/?q=Papeete"
+            }
+        ],
+        jobs: [
+            {
+                title: "Toiture Paea",
+                client: "Famille M.",
+                status: "ready",
+                state: "Pret",
+                address: "Paea - PK 21",
+                phone: "+689 87 00 00 01",
+                gps: "https://maps.google.com/?q=Paea",
+                photos: 8
+            },
+            {
+                title: "Fuite Punaauia",
+                client: "SCI Vai",
+                status: "warn",
+                state: "A verifier",
+                address: "Punaauia",
+                phone: "+689 87 00 00 02",
+                gps: "https://maps.google.com/?q=Punaauia",
+                photos: 3
+            },
+            {
+                title: "Extension terrasse",
+                client: "Hotel T.",
+                status: "blocked",
+                state: "Piece manquante",
+                address: "Mahina",
+                phone: "+689 87 00 00 04",
+                gps: "https://maps.google.com/?q=Mahina",
+                photos: 0
+            }
+        ],
+        clients: [
+            {
+                name: "Famille M.",
+                phone: "+689 87 00 00 01",
+                email: "client@example.com",
+                address: "Paea - PK 21",
+                status: "Actif",
+                history: ["Appel recu", "Visite technique", "Devis accepte"],
+                notes: "Client prioritaire. Acces par portail cote mer.",
+                photos: ["Avant", "Pendant", "Apres"],
+                quotes: ["DEV-1042", "DEV-1048"]
+            },
+            {
+                name: "SCI Vai",
+                phone: "+689 87 00 00 02",
+                email: "contact@example.com",
+                address: "Punaauia",
+                status: "En cours",
+                history: ["Demande Messenger", "Diagnostic planifie"],
+                notes: "Verifier infiltration apres pluie.",
+                photos: ["Fuite", "Plafond", "Acces"],
+                quotes: ["DEV-1051"]
+            }
+        ],
+        quotes: [
+            { number: "DEV-1042", client: "Famille M.", amount: "485 000 F", status: "accepted", label: "Accepte" },
+            { number: "DEV-1051", client: "SCI Vai", amount: "96 000 F", status: "pending", label: "En attente" },
+            { number: "DEV-1038", client: "Hotel T.", amount: "720 000 F", status: "refused", label: "Refuse" },
+            { number: "DEV-1053", client: "Particulier Mahina", amount: "158 000 F", status: "pending", label: "En attente" }
+        ],
+        team: [
+            { name: "Tane", role: "Chef chantier", status: "En chantier", hours: "6h15", state: "ready" },
+            { name: "Moana", role: "Technicien", status: "Present", hours: "5h40", state: "ready" },
+            { name: "Hiro", role: "Aide", status: "Absent", hours: "0h00", state: "blocked" },
+            { name: "Ari", role: "Support", status: "En route", hours: "2h10", state: "warn" }
+        ],
+        messages: [
+            { from: "Famille M.", time: "08:12", text: "Portail ouvert, vous pouvez entrer.", unread: true },
+            { from: "SCI Vai", time: "09:04", text: "La fuite revient quand la pluie est forte.", unread: true },
+            { from: "Fournisseur", time: "10:18", text: "Materiaux disponibles cet apres-midi.", unread: false }
+        ],
+        stats: {
+            revenue: "2,4 M F",
+            quotesSent: 18,
+            acceptanceRate: 64,
+            jobsDone: 11
+        },
+        aurel: {
+            status: "present",
+            text: "Aurel reste visible sur toutes les vues. Il ne decide rien encore : il prepare seulement l'espace pour la suite."
+        }
+    };
 
 }
 
@@ -710,6 +1074,13 @@ function initNavigation() {
     document.querySelectorAll("#crmNav button").forEach((button) => {
         button.addEventListener("click", () => {
             CRM_STATE.view = button.dataset.view;
+            renderCrm();
+        });
+    });
+
+    document.querySelectorAll("[data-view-shortcut]").forEach((button) => {
+        button.addEventListener("click", () => {
+            CRM_STATE.view = button.dataset.viewShortcut;
             renderCrm();
         });
     });
@@ -736,8 +1107,9 @@ function renderCrm() {
     renderNav();
     renderHeader();
     renderMetrics();
+    renderAurelCloud();
 
-    const view = CRM_VIEWS[CRM_STATE.view] || CRM_VIEWS.dashboard;
+    const view = CRM_VIEWS[CRM_STATE.view] || CRM_VIEWS.home;
     view.render(document.getElementById("crmView"));
 
 }
@@ -752,7 +1124,7 @@ function renderNav() {
 
 function renderHeader() {
 
-    const view = CRM_VIEWS[CRM_STATE.view] || CRM_VIEWS.dashboard;
+    const view = CRM_VIEWS[CRM_STATE.view] || CRM_VIEWS.home;
     document.getElementById("viewTitle").textContent = view.title;
     document.getElementById("viewSubtitle").textContent = view.subtitle;
 
@@ -763,148 +1135,103 @@ function renderHeader() {
 
 function renderMetrics() {
 
+    const stats = CRM_STATE.data.stats || {};
     const metrics = [
-        {
-            label: "Prospects actifs",
-            value: CRM_STATE.data.prospects.length,
-            detail: "Demandes a qualifier"
-        },
-        {
-            label: "RDV a venir",
-            value: CRM_STATE.data.appointments.length,
-            detail: "Agenda connectable Glide"
-        },
-        {
-            label: "Devis ouverts",
-            value: CRM_STATE.data.quotes.length,
-            detail: "Montants et statuts"
-        },
-        {
-            label: "Actions preparees",
-            value: CRM_STATE.draftQueue.length,
-            detail: "En attente de connexion"
-        }
+        { label: "CA du mois", value: stats.revenue || "0 F", detail: "Pret pour Glide" },
+        { label: "Chantiers du jour", value: CRM_STATE.data.today.length, detail: "Depart et priorite" },
+        { label: "Devis envoyes", value: stats.quotesSent || CRM_STATE.data.quotes.length, detail: "Suivi commercial" },
+        { label: "Actions preparees", value: CRM_STATE.draftQueue.length, detail: "File locale Glide" }
     ];
 
     document.getElementById("crmMetrics").innerHTML = metrics.map((metric) => `
         <article class="metric">
             <span>${escapeHtml(metric.label)}</span>
-            <strong>${metric.value}</strong>
+            <strong>${escapeHtml(metric.value)}</strong>
             <small>${escapeHtml(metric.detail)}</small>
         </article>
     `).join("");
 
 }
 
-function renderDashboard(target) {
+function renderHome(target) {
+
+    const summary = CRM_STATE.data.summary || {};
 
     target.innerHTML = `
         <div class="module-grid">
             <section class="card">
-                <h2>Priorites du jour</h2>
-                <div class="list">
-                    ${renderPriorityRows()}
+                <h2>Bonjour ${escapeHtml(summary.patronName || "Patron")}</h2>
+                <p class="card-copy">${escapeHtml(summary.dayResume || "Resume de la journee pret a recevoir les donnees Glide.")}</p>
+                <div class="list" style="margin-top:16px">
+                    ${renderRow({
+                        title: "Aujourd'hui",
+                        text: CRM_STATE.data.today.length + " chantier(s) planifie(s), avec heure de depart et priorite.",
+                        status: "ready",
+                        label: "pret"
+                    })}
+                    ${renderRow({
+                        title: "Aurel",
+                        text: "Bouton Aurel disponible et nuage bleu toujours visible.",
+                        status: "info",
+                        label: "present"
+                    })}
+                    ${renderRow({
+                        title: "Glide",
+                        text: window.KYNEX_CRM_DATA ? "Donnees externes chargees." : "Donnees fictives actives, structure prete a connecter.",
+                        status: window.KYNEX_CRM_DATA ? "ready" : "warn",
+                        label: window.KYNEX_CRM_DATA ? "connecte" : "pret"
+                    })}
                 </div>
             </section>
             <section class="card">
-                <h2>Connexion Glide</h2>
-                ${renderConnectionSummary()}
+                <h2>Resume de la journee</h2>
+                <div class="list">
+                    ${CRM_STATE.data.today.slice(0, 3).map(renderCompactJob).join("")}
+                </div>
             </section>
         </div>
     `;
 
 }
 
-function renderPriorityRows() {
-
-    const rows = [];
-
-    if (CRM_STATE.data.appointments.length) {
-        rows.push({
-            title: "Rendez-vous",
-            text: CRM_STATE.data.appointments.length + " rendez-vous importes depuis Glide.",
-            status: "ready",
-            label: "pret"
-        });
-    }
-
-    if (CRM_STATE.data.prospects.length) {
-        rows.push({
-            title: "Prospects",
-            text: CRM_STATE.data.prospects.length + " prospects a traiter.",
-            status: "warn",
-            label: "a traiter"
-        });
-    }
-
-    if (CRM_STATE.draftQueue.length) {
-        rows.push({
-            title: "Actions locales",
-            text: CRM_STATE.draftQueue.length + " action(s) preparee(s) pour Glide.",
-            status: "warn",
-            label: "local"
-        });
-    }
-
-    if (!rows.length) {
-        return `<div class="empty">Aucune donnee metier chargee. Le CRM est pret : connecte les tables Glide pour afficher les clients, prospects, rendez-vous, devis et chantiers.</div>`;
-    }
-
-    return rows.map(renderRow).join("");
-
-}
-
-function renderPipeline(target) {
-
-    const lanes = [
-        { key: "new", title: "Nouveaux" },
-        { key: "qualified", title: "Qualifies" },
-        { key: "quoted", title: "Devis envoyes" },
-        { key: "won", title: "Gagnes" }
-    ];
+function renderToday(target) {
 
     target.innerHTML = `
         <section class="card">
-            <h2>Pipeline commercial</h2>
-            <div class="pipeline">
-                ${lanes.map((lane) => renderPipelineLane(lane)).join("")}
+            <h2>Les chantiers du jour</h2>
+            <div class="list">
+                ${CRM_STATE.data.today.map(renderTodayJob).join("") || renderEmpty("Aucun chantier du jour charge.")}
+            </div>
+        </section>
+    `;
+
+    bindJobStartButtons(target);
+
+}
+
+function renderJobs(target) {
+
+    target.innerHTML = `
+        <section class="card">
+            <h2>Liste des chantiers</h2>
+            ${renderToolbar("Rechercher un chantier", "Tous les etats")}
+            <div class="list">
+                ${CRM_STATE.data.jobs.map(renderJobRow).join("") || renderEmpty("Aucun chantier charge.")}
             </div>
         </section>
     `;
 
 }
 
-function renderPipelineLane(lane) {
-
-    const prospects = CRM_STATE.data.prospects.filter((prospect) => (prospect.stage || "new") === lane.key);
-
-    return `
-        <div class="lane">
-            <h3>${escapeHtml(lane.title)} (${prospects.length})</h3>
-            ${prospects.length ? prospects.map(renderDeal).join("") : `<div class="empty">Aucune fiche.</div>`}
-        </div>
-    `;
-
-}
-
 function renderClients(target) {
 
-    target.innerHTML = `
-        <section class="card">
-            <h2>Clients</h2>
-            ${renderToolbar("Rechercher un client", "Tous les statuts")}
-            ${renderDataTable(CRM_STATE.data.clients, ["name", "phone", "city", "status"])}
-        </section>
-    `;
-
-}
-
-function renderPlanning(target) {
+    const selectedClient = CRM_STATE.data.clients[0];
 
     target.innerHTML = `
         <section class="card">
-            <h2>Planning</h2>
-            ${renderDataTable(CRM_STATE.data.appointments, ["date", "time", "client", "type", "status"])}
+            <h2>Client</h2>
+            ${renderToolbar("Rechercher un client", "Tous les clients")}
+            ${selectedClient ? renderClientProfile(selectedClient) : renderEmpty("Aucun client charge.")}
         </section>
     `;
 
@@ -912,63 +1239,271 @@ function renderPlanning(target) {
 
 function renderQuotes(target) {
 
-    target.innerHTML = `
-        <section class="card">
-            <h2>Devis</h2>
-            ${renderDataTable(CRM_STATE.data.quotes, ["number", "client", "amount", "status"])}
-        </section>
-    `;
-
-}
-
-function renderOperations(target) {
-
-    target.innerHTML = `
-        <div class="module-grid">
-            <section class="card">
-                <h2>Equipe</h2>
-                ${renderDataTable(CRM_STATE.data.team, ["name", "role", "status"])}
-            </section>
-            <section class="card">
-                <h2>Prestations</h2>
-                ${renderDataTable(CRM_STATE.data.services, ["name", "duration", "price"])}
-            </section>
-        </div>
-    `;
-
-}
-
-function renderDocuments(target) {
-
-    target.innerHTML = `
-        <div class="module-grid">
-            <section class="card">
-                <h2>Documents</h2>
-                ${renderDataTable(CRM_STATE.data.documents, ["name", "client", "type", "status"])}
-            </section>
-            <section class="card">
-                <h2>Paiements</h2>
-                ${renderDataTable(CRM_STATE.data.payments, ["client", "amount", "method", "status"])}
-            </section>
-        </div>
-    `;
-
-}
-
-function renderSettings(target) {
+    const lanes = [
+        { key: "pending", title: "En attente" },
+        { key: "accepted", title: "Acceptes" },
+        { key: "refused", title: "Refuses" }
+    ];
 
     target.innerHTML = `
         <section class="card">
-            <h2>Tables Glide attendues</h2>
-            <div class="list">
-                ${CRM_TABLES.map((table) => renderRow({
-                    title: table,
-                    text: "Table synchronisable avec Glide.",
-                    status: CRM_STATE.data[table].length ? "ready" : "warn",
-                    label: CRM_STATE.data[table].length ? "connectee" : "prete"
-                })).join("")}
+            <div class="toolbar">
+                <button class="primary-btn" data-action="open-drawer" data-kind="quote" type="button">Creer un devis</button>
+            </div>
+            <div class="quote-board">
+                ${lanes.map(renderQuoteLane).join("")}
             </div>
         </section>
+    `;
+
+    target.querySelector("[data-action='open-drawer']").addEventListener("click", () => openDrawer("quote"));
+
+}
+
+function renderTeam(target) {
+
+    target.innerHTML = `
+        <section class="card">
+            <h2>Equipe</h2>
+            <div class="tri-grid">
+                ${CRM_STATE.data.team.map(renderTeamMember).join("") || renderEmpty("Aucun membre d'equipe charge.")}
+            </div>
+        </section>
+    `;
+
+}
+
+function renderMessenger(target) {
+
+    target.innerHTML = `
+        <div class="module-grid">
+            <section class="card">
+                <h2>Derniers messages</h2>
+                <div class="list">
+                    ${CRM_STATE.data.messages.map(renderMessage).join("") || renderEmpty("Aucun message charge.")}
+                </div>
+            </section>
+            <section class="card">
+                <h2>Reponse rapide</h2>
+                <div class="list">
+                    ${["Je vous rappelle dans la journee.", "Pouvez-vous envoyer une photo ?", "Nous confirmons le passage de l'equipe."].map((text) => renderRow({
+                        title: text,
+                        text: "Modele pret a envoyer depuis Messenger apres connexion.",
+                        status: "info",
+                        label: "modele"
+                    })).join("")}
+                </div>
+            </section>
+        </div>
+    `;
+
+}
+
+function renderStats(target) {
+
+    const stats = CRM_STATE.data.stats || {};
+
+    target.innerHTML = `
+        <section class="card">
+            <h2>Statistiques</h2>
+            <div class="tri-grid">
+                ${renderStatCard("CA du mois", stats.revenue || "0 F", "Objectif commercial mensuel", 72)}
+                ${renderStatCard("Devis envoyes", stats.quotesSent || 0, "Volume commercial", 58)}
+                ${renderStatCard("Taux d'acceptation", (stats.acceptanceRate || 0) + "%", "Qualite des devis", stats.acceptanceRate || 0)}
+                ${renderStatCard("Chantiers termines", stats.jobsDone || 0, "Production finalisee", 66)}
+            </div>
+        </section>
+    `;
+
+}
+
+function renderAurel(target) {
+
+    const aurel = CRM_STATE.data.aurel || {};
+
+    target.innerHTML = `
+        <div class="module-grid">
+            <section class="card">
+                <h2>Nuage bleu</h2>
+                <p class="card-copy">${escapeHtml(aurel.text || "Aurel est present. Pas encore intelligent.")}</p>
+                <div class="list" style="margin-top:16px">
+                    ${renderRow({ title: "Toujours visible", text: "Le nuage reste fixe en bas de l'interface.", status: "ready", label: "ok" })}
+                    ${renderRow({ title: "Pas encore intelligent", text: "Aurel ne prend aucune decision avant la connexion des donnees.", status: "warn", label: "attente" })}
+                    ${renderRow({ title: "Prochaine etape", text: "Brancher Glide, puis remplacer les donnees fictives.", status: "info", label: "suite" })}
+                </div>
+            </section>
+            <section class="card">
+                <h2>Etat Aurel</h2>
+                ${renderConnectionSummary()}
+            </section>
+        </div>
+    `;
+
+}
+
+function renderTodayJob(job) {
+
+    return `
+        <article class="job-card">
+            <div>
+                <h3>${escapeHtml(job.title || "Chantier")}</h3>
+                <p class="job-meta">${escapeHtml(job.client || "Client")} - ${escapeHtml(job.address || "Adresse a confirmer")}</p>
+                <div class="job-signals">
+                    <span class="tag info">Depart ${escapeHtml(job.departure || "--")}</span>
+                    <span class="tag ${getPriorityClass(job.priority)}">${escapeHtml(job.priority || "Priorite")}</span>
+                    <span class="tag">${escapeHtml(job.estimate || "Temps estime")}</span>
+                </div>
+            </div>
+            <div class="row-actions">
+                <button class="primary-btn" type="button" data-job-start="${escapeAttribute(job.id || job.title)}">Commencer</button>
+            </div>
+        </article>
+    `;
+
+}
+
+function bindJobStartButtons(target) {
+
+    target.querySelectorAll("[data-job-start]").forEach((button) => {
+        button.addEventListener("click", () => {
+            CRM_STATE.draftQueue.unshift({
+                type: "job-start",
+                name: button.dataset.jobStart,
+                createdAt: new Date().toISOString()
+            });
+            button.textContent = "Lance";
+            button.disabled = true;
+            renderMetrics();
+        });
+    });
+
+}
+
+function renderCompactJob(job) {
+
+    return renderRow({
+        title: (job.start || "--") + " - " + (job.title || "Chantier"),
+        text: (job.client || "Client") + " - depart " + (job.departure || "--") + " - " + (job.estimate || "temps a confirmer"),
+        status: job.status || "ready",
+        label: job.priority || "priorite"
+    });
+
+}
+
+function renderJobRow(job) {
+
+    return `
+        <article class="row">
+            <div>
+                <h3><span class="state-${escapeAttribute(job.status || "ready")}">${escapeHtml(job.state || "Etat")}</span> - ${escapeHtml(job.title || "Chantier")}</h3>
+                <p>${escapeHtml(job.client || "Client")} - ${escapeHtml(job.address || "Adresse")}</p>
+            </div>
+            <div class="row-actions">
+                <a class="icon-btn" href="${escapeAttribute(getPhoneUrl(job.phone))}" title="Telephone">Tel</a>
+                <a class="icon-btn" href="${escapeAttribute(job.gps || "#")}" target="_blank" rel="noopener" title="GPS">GPS</a>
+                <button class="icon-btn" type="button" title="Photos">${escapeHtml(job.photos || 0)} photos</button>
+            </div>
+        </article>
+    `;
+
+}
+
+function renderClientProfile(client) {
+
+    return `
+        <div class="client-profile">
+            <div class="profile-panel">
+                <strong>${escapeHtml(client.name || "Client")}</strong>
+                <div class="profile-line"><span>Telephone</span><span>${escapeHtml(client.phone || "-")}</span></div>
+                <div class="profile-line"><span>Email</span><span>${escapeHtml(client.email || "-")}</span></div>
+                <div class="profile-line"><span>Adresse</span><span>${escapeHtml(client.address || "-")}</span></div>
+                <div class="profile-line"><span>Statut</span><span>${escapeHtml(client.status || "-")}</span></div>
+            </div>
+            <div class="profile-panel">
+                <h3>Historique</h3>
+                <div class="list" style="margin:12px 0">
+                    ${(client.history || []).map((item) => renderRow({ title: item, text: "Evenement client pret pour Glide.", status: "info", label: "historique" })).join("")}
+                </div>
+                <p class="card-copy">${escapeHtml(client.notes || "Aucune note.")}</p>
+                <div class="photo-strip">
+                    ${(client.photos || []).slice(0, 3).map((photo) => `<div class="photo-tile">${escapeHtml(photo)}</div>`).join("")}
+                </div>
+                <div class="job-signals">
+                    ${(client.quotes || []).map((quote) => `<span class="tag info">${escapeHtml(quote)}</span>`).join("")}
+                </div>
+            </div>
+        </div>
+    `;
+
+}
+
+function renderQuoteLane(lane) {
+
+    const quotes = CRM_STATE.data.quotes.filter((quote) => quote.status === lane.key);
+
+    return `
+        <div class="lane">
+            <h3>${escapeHtml(lane.title)} (${quotes.length})</h3>
+            <div class="list">
+                ${quotes.map(renderQuoteCard).join("") || renderEmpty("Aucun devis.")}
+            </div>
+        </div>
+    `;
+
+}
+
+function renderQuoteCard(quote) {
+
+    return `
+        <article class="quote-card">
+            <h3>${escapeHtml(quote.number || "DEV")}</h3>
+            <p>${escapeHtml(quote.client || "Client")}<br>${escapeHtml(quote.amount || "Montant")}</p>
+            <span class="tag ${getQuoteClass(quote.status)}">${escapeHtml(quote.label || quote.status || "statut")}</span>
+        </article>
+    `;
+
+}
+
+function renderTeamMember(member) {
+
+    return `
+        <article class="team-card">
+            <h3>${escapeHtml(member.name || "Equipe")}</h3>
+            <p>${escapeHtml(member.role || "Role")}<br>${escapeHtml(member.status || "Statut")}</p>
+            <div class="job-signals">
+                <span class="tag ${escapeAttribute(member.state || "ready")}">${escapeHtml(member.status || "statut")}</span>
+                <span class="tag info">${escapeHtml(member.hours || "0h00")}</span>
+            </div>
+        </article>
+    `;
+
+}
+
+function renderMessage(message) {
+
+    return `
+        <article class="message-card">
+            <div class="avatar">${escapeHtml((message.from || "M").charAt(0))}</div>
+            <div>
+                <h3>${escapeHtml(message.from || "Message")}</h3>
+                <p>${escapeHtml(message.text || "")}</p>
+            </div>
+            <span class="tag ${message.unread ? "warn" : "ready"}">${escapeHtml(message.time || "--")}</span>
+        </article>
+    `;
+
+}
+
+function renderStatCard(title, value, detail, progress) {
+
+    const width = Math.max(0, Math.min(100, Number(progress) || 0));
+
+    return `
+        <article class="stat-card">
+            <strong>${escapeHtml(value)}</strong>
+            <p>${escapeHtml(title)}<br>${escapeHtml(detail)}</p>
+            <div class="progress"><span style="width:${width}%"></span></div>
+        </article>
     `;
 
 }
@@ -981,31 +1516,8 @@ function renderToolbar(placeholder, optionLabel) {
             <select>
                 <option>${escapeHtml(optionLabel)}</option>
             </select>
-            <button class="ghost-btn">Filtrer</button>
+            <button class="ghost-btn" type="button">Filtrer</button>
         </div>
-    `;
-
-}
-
-function renderDataTable(rows, keys) {
-
-    if (!rows.length) {
-        return `<div class="empty">Aucune donnee disponible pour cette table. Le module est pret pour la synchronisation Glide.</div>`;
-    }
-
-    return `
-        <table class="table">
-            <thead>
-                <tr>${keys.map((key) => `<th>${escapeHtml(formatKey(key))}</th>`).join("")}</tr>
-            </thead>
-            <tbody>
-                ${rows.map((row) => `
-                    <tr>
-                        ${keys.map((key) => `<td>${escapeHtml(row[key] || "-")}</td>`).join("")}
-                    </tr>
-                `).join("")}
-            </tbody>
-        </table>
     `;
 
 }
@@ -1016,21 +1528,21 @@ function renderConnectionSummary() {
         <div class="list">
             ${renderRow({
                 title: "Mode donnees",
-                text: window.KYNEX_CRM_DATA ? "Les donnees sont chargees depuis window.KYNEX_CRM_DATA." : "Aucune source externe chargee. La structure est prete pour Glide.",
+                text: window.KYNEX_CRM_DATA ? "Les donnees sont chargees depuis window.KYNEX_CRM_DATA." : "Donnees fictives chargees pour finaliser le rendu V1.",
                 status: window.KYNEX_CRM_DATA ? "ready" : "warn",
-                label: window.KYNEX_CRM_DATA ? "connectee" : "prete"
+                label: window.KYNEX_CRM_DATA ? "connecte" : "demo"
             })}
             ${renderRow({
-                title: "Compatibilite",
-                text: "Les tables CRM correspondent aux besoins Glide : clients, prospects, rendez-vous, devis, factures, equipe, prestations, photos, documents, paiements, parametres.",
+                title: "Tables",
+                text: CRM_TABLES.join(", "),
                 status: "ready",
-                label: "standard"
+                label: "normalise"
             })}
             ${renderRow({
-                title: "Independance",
-                text: "Cette page ne charge aucun fichier du cockpit et peut etre publiee dans un Web Embed separe.",
+                title: "Aucun framework",
+                text: "HTML, CSS et JavaScript natifs uniquement.",
                 status: "ready",
-                label: "isolee"
+                label: "v1"
             })}
         </div>
     `;
@@ -1045,20 +1557,26 @@ function renderRow(row) {
                 <h3>${escapeHtml(row.title)}</h3>
                 <p>${escapeHtml(row.text)}</p>
             </div>
-            <span class="tag ${row.status}">${escapeHtml(row.label)}</span>
+            <span class="tag ${escapeAttribute(row.status)}">${escapeHtml(row.label)}</span>
         </article>
     `;
 
 }
 
-function renderDeal(prospect) {
+function renderEmpty(text) {
 
-    return `
-        <article class="deal">
-            <strong>${escapeHtml(prospect.name || "Prospect")}</strong>
-            <span>${escapeHtml(prospect.city || "Commune a definir")}<br>${escapeHtml(prospect.need || "Besoin a qualifier")}</span>
-        </article>
-    `;
+    return `<div class="empty">${escapeHtml(text)}</div>`;
+
+}
+
+function renderAurelCloud() {
+
+    const summary = CRM_STATE.data.summary || {};
+    const cloudText = document.getElementById("aurelCloudText");
+
+    if (cloudText) {
+        cloudText.textContent = summary.aurelText || "Je suis present. Pas encore intelligent, mais pret a recevoir les donnees Glide.";
+    }
 
 }
 
@@ -1067,7 +1585,7 @@ function openDrawer(kind) {
     const drawer = document.getElementById("crmDrawer");
     const formType = document.getElementById("formType");
 
-    formType.value = kind || "prospect";
+    formType.value = kind || "job";
     document.getElementById("drawerTitle").textContent = getDrawerTitle(formType.value);
     document.getElementById("formFeedback").textContent = "Aucune donnee n'est envoyee tant que la connexion Glide n'est pas configuree.";
 
@@ -1105,13 +1623,48 @@ function saveDraft() {
 function getDrawerTitle(kind) {
 
     const titles = {
-        prospect: "Nouveau prospect",
-        appointment: "Nouveau rendez-vous",
+        job: "Nouveau chantier",
+        client: "Nouveau client",
         quote: "Nouveau devis",
+        message: "Nouveau message",
         photo: "Photo chantier"
     };
 
     return titles[kind] || "Nouvelle action";
+
+}
+
+function getPhoneUrl(phone) {
+
+    return phone ? "tel:" + phone.replace(/\s/g, "") : "#";
+
+}
+
+function getPriorityClass(priority) {
+
+    if (priority === "Haute") {
+        return "blocked";
+    }
+
+    if (priority === "Moyenne") {
+        return "warn";
+    }
+
+    return "ready";
+
+}
+
+function getQuoteClass(status) {
+
+    if (status === "accepted") {
+        return "ready";
+    }
+
+    if (status === "refused") {
+        return "blocked";
+    }
+
+    return "warn";
 
 }
 
@@ -1129,12 +1682,6 @@ function updateClock() {
 
 }
 
-function formatKey(key) {
-
-    return key.replace(/([A-Z])/g, " $1").replace(/^./, (letter) => letter.toUpperCase());
-
-}
-
 function escapeHtml(value) {
 
     return String(value)
@@ -1145,6 +1692,24 @@ function escapeHtml(value) {
         .replace(/'/g, "&#039;");
 
 }
+
+function escapeAttribute(value) {
+
+    return escapeHtml(value).replace(/`/g, "&#096;");
+
+}
+
+window.KynexCrm = {
+    refresh: () => {
+        CRM_STATE.data = getInitialData();
+        renderCrm();
+    },
+    getState: () => ({
+        view: CRM_STATE.view,
+        data: CRM_STATE.data,
+        draftQueue: CRM_STATE.draftQueue
+    })
+};
 
 </script>
 
