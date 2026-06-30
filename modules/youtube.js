@@ -48,7 +48,7 @@ async function getYoutubeData(query) {
 
     if (!normalizedQuery) {
         return {
-            status: "idle",
+            status: "ready",
             query: "",
             results: [],
             message: "Saisis une recherche YouTube."
@@ -57,7 +57,7 @@ async function getYoutubeData(query) {
 
     if (!youtubeConfig.apiKey) {
         return {
-            status: "missing-key",
+            status: "missing-config",
             query: normalizedQuery,
             results: [],
             message: "Recherche YouTube prête. Clé API YouTube Data requise pour afficher les résultats."
@@ -135,14 +135,14 @@ function renderYoutube(data) {
 
     resultsElement.replaceChildren();
 
-    if (data.status === "idle" || data.status === "missing-key" || data.status === "error") {
+    if ((data.status === "ready" && !data.results.length) || data.status === "missing-config" || data.status === "error") {
         const messageElement = document.createElement("div");
         messageElement.textContent = data.message || "Recherche YouTube indisponible.";
         messageElement.style.marginBottom = "10px";
         resultsElement.appendChild(messageElement);
     }
 
-    if (data.status === "missing-key" && data.query) {
+    if (data.status === "missing-config" && data.query) {
         const linkElement = document.createElement("a");
         linkElement.href = "https://www.youtube.com/results?search_query=" + encodeURIComponent(data.query);
         linkElement.target = "_blank";
@@ -170,10 +170,21 @@ function renderYoutube(data) {
         });
     }
 
-    if (data.status === "missing-key") {
+    if (data.status === "missing-config") {
         playerElement.textContent = "Clé API YouTube non configurée";
-    } else if (data.status === "idle") {
+    } else if (data.status === "ready" && !data.results.length) {
         playerElement.textContent = "En attente d'une recherche";
+    } else if (data.status === "ready" && data.results.length) {
+        const iframeElement = document.createElement("iframe");
+        iframeElement.src = "https://www.youtube.com/embed/" + encodeURIComponent(data.results[0].videoId);
+        iframeElement.title = data.results[0].title;
+        iframeElement.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+        iframeElement.allowFullscreen = true;
+        iframeElement.style.width = "100%";
+        iframeElement.style.height = "100%";
+        iframeElement.style.border = "0";
+        iframeElement.style.borderRadius = "16px";
+        playerElement.replaceChildren(iframeElement);
     } else {
         playerElement.textContent = data.status === "ready" && data.results.length
             ? "Clique sur une vidéo pour l'ouvrir dans YouTube"
@@ -188,6 +199,8 @@ function renderYoutube(data) {
             ? "▶ Nouvelle vidéo disponible."
             : "▶ Aucune recherche récente."
     };
+
+    notifyAurelStateUpdatedIfAvailable();
 
 }
 
@@ -208,6 +221,14 @@ async function refreshYoutube(query) {
             message: "Recherche YouTube indisponible."
         });
 
+    }
+
+}
+
+function notifyAurelStateUpdatedIfAvailable() {
+
+    if (typeof notifyAurelStateUpdated === "function") {
+        notifyAurelStateUpdated();
     }
 
 }

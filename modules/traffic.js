@@ -3,7 +3,9 @@
 // =====================================
 
 const defaultTrafficConfig = {
-    refreshIntervalMs: 300000
+    refreshIntervalMs: 300000,
+    provider: "waze",
+    embedUrl: "https://embed.waze.com/iframe?zoom=13&lat=-17.552554&lon=-149.607182&pin=1"
 };
 
 function initTraffic() {
@@ -11,7 +13,7 @@ function initTraffic() {
     try {
 
         refreshTraffic();
-        setInterval(refreshTraffic, defaultTrafficConfig.refreshIntervalMs);
+        setInterval(refreshTraffic, getTrafficConfig().refreshIntervalMs);
 
     } catch (error) {
 
@@ -21,50 +23,37 @@ function initTraffic() {
 
 }
 
-function getTrafficData() {
-
-    const now = new Date();
-    const hour = now.getHours();
-    const status = getTrafficStatus(hour);
+function getTrafficConfig() {
 
     return {
-        raw: {
-            hour: hour,
-            destination: "Punaauia"
-        },
-        status: status.key,
-        label: status.label,
-        estimatedTime: status.estimatedTime,
-        updatedAt: now.toLocaleTimeString("fr-FR", {
-            hour: "2-digit",
-            minute: "2-digit"
-        })
+        ...defaultTrafficConfig,
+        ...(window.AUREL_CONFIG && window.AUREL_CONFIG.traffic ? window.AUREL_CONFIG.traffic : {})
     };
 
 }
 
-function getTrafficStatus(hour) {
+function getTrafficData() {
 
-    if ((hour >= 6 && hour <= 8) || (hour >= 16 && hour <= 18)) {
-        return {
-            key: "dense",
-            label: "🟠 Dense",
-            estimatedTime: "35 min"
-        };
-    }
+    const config = getTrafficConfig();
 
-    if (hour >= 11 && hour <= 13) {
+    if (!config.embedUrl) {
         return {
-            key: "heavy",
-            label: "🔴 Très chargé",
-            estimatedTime: "45 min"
+            raw: null,
+            status: "missing-config",
+            summary: "Circulation non configuree.",
+            message: "Configure une source trafic temps reel pour afficher la circulation."
         };
     }
 
     return {
-        key: "fluid",
-        label: "🟢 Fluide",
-        estimatedTime: "22 min"
+        raw: {
+            provider: config.provider,
+            url: config.embedUrl
+        },
+        status: "ready",
+        provider: config.provider,
+        url: config.embedUrl,
+        summary: "Carte trafic temps reel disponible."
     };
 
 }
@@ -78,33 +67,33 @@ function renderTraffic(data) {
         return;
     }
 
-    const rows = [
-        "🚦 État actuel",
-        data.label,
-        "Temps estimé vers Punaauia : " + data.estimatedTime,
-        "Dernière mise à jour : " + data.updatedAt
-    ];
-
     trafficElement.replaceChildren();
 
-    rows.forEach((row) => {
+    if (data.status !== "ready") {
+        trafficElement.textContent = data.message;
+    } else {
+        const iframeElement = document.createElement("iframe");
+        iframeElement.src = data.url;
+        iframeElement.title = "Circulation temps reel Tahiti";
+        iframeElement.loading = "lazy";
+        iframeElement.referrerPolicy = "no-referrer-when-downgrade";
+        iframeElement.style.width = "100%";
+        iframeElement.style.height = "320px";
+        iframeElement.style.border = "0";
+        iframeElement.style.borderRadius = "14px";
 
-        const rowElement = document.createElement("div");
-        rowElement.textContent = row;
-        trafficElement.appendChild(rowElement);
-
-    });
+        trafficElement.appendChild(iframeElement);
+    }
 
     window.AurelState = window.AurelState || {};
     window.AurelState.traffic = {
         raw: data.raw,
         status: data.status,
-        summary: "🚦 Circulation : " + data.label.replace(/^[^ ]+ /, "") + ".",
-        details: [
-            "Temps estimé vers Punaauia : " + data.estimatedTime,
-            "Dernière mise à jour : " + data.updatedAt
-        ]
+        summary: "🚦 " + data.summary,
+        details: data.status === "ready" ? ["Source : " + data.provider + "."] : [data.message]
     };
+
+    notifyAurelStateUpdatedIfAvailable();
 
 }
 
@@ -123,9 +112,19 @@ function refreshTraffic() {
             raw: null,
             status: "unavailable",
             summary: "🚦 Circulation indisponible.",
-            details: []
+            details: ["La source trafic n'a pas pu etre chargee."]
         };
 
+        notifyAurelStateUpdatedIfAvailable();
+
+    }
+
+}
+
+function notifyAurelStateUpdatedIfAvailable() {
+
+    if (typeof notifyAurelStateUpdated === "function") {
+        notifyAurelStateUpdated();
     }
 
 }

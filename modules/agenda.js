@@ -1,9 +1,10 @@
 // =====================================
-// AGENDA
+// AGENDA GOOGLE
 // =====================================
 
 const defaultAgendaConfig = {
-    refreshIntervalMs: 300000
+    refreshIntervalMs: 300000,
+    googleCalendarEmbedUrl: ""
 };
 
 function initAgenda() {
@@ -11,7 +12,7 @@ function initAgenda() {
     try {
 
         refreshAgenda();
-        setInterval(refreshAgenda, defaultAgendaConfig.refreshIntervalMs);
+        setInterval(refreshAgenda, getAgendaConfig().refreshIntervalMs);
 
     } catch (error) {
 
@@ -21,38 +22,70 @@ function initAgenda() {
 
 }
 
-function getAgendaData() {
+function getAgendaConfig() {
 
     return {
-        label: "Aujourd'hui",
-        status: "controlled",
-        events: [
-            {
-                time: "09:30",
-                title: "Devis Punaauia"
-            },
-            {
-                time: "10:45",
-                title: "Chantier Faaa"
-            },
-            {
-                time: "14:00",
-                title: "Appel client"
-            }
-        ]
+        ...defaultAgendaConfig,
+        ...(window.AUREL_CONFIG && window.AUREL_CONFIG.agenda ? window.AUREL_CONFIG.agenda : {})
+    };
+
+}
+
+function getAgendaData() {
+
+    const config = getAgendaConfig();
+
+    if (!config.googleCalendarEmbedUrl) {
+        return {
+            raw: null,
+            status: "missing-config",
+            summary: "Agenda Google non configure.",
+            message: "Configure l'URL d'integration Google Calendar pour afficher le vrai agenda."
+        };
+    }
+
+    return {
+        raw: {
+            url: config.googleCalendarEmbedUrl
+        },
+        status: "ready",
+        summary: "Agenda Google disponible.",
+        url: config.googleCalendarEmbedUrl
     };
 
 }
 
 function renderAgenda(data) {
 
+    const agendaElement = document.getElementById("agenda");
+
+    if (agendaElement) {
+        agendaElement.replaceChildren();
+
+        if (data.status === "ready") {
+            const iframeElement = document.createElement("iframe");
+            iframeElement.src = data.url;
+            iframeElement.title = "Agenda Google TRJ";
+            iframeElement.loading = "lazy";
+            iframeElement.style.width = "100%";
+            iframeElement.style.height = "420px";
+            iframeElement.style.border = "0";
+            iframeElement.style.borderRadius = "14px";
+            agendaElement.appendChild(iframeElement);
+        } else {
+            agendaElement.textContent = data.message;
+        }
+    }
+
     window.AurelState = window.AurelState || {};
     window.AurelState.agenda = {
-        raw: data,
+        raw: data.raw,
         status: data.status,
-        summary: "📅 " + data.label,
-        details: data.events.map((event) => event.time + " - " + event.title)
+        summary: "📅 " + data.summary,
+        details: data.status === "ready" ? ["Agenda Google integre dans le cockpit."] : [data.message]
     };
+
+    notifyAurelStateUpdatedIfAvailable();
 
 }
 
@@ -70,10 +103,20 @@ function refreshAgenda() {
         window.AurelState.agenda = {
             raw: null,
             status: "unavailable",
-            summary: "📅 Agenda indisponible.",
-            details: []
+            summary: "📅 Agenda Google indisponible.",
+            details: ["La source agenda n'a pas pu etre lue."]
         };
 
+        notifyAurelStateUpdatedIfAvailable();
+
+    }
+
+}
+
+function notifyAurelStateUpdatedIfAvailable() {
+
+    if (typeof notifyAurelStateUpdated === "function") {
+        notifyAurelStateUpdated();
     }
 
 }

@@ -4,38 +4,51 @@
 
 const defaultRadarConfig = {
     refreshIntervalMs: 600000,
-    animationIntervalMs: 900,
     latitude: -17.552554,
     longitude: -149.607182,
-    zoom: 6,
+    zoom: 10,
     api: "https://api.rainviewer.com/public/weather-maps.json",
-    baseTile: "https://tile.openstreetmap.org",
+    baseTile: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
     colorScheme: 2,
     smooth: 1,
     snow: 0
 };
 
-let radarFrames = [];
-let radarFrameIndex = 0;
-let radarAnimationTimer = null;
+let radarMap = null;
+let radarRainLayer = null;
 
 function initRadar() {
 
     refreshRadar();
-    setInterval(refreshRadar, defaultRadarConfig.refreshIntervalMs);
+    setInterval(refreshRadar, getRadarConfig().refreshIntervalMs);
+
+}
+
+function getRadarConfig() {
+
+    return {
+        ...defaultRadarConfig,
+        ...(window.AUREL_CONFIG && window.AUREL_CONFIG.radar ? window.AUREL_CONFIG.radar : {})
+    };
 
 }
 
 async function getRadarData() {
 
-    const response = await fetch(defaultRadarConfig.api);
+    const radarConfig = getRadarConfig();
+
+    if (typeof L === "undefined") {
+        throw new Error("Leaflet indisponible.");
+    }
+
+    const response = await fetch(radarConfig.api);
 
     if (!response.ok) {
         throw new Error("RainViewer HTTP " + response.status);
     }
 
     const data = await response.json();
-    const frames = data && data.radar && Array.isArray(data.radar.past) ? data.radar.past.slice(-6) : [];
+    const frames = data && data.radar && Array.isArray(data.radar.past) ? data.radar.past : [];
 
     if (!frames.length) {
         throw new Error("Radar pluie indisponible.");
@@ -43,21 +56,9 @@ async function getRadarData() {
 
     return {
         host: data.host,
-        frames: frames,
-        center: latLonToTile(defaultRadarConfig.latitude, defaultRadarConfig.longitude, defaultRadarConfig.zoom)
-    };
-
-}
-
-function latLonToTile(latitude, longitude, zoom) {
-
-    const latRad = latitude * Math.PI / 180;
-    const scale = Math.pow(2, zoom);
-
-    return {
-        x: Math.floor((longitude + 180) / 360 * scale),
-        y: Math.floor((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2 * scale),
-        zoom: zoom
+        frame: frames[frames.length - 1],
+        center: [radarConfig.latitude, radarConfig.longitude],
+        config: radarConfig
     };
 
 }
@@ -75,104 +76,50 @@ function renderRadar(data) {
     radarElement.style.position = "relative";
     radarElement.style.overflow = "hidden";
 
-    radarElement.appendChild(createRadarBaseLayer(data.center));
+    const mapElement = document.createElement("div");
+    mapElement.style.width = "100%";
+    mapElement.style.height = "100%";
+    mapElement.style.borderRadius = "16px";
+    mapElement.style.overflow = "hidden";
+    radarElement.appendChild(mapElement);
 
-    radarFrames = data.frames.map((frame) => createRadarFrame(data.host, frame, data.center));
-    radarFrameIndex = 0;
+    radarMap = L.map(mapElement, {
+        zoomControl: true,
+        attributionControl: true
+    }).setView(data.center, data.config.zoom);
 
-    radarFrames.forEach((frameElement, index) => {
-        frameElement.style.opacity = index === 0 ? "1" : "0";
-        radarElement.appendChild(frameElement);
-    });
+    L.tileLayer(data.config.baseTile, {
+        maxZoom: 19,
+        attribution: "&copy; OpenStreetMap"
+    }).addTo(radarMap);
 
-    const labelElement = document.createElement("div");
-    labelElement.textContent = "Radar pluie Tahiti";
-    labelElement.style.position = "absolute";
-    labelElement.style.left = "12px";
-    labelElement.style.bottom = "10px";
-    labelElement.style.padding = "6px 10px";
-    labelElement.style.borderRadius = "10px";
-    labelElement.style.background = "rgba(0,0,0,.45)";
-    labelElement.style.fontSize = "14px";
-    radarElement.appendChild(labelElement);
+    radarRainLayer = L.tileLayer(buildRainViewerTileUrl(data.host, data.frame, data.config), {
+        opacity: 0.7,
+        zIndex: 10,
+        attribution: "RainViewer"
+    }).addTo(radarMap);
 
-    if (radarAnimationTimer) {
-        clearInterval(radarAnimationTimer);
-    }
-
-    radarAnimationTimer = setInterval(animateRadar, defaultRadarConfig.animationIntervalMs);
+    window.setTimeout(() => {
+        radarMap.invalidateSize();
+    }, 100);
 
     window.AurelState = window.AurelState || {};
     window.AurelState.radar = {
         raw: {
-            frames: data.frames.length
+            frameTime: data.frame.time
         },
         status: "ready",
-        summary: "🌧 Radar pluie actif."
+        summary: "🌧 Radar pluie interactif disponible.",
+        details: ["Source : RainViewer."]
     };
 
-}
-
-function createRadarBaseLayer(center) {
-
-    const frameElement = document.createElement("div");
-    frameElement.style.position = "absolute";
-    frameElement.style.inset = "0";
-
-    [-1, 0, 1].forEach((offsetY) => {
-        [-1, 0, 1].forEach((offsetX) => {
-            const baseTile = document.createElement("img");
-            baseTile.src = defaultRadarConfig.baseTile + "/" + center.zoom + "/" + (center.x + offsetX) + "/" + (center.y + offsetY) + ".png";
-            baseTile.alt = "";
-            baseTile.style.position = "absolute";
-            baseTile.style.width = "33.34%";
-            baseTile.style.height = "33.34%";
-            baseTile.style.left = ((offsetX + 1) * 33.34) + "%";
-            baseTile.style.top = ((offsetY + 1) * 33.34) + "%";
-            baseTile.style.objectFit = "cover";
-            frameElement.appendChild(baseTile);
-        });
-    });
-
-    return frameElement;
+    notifyAurelStateUpdatedIfAvailable();
 
 }
 
-function createRadarFrame(host, frame, center) {
+function buildRainViewerTileUrl(host, frame, config) {
 
-    const frameElement = document.createElement("div");
-    frameElement.style.position = "absolute";
-    frameElement.style.inset = "0";
-    frameElement.style.transition = "opacity .35s";
-
-    [-1, 0, 1].forEach((offsetY) => {
-        [-1, 0, 1].forEach((offsetX) => {
-            const tile = document.createElement("img");
-            tile.src = host + frame.path + "/256/" + center.zoom + "/" + (center.x + offsetX) + "/" + (center.y + offsetY) + "/" + defaultRadarConfig.colorScheme + "/" + defaultRadarConfig.smooth + "_" + defaultRadarConfig.snow + ".png";
-            tile.alt = "";
-            tile.style.position = "absolute";
-            tile.style.width = "33.34%";
-            tile.style.height = "33.34%";
-            tile.style.left = ((offsetX + 1) * 33.34) + "%";
-            tile.style.top = ((offsetY + 1) * 33.34) + "%";
-            tile.style.objectFit = "cover";
-            frameElement.appendChild(tile);
-        });
-    });
-
-    return frameElement;
-
-}
-
-function animateRadar() {
-
-    if (!radarFrames.length) {
-        return;
-    }
-
-    radarFrames[radarFrameIndex].style.opacity = "0";
-    radarFrameIndex = (radarFrameIndex + 1) % radarFrames.length;
-    radarFrames[radarFrameIndex].style.opacity = "1";
+    return host + frame.path + "/256/{z}/{x}/{y}/" + config.colorScheme + "/" + config.smooth + "_" + config.snow + ".png";
 
 }
 
@@ -180,13 +127,11 @@ function renderRadarError(error) {
 
     const radarElement = document.getElementById("radar");
 
-    if (radarAnimationTimer) {
-        clearInterval(radarAnimationTimer);
-        radarAnimationTimer = null;
+    if (radarMap) {
+        radarMap.remove();
+        radarMap = null;
+        radarRainLayer = null;
     }
-
-    radarFrames = [];
-    radarFrameIndex = 0;
 
     if (radarElement) {
         radarElement.replaceChildren();
@@ -198,8 +143,11 @@ function renderRadarError(error) {
         raw: null,
         status: "unavailable",
         summary: "🌧 Radar pluie indisponible.",
+        details: ["La carte radar ne peut pas etre chargee."],
         error: error ? error.message : "Erreur radar inconnue"
     };
+
+    notifyAurelStateUpdatedIfAvailable();
 
 }
 
@@ -207,13 +155,38 @@ async function refreshRadar() {
 
     try {
 
-        renderRadar(await getRadarData());
+        const data = await getRadarData();
+
+        if (radarMap && radarRainLayer) {
+            radarRainLayer.setUrl(buildRainViewerTileUrl(data.host, data.frame, data.config));
+            window.AurelState = window.AurelState || {};
+            window.AurelState.radar = {
+                raw: {
+                    frameTime: data.frame.time
+                },
+                status: "ready",
+                summary: "🌧 Radar pluie interactif disponible.",
+                details: ["Source : RainViewer."]
+            };
+            notifyAurelStateUpdatedIfAvailable();
+            return;
+        }
+
+        renderRadar(data);
 
     } catch (error) {
 
         console.warn("Erreur pendant la mise a jour radar.", error);
         renderRadarError(error);
 
+    }
+
+}
+
+function notifyAurelStateUpdatedIfAvailable() {
+
+    if (typeof notifyAurelStateUpdated === "function") {
+        notifyAurelStateUpdated();
     }
 
 }

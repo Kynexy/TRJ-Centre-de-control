@@ -3,7 +3,7 @@
 // =====================================
 
 const defaultReportConfig = {
-    refreshIntervalMs: 30000
+    refreshIntervalMs: 5000
 };
 
 function initReport() {
@@ -28,18 +28,23 @@ function getReportData() {
     const state = window.AurelState;
 
     return {
-        greeting: "🤖 Bonjour Patron.",
-        webcam: getReportSummary(state.webcam, "🟡 Webcam en vérification."),
-        weather: getReportSummary(state.weather, "🌦️ Conditions de chantier : Indisponibles."),
-        agenda: getReportSummary(state.agenda, "📅 Agenda indisponible."),
+        greeting: "Bonjour Patron.",
+        webcam: getReportSummary(state.webcam, "Webcam en verification."),
+        weather: getReportSummary(state.weather, "Meteo indisponible."),
+        radar: getReportSummary(state.radar, "Radar pluie indisponible."),
+        radarDetails: getReportDetails(state.radar),
+        agenda: getReportSummary(state.agenda, "Agenda Google indisponible."),
         agendaDetails: getReportDetails(state.agenda),
-        traffic: getReportSummary(state.traffic, "🚦 Circulation indisponible."),
+        traffic: getReportSummary(state.traffic, "Circulation indisponible."),
         trafficDetails: getReportDetails(state.traffic),
-        photo: getReportSummary(state.photo, "📸 Photo du jour indisponible."),
-        youtube: getReportSummary(state.youtube, "▶ Aucune recherche récente."),
-        messenger: getReportSummary(state.messenger, "💬 Messenger indisponible."),
-        news: getReportSummary(state.news, "📰 Actualités indisponibles."),
-        prospects: getReportSummary(state.prospects, "📈 Prospects indisponibles.")
+        messenger: getReportSummary(state.messenger, "Messenger TRJ indisponible."),
+        messengerDetails: getReportDetails(state.messenger),
+        photo: getReportSummary(state.photo, "Photo du jour indisponible."),
+        photoDetails: getReportDetails(state.photo),
+        youtube: getReportSummary(state.youtube, "YouTube en attente d'une recherche."),
+        news: getReportSummary(state.news, "Actualites indisponibles."),
+        prospects: getReportSummary(state.prospects, "Prospects indisponibles."),
+        prospectsDetails: getReportDetails(state.prospects)
     };
 
 }
@@ -74,19 +79,24 @@ function renderReport(data) {
     }
 
     const rows = [
-        data.greeting,
+        "🤖 " + data.greeting,
         "",
         data.webcam,
         data.weather,
+        data.radar,
+        ...data.radarDetails,
         data.agenda,
         ...data.agendaDetails,
         data.traffic,
         ...data.trafficDetails,
         data.messenger,
+        ...data.messengerDetails,
         data.photo,
+        ...data.photoDetails,
         data.youtube,
         data.news,
-        data.prospects
+        data.prospects,
+        ...data.prospectsDetails
     ];
 
     reportElement.replaceChildren();
@@ -116,6 +126,14 @@ function refreshReport() {
 
         console.warn("Erreur pendant la mise a jour du rapport.", error);
 
+    }
+
+}
+
+function notifyAurelStateUpdated() {
+
+    if (typeof refreshReport === "function") {
+        refreshReport();
     }
 
 }

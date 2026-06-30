@@ -11,6 +11,46 @@ window.AUREL_CONFIG = {
     api: {
         youtubeApiKey: ""
     },
+    agenda: {
+        googleCalendarEmbedUrl: ""
+    },
+    traffic: {
+        provider: "waze",
+        latitude: -17.552554,
+        longitude: -149.607182,
+        zoom: 13,
+        embedUrl: "https://embed.waze.com/iframe?zoom=13&lat=-17.552554&lon=-149.607182&pin=1"
+    },
+    radar: {
+        refreshIntervalMs: 600000,
+        latitude: -17.552554,
+        longitude: -149.607182,
+        zoom: 10,
+        api: "https://api.rainviewer.com/public/weather-maps.json",
+        baseTile: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        colorScheme: 2,
+        smooth: 1,
+        snow: 0
+    },
+    prospects: {
+        provider: "Kynexy",
+        url: ""
+    },
+    messenger: {
+        provider: "Messenger TRJ",
+        url: ""
+    },
+    photo: {
+        imageUrl: "",
+        linkUrl: ""
+    },
+    news: {
+        endpoint: "https://api.gdeltproject.org/api/v2/doc/doc",
+        query: "Tahiti OR Polynesie",
+        maxRecords: 3,
+        timeoutMs: 4000,
+        fallbackUrl: "https://news.google.com/search?q=Tahiti%20Polynesie&hl=fr&gl=FR&ceid=FR%3Afr"
+    },
     youtube: {
         endpoint: "https://www.googleapis.com/youtube/v3/search",
         maxResults: 5,

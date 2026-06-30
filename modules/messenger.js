@@ -3,32 +3,50 @@
 // =====================================
 
 const defaultMessengerConfig = {
-    refreshIntervalMs: 300000
+    refreshIntervalMs: 300000,
+    provider: "Messenger TRJ",
+    url: ""
 };
 
 function initMessenger() {
 
     refreshMessenger();
-    setInterval(refreshMessenger, defaultMessengerConfig.refreshIntervalMs);
+    setInterval(refreshMessenger, getMessengerConfig().refreshIntervalMs);
+
+}
+
+function getMessengerConfig() {
+
+    return {
+        ...defaultMessengerConfig,
+        ...(window.AUREL_CONFIG && window.AUREL_CONFIG.messenger ? window.AUREL_CONFIG.messenger : {})
+    };
 
 }
 
 function getMessengerData() {
 
-    const now = new Date();
+    const config = getMessengerConfig();
+
+    if (!config.url) {
+        return {
+            raw: null,
+            status: "missing-config",
+            summary: "Messenger TRJ non connecte.",
+            message: "L'inbox Messenger ne peut pas etre integree directement sans acces Meta Business.",
+            action: "Configurer le lien Messenger ou Meta Business Suite."
+        };
+    }
 
     return {
         raw: {
-            source: "Messenger TRJ"
+            provider: config.provider,
+            url: config.url
         },
-        status: "up-to-date",
-        sender: "Équipe TRJ",
-        message: "Planning équipe confirmé pour demain.",
-        time: now.toLocaleTimeString("fr-FR", {
-            hour: "2-digit",
-            minute: "2-digit"
-        }),
-        unreadCount: 0
+        status: "ready",
+        summary: "Messenger TRJ accessible.",
+        message: "Ouvrir Messenger TRJ",
+        url: config.url
     };
 
 }
@@ -42,30 +60,40 @@ function renderMessenger(data) {
         return;
     }
 
-    const rows = [
-        "💬 État des messages : " + (data.unreadCount ? data.unreadCount + " non lu(s)" : "À jour"),
-        "Dernier expéditeur : " + data.sender,
-        "Dernier message : " + data.message,
-        "Heure : " + data.time
-    ];
-
     messengerElement.replaceChildren();
 
-    rows.forEach((row) => {
-        const rowElement = document.createElement("div");
-        rowElement.textContent = row;
-        messengerElement.appendChild(rowElement);
-    });
+    const statusElement = document.createElement("div");
+    statusElement.textContent = "💬 " + data.summary;
+    messengerElement.appendChild(statusElement);
+
+    const detailElement = document.createElement("div");
+    detailElement.textContent = data.message;
+    messengerElement.appendChild(detailElement);
+
+    if (data.url) {
+        const linkElement = document.createElement("a");
+        linkElement.href = data.url;
+        linkElement.target = "_blank";
+        linkElement.rel = "noopener";
+        linkElement.textContent = data.message;
+        linkElement.style.display = "block";
+        linkElement.style.marginTop = "12px";
+        messengerElement.appendChild(linkElement);
+    } else {
+        const actionElement = document.createElement("div");
+        actionElement.textContent = data.action;
+        messengerElement.appendChild(actionElement);
+    }
 
     window.AurelState = window.AurelState || {};
     window.AurelState.messenger = {
         raw: data.raw,
         status: data.status,
-        summary: "💬 Messenger : messages à jour.",
-        details: [
-            "Dernier message : " + data.sender + " - " + data.message
-        ]
+        summary: "💬 " + data.summary,
+        details: [data.action || data.message]
     };
+
+    notifyAurelStateUpdatedIfAvailable();
 
 }
 
@@ -79,6 +107,14 @@ function refreshMessenger() {
 
         console.warn("Erreur pendant la mise a jour Messenger.", error);
 
+    }
+
+}
+
+function notifyAurelStateUpdatedIfAvailable() {
+
+    if (typeof notifyAurelStateUpdated === "function") {
+        notifyAurelStateUpdated();
     }
 
 }

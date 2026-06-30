@@ -33,7 +33,7 @@ let hls = null;
 
 window.AurelState = window.AurelState || {};
 window.AurelState.webcam = window.AurelState.webcam || {
-    status: "checking",
+    status: "loading",
     text: webcamStatuses.checking.text,
     operational: false,
     summary: "🟡 Webcam en vérification."
@@ -58,11 +58,27 @@ function updateWebcamStatus(status) {
     statusElement.style.color = statusConfig.color;
 
     window.AurelState.webcam = {
-        status: status,
+        status: getAurelWebcamStatus(status),
         text: statusConfig.text,
         operational: status === "connected",
         summary: getWebcamSummary(status)
     };
+
+    notifyAurelStateUpdatedIfAvailable();
+
+}
+
+function getAurelWebcamStatus(status) {
+
+    const statuses = {
+        checking: "loading",
+        connecting: "loading",
+        connected: "ready",
+        switching: "loading",
+        unavailable: "unavailable"
+    };
+
+    return statuses[status] || "error";
 
 }
 
@@ -121,9 +137,9 @@ function chargerWebcam() {
 
         hls.on(Hls.Events.ERROR, (event, data) => {
 
-            console.warn(data);
-
             if (data.fatal) {
+
+                console.warn("Erreur fatale webcam.", data);
 
                 webcamIndex++;
 
@@ -181,5 +197,13 @@ function chargerWebcam() {
 function initWebcam() {
 
     chargerWebcam();
+
+}
+
+function notifyAurelStateUpdatedIfAvailable() {
+
+    if (typeof notifyAurelStateUpdated === "function") {
+        notifyAurelStateUpdated();
+    }
 
 }

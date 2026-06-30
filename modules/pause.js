@@ -74,10 +74,20 @@ function renderPause(data) {
         details: data.details
     };
 
+    notifyAurelStateUpdatedIfAvailable();
+
 }
 
 function refreshPause() {
 
     renderPause(getPauseData());
+
+}
+
+function notifyAurelStateUpdatedIfAvailable() {
+
+    if (typeof notifyAurelStateUpdated === "function") {
+        notifyAurelStateUpdated();
+    }
 
 }

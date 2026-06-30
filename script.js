@@ -330,11 +330,13 @@ function renderWeather(data) {
     window.AurelState = window.AurelState || {};
     window.AurelState.weather = {
         raw: data,
-        status: data.chantier,
+        status: "ready",
         summary: "🌦️ Conditions de chantier : " + formatChantierStatus(data.chantier).replace(/^[^ ]+ /, "") + ".",
         chantier: data.chantier,
         chantierLabel: formatChantierStatus(data.chantier).replace(/^[^ ]+ /, "")
     };
+
+    notifyAurelStateUpdatedIfAvailable();
 
 }
 
@@ -371,6 +373,8 @@ function renderWeatherError(error) {
         summary: "🌦️ Météo indisponible.",
         error: error ? error.message : "Erreur météo inconnue"
     };
+
+    notifyAurelStateUpdatedIfAvailable();
 
 }
 
@@ -447,3 +451,11 @@ function initAurel(modules) {
 }
 
 initAurel(aurelModules);
+
+function notifyAurelStateUpdatedIfAvailable() {
+
+    if (typeof notifyAurelStateUpdated === "function") {
+        notifyAurelStateUpdated();
+    }
+
+}

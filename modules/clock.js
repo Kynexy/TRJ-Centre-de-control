@@ -59,14 +59,26 @@ function initClock() {
         });
 
         window.AurelState.clock = {
+            status: "ready",
             now: now,
             time: heureElement.textContent,
-            date: dateElement.textContent
+            date: dateElement.textContent,
+            summary: "Horloge a jour."
         };
+
+        notifyAurelStateUpdatedIfAvailable();
 
     }
 
     updateClock();
     setInterval(updateClock, timeConfig.refreshIntervalMs);
+
+}
+
+function notifyAurelStateUpdatedIfAvailable() {
+
+    if (typeof notifyAurelStateUpdated === "function") {
+        notifyAurelStateUpdated();
+    }
 
 }
