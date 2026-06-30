@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Kynex CRM TRJ</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,Helvetica,sans-serif;
+}
+
+:root{
+--bg:#07182d;
+--card:#123d74;
+--card-2:#0f2f58;
+--blue:#2ca9ff;
+--blue-soft:#9fd4ff;
+--green:#5ee37d;
+--orange:#ffd166;
+--red:#ff6b6b;
+--text:#ffffff;
+--muted:rgba(255,255,255,.72);
+--line:rgba(255,255,255,.12);
+}
+
+body{
+background:var(--bg);
+color:var(--text);
+padding:16px;
+}
+
+button,
+input,
+select,
+textarea{
+font:inherit;
+}
+
+button{
+cursor:pointer;
+}
+
+.crm-shell{
+max-width:1480px;
+margin:0 auto;
+}
+
+.topbar{
+background:linear-gradient(135deg,#123d74,#1c5fb6);
+padding:22px;
+border-radius:22px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+flex-wrap:wrap;
+gap:18px;
+margin-bottom:20px;
+box-shadow:0 10px 30px rgba(0,0,0,.35);
+}
+
+.title h1{
+font-size:2rem;
+margin-bottom:4px;
+}
+
+.title p{
+opacity:.8;
+}
+
+.status{
+display:flex;
+gap:12px;
+flex-wrap:wrap;
+}
+
+.pill{
+background:rgba(255,255,255,.12);
+border:1px solid rgba(255,255,255,.12);
+border-radius:999px;
+padding:9px 13px;
+font-size:14px;
+color:var(--text);
+}
+
+.layout{
+display:grid;
+grid-template-columns:260px 1fr;
+gap:22px;
+align-items:start;
+}
+
+.sidebar,
+.card{
+background:var(--card);
+border-radius:22px;
+padding:22px;
+box-shadow:0 8px 25px rgba(0,0,0,.30);
+}
+
+.sidebar{
+position:sticky;
+top:16px;
+}
+
+.brand-mark{
+width:58px;
+height:58px;
+border-radius:50%;
+background:var(--blue);
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:28px;
+font-weight:700;
+box-shadow:0 0 28px rgba(44,169,255,.65);
+margin-bottom:18px;
+}
+
+.nav{
+display:flex;
+flex-direction:column;
+gap:9px;
+}
+
+.nav button{
+width:100%;
+border:0;
+border-radius:13px;
+padding:12px 13px;
+text-align:left;
+background:rgba(255,255,255,.08);
+color:white;
+transition:.2s;
+}
+
+.nav button:hover,
+.nav button.active{
+background:var(--blue);
+}
+
+.sidebar-note{
+margin-top:20px;
+padding-top:18px;
+border-top:1px solid var(--line);
+font-size:13px;
+line-height:1.5;
+color:var(--muted);
+}
+
+.main{
+display:flex;
+flex-direction:column;
+gap:22px;
+}
+
+.hero{
+background:linear-gradient(135deg,#0b2b4e,#164b82);
+border-radius:22px;
+padding:22px;
+display:grid;
+grid-template-columns:1.4fr .8fr;
+gap:18px;
+box-shadow:0 8px 25px rgba(0,0,0,.30);
+}
+
+.hero h2,
+.card h2{
+color:var(--blue-soft);
+margin-bottom:14px;
+}
+
+.hero p{
+color:var(--muted);
+line-height:1.5;
+}
+
+.quick-actions{
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:10px;
+}
+
+.primary-btn,
+.ghost-btn{
+border:0;
+border-radius:13px;
+padding:13px;
+color:white;
+}
+
+.primary-btn{
+background:var(--blue);
+}
+
+.ghost-btn{
+background:rgba(255,255,255,.12);
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(4,minmax(0,1fr));
+gap:16px;
+}
+
+.metric{
+background:rgba(255,255,255,.08);
+border:1px solid rgba(255,255,255,.08);
+border-radius:18px;
+padding:18px;
+min-height:122px;
+}
+
+.metric span{
+display:block;
+color:var(--muted);
+font-size:14px;
+margin-bottom:12px;
+}
+
+.metric strong{
+font-size:34px;
+}
+
+.metric small{
+display:block;
+margin-top:8px;
+color:var(--muted);
+line-height:1.4;
+}
+
+.module-grid{
+display:grid;
+grid-template-columns:1.15fr .85fr;
+gap:22px;
+}
+
+.toolbar{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+margin-bottom:16px;
+}
+
+.toolbar input,
+.toolbar select{
+background:rgba(255,255,255,.1);
+border:1px solid rgba(255,255,255,.14);
+border-radius:12px;
+padding:12px 13px;
+color:white;
+min-width:170px;
+}
+
+.toolbar input::placeholder{
+color:rgba(255,255,255,.55);
+}
+
+.list{
+display:flex;
+flex-direction:column;
+gap:11px;
+}
+
+.row{
+background:rgba(255,255,255,.08);
+border:1px solid rgba(255,255,255,.08);
+border-radius:16px;
+padding:15px;
+display:grid;
+grid-template-columns:1fr auto;
+gap:14px;
+align-items:center;
+}
+
+.row h3{
+font-size:17px;
+margin-bottom:5px;
+}
+
+.row p{
+font-size:14px;
+line-height:1.5;
+color:var(--muted);
+}
+
+.tag{
+display:inline-flex;
+align-items:center;
+gap:6px;
+border-radius:999px;
+padding:7px 10px;
+background:rgba(255,255,255,.12);
+font-size:13px;
+white-space:nowrap;
+}
+
+.tag.ready{
+color:var(--green);
+}
+
+.tag.warn{
+color:var(--orange);
+}
+
+.tag.blocked{
+color:var(--red);
+}
+
+.pipeline{
+display:grid;
+grid-template-columns:repeat(4,minmax(170px,1fr));
+gap:12px;
+overflow:auto;
+padding-bottom:2px;
+}
+
+.lane{
+background:rgba(0,0,0,.13);
+border:1px solid var(--line);
+border-radius:18px;
+padding:14px;
+min-height:260px;
+}
+
+.lane h3{
+font-size:15px;
+color:var(--blue-soft);
+margin-bottom:12px;
+}
+
+.deal{
+background:rgba(255,255,255,.1);
+border-radius:14px;
+padding:13px;
+margin-bottom:10px;
+}
+
+.deal strong{
+display:block;
+margin-bottom:7px;
+}
+
+.deal span{
+font-size:13px;
+color:var(--muted);
+line-height:1.4;
+}
+
+.empty{
+background:rgba(255,255,255,.07);
+border:1px dashed rgba(255,255,255,.22);
+border-radius:16px;
+padding:18px;
+color:var(--muted);
+line-height:1.5;
+}
+
+.table{
+width:100%;
+border-collapse:collapse;
+overflow:hidden;
+border-radius:16px;
+}
+
+.table th,
+.table td{
+padding:13px;
+border-bottom:1px solid var(--line);
+text-align:left;
+font-size:14px;
+}
+
+.table th{
+color:var(--blue-soft);
+font-weight:700;
+}
+
+.drawer{
+display:none;
+position:fixed;
+right:16px;
+top:16px;
+bottom:16px;
+width:min(460px,calc(100vw - 32px));
+background:#0f2f58;
+border:1px solid rgba(255,255,255,.12);
+border-radius:22px;
+box-shadow:0 18px 50px rgba(0,0,0,.45);
+z-index:10;
+padding:22px;
+overflow:auto;
+}
+
+.drawer.open{
+display:block;
+}
+
+.drawer-header{
+display:flex;
+justify-content:space-between;
+gap:12px;
+align-items:center;
+margin-bottom:18px;
+}
+
+.form{
+display:flex;
+flex-direction:column;
+gap:12px;
+}
+
+.form label{
+font-size:13px;
+color:var(--muted);
+}
+
+.form input,
+.form select,
+.form textarea{
+width:100%;
+margin-top:6px;
+background:rgba(255,255,255,.1);
+border:1px solid rgba(255,255,255,.15);
+border-radius:13px;
+padding:12px;
+color:white;
+}
+
+.form textarea{
+min-height:92px;
+resize:vertical;
+}
+
+.footer-note{
+color:var(--muted);
+font-size:13px;
+line-height:1.5;
+}
+
+@media(max-width:1050px){
+.layout,
+.hero,
+.module-grid{
+grid-template-columns:1fr;
+}
+
+.sidebar{
+position:static;
+}
+
+.nav{
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+}
+
+.grid{
+grid-template-columns:repeat(2,minmax(0,1fr));
+}
+}
+
+@media(max-width:720px){
+body{
+padding:10px;
+}
+
+.topbar,
+.sidebar,
+.card,
+.hero{
+border-radius:20px;
+padding:18px;
+}
+
+.status,
+.quick-actions,
+.grid,
+.nav{
+grid-template-columns:1fr;
+}
+
+.status,
+.toolbar{
+flex-direction:column;
+}
+
+.toolbar input,
+.toolbar select,
+.toolbar button{
+width:100%;
+}
+
+.row{
+grid-template-columns:1fr;
+}
+
+.pipeline{
+grid-template-columns:1fr;
+overflow:visible;
+}
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="crm-shell">
+
+<header class="topbar">
+<div class="title">
+<h1>Kynex CRM</h1>
+<p>Production commerciale TRJ</p>
+</div>
+<div class="status">
+<div class="pill" id="crmSourceStatus">Source Glide : prete</div>
+<div class="pill" id="crmClock">Initialisation</div>
+</div>
+</header>
+
+<div class="layout">
+
+<aside class="sidebar">
+<div class="brand-mark">K</div>
+<nav class="nav" id="crmNav">
+<button class="active" data-view="dashboard">Vue du jour</button>
+<button data-view="pipeline">Pipeline</button>
+<button data-view="clients">Clients</button>
+<button data-view="planning">Planning</button>
+<button data-view="devis">Devis</button>
+<button data-view="operations">Operations</button>
+<button data-view="documents">Documents</button>
+<button data-view="settings">Connexions</button>
+</nav>
+<div class="sidebar-note">
+CRM independant du Cockpit Scroll V1. Les donnees peuvent etre alimentees par Glide via window.KYNEX_CRM_DATA.
+</div>
+</aside>
+
+<main class="main">
+
+<section class="hero">
+<div>
+<h2 id="viewTitle">Vue du jour</h2>
+<p id="viewSubtitle">Suivre les prospects, les rendez-vous, les devis et les chantiers sans quitter l'environnement Kynex.</p>
+</div>
+<div class="quick-actions">
+<button class="primary-btn" data-action="open-drawer" data-kind="prospect">Nouveau prospect</button>
+<button class="ghost-btn" data-action="open-drawer" data-kind="appointment">Nouveau RDV</button>
+<button class="ghost-btn" data-action="open-drawer" data-kind="quote">Nouveau devis</button>
+<button class="ghost-btn" data-action="open-drawer" data-kind="photo">Photo chantier</button>
+</div>
+</section>
+
+<section class="grid" id="crmMetrics"></section>
+
+<section id="crmView"></section>
+
+<section class="card">
+<h2>Socle ERP</h2>
+<p class="footer-note">
+Modules prevus : clients, prospects, rendez-vous, devis, factures, equipe, prestations, photos, documents, paiements et parametres.
+Chaque module possede son etat, ses donnees et son rendu afin de pouvoir evoluer sans casser les autres.
+</p>
+</section>
+
+</main>
+
+</div>
+
+</div>
+
+<aside class="drawer" id="crmDrawer" aria-hidden="true">
+<div class="drawer-header">
+<h2 id="drawerTitle">Nouvelle action</h2>
+<button class="ghost-btn" id="closeDrawer">Fermer</button>
+</div>
+<form class="form" id="crmForm">
+<label>
+Type
+<select id="formType">
+<option value="prospect">Prospect</option>
+<option value="appointment">Rendez-vous</option>
+<option value="quote">Devis</option>
+<option value="photo">Photo chantier</option>
+</select>
+</label>
+<label>
+Nom
+<input id="formName" type="text" placeholder="Nom client ou chantier">
+</label>
+<label>
+Telephone
+<input id="formPhone" type="tel" placeholder="+689 ...">
+</label>
+<label>
+Adresse
+<input id="formAddress" type="text" placeholder="Commune, quartier, repere">
+</label>
+<label>
+Notes
+<textarea id="formNotes" placeholder="Besoin, urgence, prochaine action"></textarea>
+</label>
+<button class="primary-btn" type="submit">Preparer pour Glide</button>
+<p class="footer-note" id="formFeedback">Aucune donnee n'est envoyee tant que la connexion Glide n'est pas configuree.</p>
+</form>
+</aside>
+
+<script>
+
+const CRM_TABLES = [
+    "clients",
+    "prospects",
+    "appointments",
+    "quotes",
+    "invoices",
+    "team",
+    "services",
+    "photos",
+    "documents",
+    "payments",
+    "settings"
+];
+
+const CRM_STATE = {
+    view: "dashboard",
+    data: getInitialData(),
+    draftQueue: []
+};
+
+const CRM_VIEWS = {
+    dashboard: {
+        title: "Vue du jour",
+        subtitle: "Les priorites commerciales et operationnelles en un coup d'oeil.",
+        render: renderDashboard
+    },
+    pipeline: {
+        title: "Pipeline",
+        subtitle: "Transformer les demandes en rendez-vous, devis puis chantiers.",
+        render: renderPipeline
+    },
+    clients: {
+        title: "Clients",
+        subtitle: "Base client prete pour synchronisation Glide.",
+        render: renderClients
+    },
+    planning: {
+        title: "Planning",
+        subtitle: "Rendez-vous et interventions du jour.",
+        render: renderPlanning
+    },
+    devis: {
+        title: "Devis",
+        subtitle: "Suivi des devis, statuts et montants.",
+        render: renderQuotes
+    },
+    operations: {
+        title: "Operations",
+        subtitle: "Equipe, prestations, photos et suivi chantier.",
+        render: renderOperations
+    },
+    documents: {
+        title: "Documents",
+        subtitle: "Documents, factures, paiements et signatures.",
+        render: renderDocuments
+    },
+    settings: {
+        title: "Connexions",
+        subtitle: "Controle des tables necessaires pour brancher Glide.",
+        render: renderSettings
+    }
+};
+
+document.addEventListener("DOMContentLoaded", initCrm);
+
+function initCrm() {
+
+    updateClock();
+    window.setInterval(updateClock, 30000);
+
+    initNavigation();
+    initDrawer();
+    renderCrm();
+
+}
+
+function getInitialData() {
+
+    const source = window.KYNEX_CRM_DATA || {};
+    const data = {};
+
+    CRM_TABLES.forEach((table) => {
+        data[table] = Array.isArray(source[table]) ? source[table] : [];
+    });
+
+    return data;
+
+}
+
+function initNavigation() {
+
+    document.querySelectorAll("#crmNav button").forEach((button) => {
+        button.addEventListener("click", () => {
+            CRM_STATE.view = button.dataset.view;
+            renderCrm();
+        });
+    });
+
+}
+
+function initDrawer() {
+
+    document.querySelectorAll("[data-action='open-drawer']").forEach((button) => {
+        button.addEventListener("click", () => openDrawer(button.dataset.kind));
+    });
+
+    document.getElementById("closeDrawer").addEventListener("click", closeDrawer);
+
+    document.getElementById("crmForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        saveDraft();
+    });
+
+}
+
+function renderCrm() {
+
+    renderNav();
+    renderHeader();
+    renderMetrics();
+
+    const view = CRM_VIEWS[CRM_STATE.view] || CRM_VIEWS.dashboard;
+    view.render(document.getElementById("crmView"));
+
+}
+
+function renderNav() {
+
+    document.querySelectorAll("#crmNav button").forEach((button) => {
+        button.classList.toggle("active", button.dataset.view === CRM_STATE.view);
+    });
+
+}
+
+function renderHeader() {
+
+    const view = CRM_VIEWS[CRM_STATE.view] || CRM_VIEWS.dashboard;
+    document.getElementById("viewTitle").textContent = view.title;
+    document.getElementById("viewSubtitle").textContent = view.subtitle;
+
+    const hasExternalData = Boolean(window.KYNEX_CRM_DATA);
+    document.getElementById("crmSourceStatus").textContent = hasExternalData ? "Source Glide : connectee" : "Source Glide : prete";
+
+}
+
+function renderMetrics() {
+
+    const metrics = [
+        {
+            label: "Prospects actifs",
+            value: CRM_STATE.data.prospects.length,
+            detail: "Demandes a qualifier"
+        },
+        {
+            label: "RDV a venir",
+            value: CRM_STATE.data.appointments.length,
+            detail: "Agenda connectable Glide"
+        },
+        {
+            label: "Devis ouverts",
+            value: CRM_STATE.data.quotes.length,
+            detail: "Montants et statuts"
+        },
+        {
+            label: "Actions preparees",
+            value: CRM_STATE.draftQueue.length,
+            detail: "En attente de connexion"
+        }
+    ];
+
+    document.getElementById("crmMetrics").innerHTML = metrics.map((metric) => `
+        <article class="metric">
+            <span>${escapeHtml(metric.label)}</span>
+            <strong>${metric.value}</strong>
+            <small>${escapeHtml(metric.detail)}</small>
+        </article>
+    `).join("");
+
+}
+
+function renderDashboard(target) {
+
+    target.innerHTML = `
+        <div class="module-grid">
+            <section class="card">
+                <h2>Priorites du jour</h2>
+                <div class="list">
+                    ${renderPriorityRows()}
+                </div>
+            </section>
+            <section class="card">
+                <h2>Connexion Glide</h2>
+                ${renderConnectionSummary()}
+            </section>
+        </div>
+    `;
+
+}
+
+function renderPriorityRows() {
+
+    const rows = [];
+
+    if (CRM_STATE.data.appointments.length) {
+        rows.push({
+            title: "Rendez-vous",
+            text: CRM_STATE.data.appointments.length + " rendez-vous importes depuis Glide.",
+            status: "ready",
+            label: "pret"
+        });
+    }
+
+    if (CRM_STATE.data.prospects.length) {
+        rows.push({
+            title: "Prospects",
+            text: CRM_STATE.data.prospects.length + " prospects a traiter.",
+            status: "warn",
+            label: "a traiter"
+        });
+    }
+
+    if (CRM_STATE.draftQueue.length) {
+        rows.push({
+            title: "Actions locales",
+            text: CRM_STATE.draftQueue.length + " action(s) preparee(s) pour Glide.",
+            status: "warn",
+            label: "local"
+        });
+    }
+
+    if (!rows.length) {
+        return `<div class="empty">Aucune donnee metier chargee. Le CRM est pret : connecte les tables Glide pour afficher les clients, prospects, rendez-vous, devis et chantiers.</div>`;
+    }
+
+    return rows.map(renderRow).join("");
+
+}
+
+function renderPipeline(target) {
+
+    const lanes = [
+        { key: "new", title: "Nouveaux" },
+        { key: "qualified", title: "Qualifies" },
+        { key: "quoted", title: "Devis envoyes" },
+        { key: "won", title: "Gagnes" }
+    ];
+
+    target.innerHTML = `
+        <section class="card">
+            <h2>Pipeline commercial</h2>
+            <div class="pipeline">
+                ${lanes.map((lane) => renderPipelineLane(lane)).join("")}
+            </div>
+        </section>
+    `;
+
+}
+
+function renderPipelineLane(lane) {
+
+    const prospects = CRM_STATE.data.prospects.filter((prospect) => (prospect.stage || "new") === lane.key);
+
+    return `
+        <div class="lane">
+            <h3>${escapeHtml(lane.title)} (${prospects.length})</h3>
+            ${prospects.length ? prospects.map(renderDeal).join("") : `<div class="empty">Aucune fiche.</div>`}
+        </div>
+    `;
+
+}
+
+function renderClients(target) {
+
+    target.innerHTML = `
+        <section class="card">
+            <h2>Clients</h2>
+            ${renderToolbar("Rechercher un client", "Tous les statuts")}
+            ${renderDataTable(CRM_STATE.data.clients, ["name", "phone", "city", "status"])}
+        </section>
+    `;
+
+}
+
+function renderPlanning(target) {
+
+    target.innerHTML = `
+        <section class="card">
+            <h2>Planning</h2>
+            ${renderDataTable(CRM_STATE.data.appointments, ["date", "time", "client", "type", "status"])}
+        </section>
+    `;
+
+}
+
+function renderQuotes(target) {
+
+    target.innerHTML = `
+        <section class="card">
+            <h2>Devis</h2>
+            ${renderDataTable(CRM_STATE.data.quotes, ["number", "client", "amount", "status"])}
+        </section>
+    `;
+
+}
+
+function renderOperations(target) {
+
+    target.innerHTML = `
+        <div class="module-grid">
+            <section class="card">
+                <h2>Equipe</h2>
+                ${renderDataTable(CRM_STATE.data.team, ["name", "role", "status"])}
+            </section>
+            <section class="card">
+                <h2>Prestations</h2>
+                ${renderDataTable(CRM_STATE.data.services, ["name", "duration", "price"])}
+            </section>
+        </div>
+    `;
+
+}
+
+function renderDocuments(target) {
+
+    target.innerHTML = `
+        <div class="module-grid">
+            <section class="card">
+                <h2>Documents</h2>
+                ${renderDataTable(CRM_STATE.data.documents, ["name", "client", "type", "status"])}
+            </section>
+            <section class="card">
+                <h2>Paiements</h2>
+                ${renderDataTable(CRM_STATE.data.payments, ["client", "amount", "method", "status"])}
+            </section>
+        </div>
+    `;
+
+}
+
+function renderSettings(target) {
+
+    target.innerHTML = `
+        <section class="card">
+            <h2>Tables Glide attendues</h2>
+            <div class="list">
+                ${CRM_TABLES.map((table) => renderRow({
+                    title: table,
+                    text: "Table synchronisable avec Glide.",
+                    status: CRM_STATE.data[table].length ? "ready" : "warn",
+                    label: CRM_STATE.data[table].length ? "connectee" : "prete"
+                })).join("")}
+            </div>
+        </section>
+    `;
+
+}
+
+function renderToolbar(placeholder, optionLabel) {
+
+    return `
+        <div class="toolbar">
+            <input type="search" placeholder="${escapeHtml(placeholder)}">
+            <select>
+                <option>${escapeHtml(optionLabel)}</option>
+            </select>
+            <button class="ghost-btn">Filtrer</button>
+        </div>
+    `;
+
+}
+
+function renderDataTable(rows, keys) {
+
+    if (!rows.length) {
+        return `<div class="empty">Aucune donnee disponible pour cette table. Le module est pret pour la synchronisation Glide.</div>`;
+    }
+
+    return `
+        <table class="table">
+            <thead>
+                <tr>${keys.map((key) => `<th>${escapeHtml(formatKey(key))}</th>`).join("")}</tr>
+            </thead>
+            <tbody>
+                ${rows.map((row) => `
+                    <tr>
+                        ${keys.map((key) => `<td>${escapeHtml(row[key] || "-")}</td>`).join("")}
+                    </tr>
+                `).join("")}
+            </tbody>
+        </table>
+    `;
+
+}
+
+function renderConnectionSummary() {
+
+    return `
+        <div class="list">
+            ${renderRow({
+                title: "Mode donnees",
+                text: window.KYNEX_CRM_DATA ? "Les donnees sont chargees depuis window.KYNEX_CRM_DATA." : "Aucune source externe chargee. La structure est prete pour Glide.",
+                status: window.KYNEX_CRM_DATA ? "ready" : "warn",
+                label: window.KYNEX_CRM_DATA ? "connectee" : "prete"
+            })}
+            ${renderRow({
+                title: "Compatibilite",
+                text: "Les tables CRM correspondent aux besoins Glide : clients, prospects, rendez-vous, devis, factures, equipe, prestations, photos, documents, paiements, parametres.",
+                status: "ready",
+                label: "standard"
+            })}
+            ${renderRow({
+                title: "Independance",
+                text: "Cette page ne charge aucun fichier du cockpit et peut etre publiee dans un Web Embed separe.",
+                status: "ready",
+                label: "isolee"
+            })}
+        </div>
+    `;
+
+}
+
+function renderRow(row) {
+
+    return `
+        <article class="row">
+            <div>
+                <h3>${escapeHtml(row.title)}</h3>
+                <p>${escapeHtml(row.text)}</p>
+            </div>
+            <span class="tag ${row.status}">${escapeHtml(row.label)}</span>
+        </article>
+    `;
+
+}
+
+function renderDeal(prospect) {
+
+    return `
+        <article class="deal">
+            <strong>${escapeHtml(prospect.name || "Prospect")}</strong>
+            <span>${escapeHtml(prospect.city || "Commune a definir")}<br>${escapeHtml(prospect.need || "Besoin a qualifier")}</span>
+        </article>
+    `;
+
+}
+
+function openDrawer(kind) {
+
+    const drawer = document.getElementById("crmDrawer");
+    const formType = document.getElementById("formType");
+
+    formType.value = kind || "prospect";
+    document.getElementById("drawerTitle").textContent = getDrawerTitle(formType.value);
+    document.getElementById("formFeedback").textContent = "Aucune donnee n'est envoyee tant que la connexion Glide n'est pas configuree.";
+
+    drawer.classList.add("open");
+    drawer.setAttribute("aria-hidden", "false");
+
+}
+
+function closeDrawer() {
+
+    const drawer = document.getElementById("crmDrawer");
+    drawer.classList.remove("open");
+    drawer.setAttribute("aria-hidden", "true");
+
+}
+
+function saveDraft() {
+
+    const draft = {
+        type: document.getElementById("formType").value,
+        name: document.getElementById("formName").value.trim(),
+        phone: document.getElementById("formPhone").value.trim(),
+        address: document.getElementById("formAddress").value.trim(),
+        notes: document.getElementById("formNotes").value.trim(),
+        createdAt: new Date().toISOString()
+    };
+
+    CRM_STATE.draftQueue.unshift(draft);
+    document.getElementById("crmForm").reset();
+    document.getElementById("formFeedback").textContent = "Action preparee localement. Elle pourra etre envoyee vers Glide quand la connexion sera active.";
+    renderCrm();
+
+}
+
+function getDrawerTitle(kind) {
+
+    const titles = {
+        prospect: "Nouveau prospect",
+        appointment: "Nouveau rendez-vous",
+        quote: "Nouveau devis",
+        photo: "Photo chantier"
+    };
+
+    return titles[kind] || "Nouvelle action";
+
+}
+
+function updateClock() {
+
+    const now = new Date();
+    document.getElementById("crmClock").textContent = now.toLocaleDateString("fr-FR", {
+        weekday: "long",
+        day: "2-digit",
+        month: "long"
+    }) + " - " + now.toLocaleTimeString("fr-FR", {
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+
+}
+
+function formatKey(key) {
+
+    return key.replace(/([A-Z])/g, " $1").replace(/^./, (letter) => letter.toUpperCase());
+
+}
+
+function escapeHtml(value) {
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
+</script>
+
+</body>
+
+</html>

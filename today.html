@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#07182d">
+
+<title>TRJ OS - Aujourd'hui</title>
+
+<link rel="stylesheet" href="today.css">
+
+</head>
+
+<body>
+
+<main class="today-shell" aria-live="polite">
+
+<header class="today-topbar">
+<div>
+<p class="eyebrow">TRJ OS</p>
+<h1>Aujourd'hui</h1>
+</div>
+<div class="source-pill" id="sourceStatus">Glide pret</div>
+</header>
+
+<section class="aurel-card" aria-labelledby="aurelTitle">
+<div class="aurel-orb">A</div>
+<div class="aurel-copy">
+<p class="eyebrow">Aurel</p>
+<h2 id="aurelTitle">Bonjour Patron</h2>
+<p id="aurelBrief">Je prepare ta journee des que le moteur metier Glide est connecte.</p>
+</div>
+<button class="voice-button" id="talkToAurel" type="button">Parler</button>
+</section>
+
+<section class="next-job-card" id="nextJobCard" aria-labelledby="nextJobTitle">
+<div class="section-heading">
+<p class="eyebrow">Maintenant</p>
+<h2 id="nextJobTitle">Prochain chantier</h2>
+</div>
+<div id="nextJob"></div>
+</section>
+
+<section class="signal-grid" aria-label="Signaux de la journee">
+<article class="signal-card">
+<span>Depart</span>
+<strong id="departureTime">--</strong>
+<small id="departureDetail">En attente du planning</small>
+</article>
+<article class="signal-card">
+<span>Trajet</span>
+<strong id="travelTime">--</strong>
+<small id="travelDetail">Temps non disponible</small>
+</article>
+<article class="signal-card">
+<span>Meteo</span>
+<strong id="weatherStatus">--</strong>
+<small id="weatherDetail">Source non connectee</small>
+</article>
+<article class="signal-card">
+<span>Equipe</span>
+<strong id="teamStatus">--</strong>
+<small id="teamDetail">Aucune equipe chargee</small>
+</article>
+</section>
+
+<section class="risk-card" aria-labelledby="riskTitle">
+<div class="section-heading">
+<p class="eyebrow">Attention</p>
+<h2 id="riskTitle">Risques</h2>
+</div>
+<div id="risks"></div>
+</section>
+
+<section class="actions-card" aria-labelledby="actionsTitle">
+<div class="section-heading">
+<p class="eyebrow">Priorite</p>
+<h2 id="actionsTitle">3 actions maximum</h2>
+</div>
+<div class="action-list" id="priorityActions"></div>
+</section>
+
+<footer class="today-footer">
+<span id="lastUpdated">Initialisation</span>
+<span>Mission Terrain : supprimer la prochaine friction</span>
+</footer>
+
+</main>
+
+<script src="today.js"></script>
+
+</body>
+
+</html>
