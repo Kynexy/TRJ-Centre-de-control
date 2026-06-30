@@ -2,7 +2,7 @@
 // WEBCAM FAAA V4
 // =====================================
 
-const webcams = window.AUREL_CONFIG.webcams.streams;
+const webcams = normalizeWebcamStreams(window.AUREL_CONFIG.webcams.streams);
 const webcamRetryDelayMs = window.AUREL_CONFIG.webcams.retryDelayMs;
 const webcamHlsOptions = window.AUREL_CONFIG.webcams.hlsOptions;
 const webcamStatuses = {
@@ -84,6 +84,28 @@ function getAurelWebcamStatus(status) {
 
 function getWebcamSummary(status) {
 
+    const currentWebcam = webcams[webcamIndex] ? webcams[webcamIndex].name : "camera";
+
+    if (status === "checking") {
+        return "Cameras en verification.";
+    }
+
+    if (status === "connecting") {
+        return "Connexion camera en cours.";
+    }
+
+    if (status === "connected") {
+        return "Camera active : " + currentWebcam + ".";
+    }
+
+    if (status === "switching") {
+        return "Changement de camera en cours.";
+    }
+
+    if (status === "unavailable") {
+        return "Aucune camera disponible.";
+    }
+
     const summaries = {
         checking: "🟡 Webcam en vérification.",
         connecting: "🟡 Connexion webcam en cours.",
@@ -115,7 +137,12 @@ function chargerWebcam() {
     console.clear();
     console.log("🎥 Tentative webcam " + (webcamIndex + 1));
 
-    const source = webcams[webcamIndex];
+    const source = webcams[webcamIndex] ? webcams[webcamIndex].url : "";
+
+    if (!source) {
+        updateWebcamStatus("unavailable");
+        return;
+    }
 
     if (typeof Hls !== "undefined" && Hls.isSupported()) {
 
@@ -196,7 +223,64 @@ function chargerWebcam() {
 
 function initWebcam() {
 
+    renderWebcamSelector();
     chargerWebcam();
+
+}
+
+function normalizeWebcamStreams(streams) {
+
+    return (streams || []).map((stream, index) => {
+        if (typeof stream === "string") {
+            return {
+                name: "Camera " + (index + 1),
+                location: "Tahiti",
+                url: stream
+            };
+        }
+
+        return {
+            name: stream.name || "Camera " + (index + 1),
+            location: stream.location || "Tahiti",
+            url: stream.url
+        };
+    }).filter((stream) => stream.url);
+
+}
+
+function renderWebcamSelector() {
+
+    const selectorElement = document.getElementById("webcamSelector");
+
+    if (!selectorElement) {
+        return;
+    }
+
+    selectorElement.replaceChildren();
+    selectorElement.style.display = "flex";
+    selectorElement.style.flexWrap = "wrap";
+    selectorElement.style.gap = "8px";
+    selectorElement.style.margin = "12px 0";
+
+    webcams.forEach((webcam, index) => {
+        const buttonElement = document.createElement("button");
+        buttonElement.type = "button";
+        buttonElement.textContent = webcam.name;
+        buttonElement.style.padding = "8px 12px";
+        buttonElement.style.border = "0";
+        buttonElement.style.borderRadius = "10px";
+        buttonElement.style.cursor = "pointer";
+        buttonElement.style.background = index === webcamIndex ? "#2ca9ff" : "rgba(255,255,255,.18)";
+        buttonElement.style.color = "white";
+
+        buttonElement.addEventListener("click", () => {
+            webcamIndex = index;
+            renderWebcamSelector();
+            chargerWebcam();
+        });
+
+        selectorElement.appendChild(buttonElement);
+    });
 
 }
 

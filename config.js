@@ -23,14 +23,8 @@ window.AUREL_CONFIG = {
     },
     radar: {
         refreshIntervalMs: 600000,
-        latitude: -17.552554,
-        longitude: -149.607182,
-        zoom: 10,
-        api: "https://api.rainviewer.com/public/weather-maps.json",
-        baseTile: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        colorScheme: 2,
-        smooth: 1,
-        snow: 0
+        provider: "Windy",
+        embedUrl: "https://embed.windy.com/embed2.html?lat=-17.58&lon=-149.61&detailLat=-17.58&detailLon=-149.61&width=650&height=450&zoom=8&level=surface&overlay=rain&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1"
     },
     prospects: {
         provider: "Kynexy",
@@ -60,8 +54,16 @@ window.AUREL_CONFIG = {
     },
     webcams: {
         streams: [
-            "https://s81.ipcamlive.com/streams/51k8ybmjdfgkpx9uz/stream.m3u8",
-            "https://s60.ipcamlive.com/streams/3c0abpcqisnmkuxyn/stream.m3u8"
+            {
+                name: "Faa'a - vue 1",
+                location: "Faa'a",
+                url: "https://s81.ipcamlive.com/streams/51k8ybmjdfgkpx9uz/stream.m3u8"
+            },
+            {
+                name: "Faa'a - vue 2",
+                location: "Faa'a",
+                url: "https://s60.ipcamlive.com/streams/3c0abpcqisnmkuxyn/stream.m3u8"
+            }
         ],
         retryDelayMs: 1500,
         hlsOptions: {

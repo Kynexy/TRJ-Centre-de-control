@@ -285,6 +285,48 @@ function renderWeather(data) {
         return;
     }
 
+    const essentialRows = [
+        {
+            label: "Conditions chantier",
+            value: formatChantierStatus(data.chantier)
+        },
+        {
+            label: "Pluie",
+            value: data.rainRisk
+        },
+        {
+            label: "Vent",
+            value: data.wind
+        },
+        {
+            label: "Ciel",
+            value: data.conditions
+        }
+    ];
+
+    weatherElement.replaceChildren();
+
+    essentialRows.forEach((row) => {
+
+        const rowElement = document.createElement("div");
+        rowElement.textContent = row.label + " : " + row.value;
+        rowElement.style.marginBottom = "8px";
+        weatherElement.appendChild(rowElement);
+
+    });
+
+    window.AurelState = window.AurelState || {};
+    window.AurelState.weather = {
+        raw: data,
+        status: "ready",
+        summary: "Conditions chantier : " + formatChantierStatus(data.chantier).replace(/^[^ ]+ /, "") + ".",
+        chantier: data.chantier,
+        chantierLabel: formatChantierStatus(data.chantier).replace(/^[^ ]+ /, "")
+    };
+
+    notifyAurelStateUpdatedIfAvailable();
+    return;
+
     const rows = [
         {
             label: "🌡 Température actuelle",
@@ -417,13 +459,8 @@ const aurelModules = [
     "initClock",
     "initRadar",
     "initWeather",
-    "initAgenda",
     "initTraffic",
-    "initProspects",
-    "initMessenger",
     "initPause",
-    "initNews",
-    "initPhoto",
     "initYoutube",
     "initReport"
 ];

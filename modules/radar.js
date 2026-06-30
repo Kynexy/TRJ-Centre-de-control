@@ -4,18 +4,9 @@
 
 const defaultRadarConfig = {
     refreshIntervalMs: 600000,
-    latitude: -17.552554,
-    longitude: -149.607182,
-    zoom: 10,
-    api: "https://api.rainviewer.com/public/weather-maps.json",
-    baseTile: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-    colorScheme: 2,
-    smooth: 1,
-    snow: 0
+    provider: "Windy",
+    embedUrl: "https://embed.windy.com/embed2.html?lat=-17.58&lon=-149.61&detailLat=-17.58&detailLon=-149.61&width=650&height=450&zoom=8&level=surface&overlay=rain&product=ecmwf&menu=&message=true&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1"
 };
-
-let radarMap = null;
-let radarRainLayer = null;
 
 function initRadar() {
 
@@ -33,32 +24,29 @@ function getRadarConfig() {
 
 }
 
-async function getRadarData() {
+function getRadarData() {
 
     const radarConfig = getRadarConfig();
 
-    if (typeof L === "undefined") {
-        throw new Error("Leaflet indisponible.");
-    }
-
-    const response = await fetch(radarConfig.api);
-
-    if (!response.ok) {
-        throw new Error("RainViewer HTTP " + response.status);
-    }
-
-    const data = await response.json();
-    const frames = data && data.radar && Array.isArray(data.radar.past) ? data.radar.past : [];
-
-    if (!frames.length) {
-        throw new Error("Radar pluie indisponible.");
+    if (!radarConfig.embedUrl) {
+        return {
+            raw: null,
+            status: "missing-config",
+            summary: "Radar meteo non configure.",
+            details: ["Aucune source radar interactive n'est configuree."]
+        };
     }
 
     return {
-        host: data.host,
-        frame: frames[frames.length - 1],
-        center: [radarConfig.latitude, radarConfig.longitude],
-        config: radarConfig
+        raw: {
+            provider: radarConfig.provider,
+            url: radarConfig.embedUrl
+        },
+        status: "ready",
+        provider: radarConfig.provider,
+        url: radarConfig.embedUrl,
+        summary: "Radar meteo interactif disponible.",
+        details: ["Source : " + radarConfig.provider + "."]
     };
 
 }
@@ -73,111 +61,54 @@ function renderRadar(data) {
     }
 
     radarElement.replaceChildren();
-    radarElement.style.position = "relative";
-    radarElement.style.overflow = "hidden";
 
-    const mapElement = document.createElement("div");
-    mapElement.style.width = "100%";
-    mapElement.style.height = "100%";
-    mapElement.style.borderRadius = "16px";
-    mapElement.style.overflow = "hidden";
-    radarElement.appendChild(mapElement);
-
-    radarMap = L.map(mapElement, {
-        zoomControl: true,
-        attributionControl: true
-    }).setView(data.center, data.config.zoom);
-
-    L.tileLayer(data.config.baseTile, {
-        maxZoom: 19,
-        attribution: "&copy; OpenStreetMap"
-    }).addTo(radarMap);
-
-    radarRainLayer = L.tileLayer(buildRainViewerTileUrl(data.host, data.frame, data.config), {
-        opacity: 0.7,
-        zIndex: 10,
-        attribution: "RainViewer"
-    }).addTo(radarMap);
-
-    window.setTimeout(() => {
-        radarMap.invalidateSize();
-    }, 100);
+    if (data.status !== "ready") {
+        radarElement.textContent = data.summary;
+    } else {
+        const iframeElement = document.createElement("iframe");
+        iframeElement.src = data.url;
+        iframeElement.title = "Radar meteo interactif Tahiti";
+        iframeElement.loading = "lazy";
+        iframeElement.referrerPolicy = "no-referrer-when-downgrade";
+        iframeElement.style.width = "100%";
+        iframeElement.style.height = "100%";
+        iframeElement.style.border = "0";
+        iframeElement.style.borderRadius = "16px";
+        radarElement.appendChild(iframeElement);
+    }
 
     window.AurelState = window.AurelState || {};
     window.AurelState.radar = {
-        raw: {
-            frameTime: data.frame.time
-        },
-        status: "ready",
-        summary: "🌧 Radar pluie interactif disponible.",
-        details: ["Source : RainViewer."]
+        raw: data.raw,
+        status: data.status,
+        summary: data.summary,
+        details: data.details
     };
 
     notifyAurelStateUpdatedIfAvailable();
 
 }
 
-function buildRainViewerTileUrl(host, frame, config) {
-
-    return host + frame.path + "/256/{z}/{x}/{y}/" + config.colorScheme + "/" + config.smooth + "_" + config.snow + ".png";
-
-}
-
-function renderRadarError(error) {
-
-    const radarElement = document.getElementById("radar");
-
-    if (radarMap) {
-        radarMap.remove();
-        radarMap = null;
-        radarRainLayer = null;
-    }
-
-    if (radarElement) {
-        radarElement.replaceChildren();
-        radarElement.textContent = "Radar pluie indisponible. Nouvelle tentative automatique.";
-    }
-
-    window.AurelState = window.AurelState || {};
-    window.AurelState.radar = {
-        raw: null,
-        status: "unavailable",
-        summary: "🌧 Radar pluie indisponible.",
-        details: ["La carte radar ne peut pas etre chargee."],
-        error: error ? error.message : "Erreur radar inconnue"
-    };
-
-    notifyAurelStateUpdatedIfAvailable();
-
-}
-
-async function refreshRadar() {
+function refreshRadar() {
 
     try {
 
-        const data = await getRadarData();
-
-        if (radarMap && radarRainLayer) {
-            radarRainLayer.setUrl(buildRainViewerTileUrl(data.host, data.frame, data.config));
-            window.AurelState = window.AurelState || {};
-            window.AurelState.radar = {
-                raw: {
-                    frameTime: data.frame.time
-                },
-                status: "ready",
-                summary: "🌧 Radar pluie interactif disponible.",
-                details: ["Source : RainViewer."]
-            };
-            notifyAurelStateUpdatedIfAvailable();
-            return;
-        }
-
-        renderRadar(data);
+        renderRadar(getRadarData());
 
     } catch (error) {
 
         console.warn("Erreur pendant la mise a jour radar.", error);
-        renderRadarError(error);
+
+        window.AurelState = window.AurelState || {};
+        window.AurelState.radar = {
+            raw: null,
+            status: "error",
+            summary: "Radar meteo indisponible.",
+            details: ["La carte meteo interactive ne peut pas etre chargee."],
+            error: error ? error.message : "Erreur radar inconnue"
+        };
+
+        notifyAurelStateUpdatedIfAvailable();
 
     }
 

@@ -10,12 +10,6 @@
 
 <link rel="stylesheet" href="style.css">
 
-<link
-rel="stylesheet"
-href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-integrity="sha256-p4NxAoJBhIINfQb8rlQ1K5Lq1cE4Q9Cw5gVXG0T/rpE="
-crossorigin="">
-
 </head>
 
 <body>
@@ -28,17 +22,17 @@ crossorigin="">
 
 <div class="title">
 
-<h1>☁️ Aurel</h1>
+<h1>Aurel</h1>
 
-<p>Centre de contrôle TRJ</p>
+<p>Centre de controle TRJ</p>
 
 </div>
 
 <div class="status">
 
-<div>🕒 <span id="heure">Initialisation</span></div>
+<div>Heure <span id="heure">Initialisation</span></div>
 
-<div>📅 <span id="date">Initialisation</span></div>
+<div>Date <span id="date">Initialisation</span></div>
 
 </div>
 
@@ -47,12 +41,12 @@ crossorigin="">
 <main>
 
 <!-- ========================= -->
-<!-- WEBCAM -->
+<!-- CAMERAS -->
 <!-- ========================= -->
 
 <section class="card webcam">
 
-<h2>🎥 Webcam Aéroport Faaa</h2>
+<h2>Cameras de Tahiti</h2>
 
 <video
 id="faaaCam"
@@ -62,27 +56,29 @@ playsinline
 controls>
 </video>
 
-<div id="webcamStatus">⚪ Vérification du flux...</div>
+<div id="webcamSelector"></div>
+
+<div id="webcamStatus">Verification du flux...</div>
 
 </section>
 
 <!-- ========================= -->
-<!-- METEO -->
+<!-- RADAR ET METEO -->
 <!-- ========================= -->
 
 <section class="card weather">
 
-<h2>🌦 Conditions météo</h2>
+<h2>Radar & conditions chantier</h2>
 
 <div id="radar">
 
-Radar pluie Tahiti
+Radar Tahiti
 
 </div>
 
 <div id="weather">
 
-Météo en direct
+Conditions chantier
 
 </div>
 
@@ -94,7 +90,7 @@ Météo en direct
 
 <section class="card traffic">
 
-<h2>🚦 Circulation</h2>
+<h2>Circulation</h2>
 
 <div id="traffic">
 
@@ -105,71 +101,19 @@ Circulation en direct
 </section>
 
 <!-- ========================= -->
-<!-- AGENDA -->
+<!-- PAUSE -->
 <!-- ========================= -->
 
-<section class="card agenda">
+<section class="card pause">
 
-<h2>📅 Agenda Google</h2>
+<h2>Pause</h2>
 
-<div id="agenda">
-
-Agenda Google a connecter
-
-</div>
-
-</section>
-
-<!-- ========================= -->
-<!-- PROSPECTS -->
-<!-- ========================= -->
-
-<section class="card prospects">
-
-<h2>📈 Prospects</h2>
-
-<div id="prospectGauge">
-
-0
-
-</div>
-
-<div class="prospectText">
-
-Aujourd'hui
-
-</div>
-
-</section>
-
-<!-- ========================= -->
-<!-- MESSENGER -->
-<!-- ========================= -->
-
-<section class="card messenger">
-
-<h2>💬 Messenger TRJ</h2>
-
-<div id="messengerCard">
-
-Messagerie TRJ prête
-
-</div>
-
-</section>
-
-<!-- ========================= -->
-<!-- YOUTUBE -->
-<!-- ========================= -->
-
-<section class="card youtube">
-
-<h2>▶️ YouTube</h2>
+<div class="youtube">
 
 <input
 type="text"
 id="youtubeSearch"
-placeholder="Rechercher une vidéo">
+placeholder="Rechercher une video">
 
 <button id="searchYoutube">
 
@@ -189,39 +133,31 @@ Recherche YouTube
 
 </div>
 
-</section>
-
-<!-- ========================= -->
-<!-- SALLE DE PAUSE -->
-<!-- ========================= -->
-
-<section class="card pause">
-
-<h2>🎮 Salle de pause</h2>
+</div>
 
 <div class="games">
 
 <div class="game">
 
-🐍 Snake
+Snake
 
 </div>
 
 <div class="game">
 
-🧩 2048
+2048
 
 </div>
 
 <div class="game">
 
-♟️ Échecs
+Echecs
 
 </div>
 
 <div class="game">
 
-🎯 Sudoku
+Sudoku
 
 </div>
 
@@ -230,44 +166,12 @@ Recherche YouTube
 </section>
 
 <!-- ========================= -->
-<!-- ACTUALITE -->
-<!-- ========================= -->
-
-<section class="card news">
-
-<h2>📰 Actualité du jour</h2>
-
-<div id="news">
-
-Actualites en verification
-
-</div>
-
-</section>
-
-<!-- ========================= -->
-<!-- PHOTO TRJ -->
-<!-- ========================= -->
-
-<section class="card gallery">
-
-<h2>📸 Photo du jour</h2>
-
-<div id="photoJour">
-
-Photo du jour
-
-</div>
-
-</section>
-
-<!-- ========================= -->
-<!-- AUREL -->
+<!-- RAPPORT -->
 <!-- ========================= -->
 
 <section class="card rapport">
 
-<h2>🤖 Aurel au rapport</h2>
+<h2>Rapport du matin</h2>
 
 <div id="rapport">
 
@@ -281,16 +185,11 @@ Bonjour Patron.
 
 <div class="aurel">
 
-☁️
+A
 
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@1.6.7/dist/hls.min.js"></script>
-
-<script
-src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-crossorigin=""></script>
 
 <script src="config.js"></script>
 
@@ -300,19 +199,9 @@ crossorigin=""></script>
 
 <script src="modules/radar.js"></script>
 
-<script src="modules/agenda.js"></script>
-
 <script src="modules/traffic.js"></script>
 
-<script src="modules/prospects.js"></script>
-
-<script src="modules/messenger.js"></script>
-
 <script src="modules/pause.js"></script>
-
-<script src="modules/news.js"></script>
-
-<script src="modules/photo.js"></script>
 
 <script src="modules/youtube.js"></script>
 
