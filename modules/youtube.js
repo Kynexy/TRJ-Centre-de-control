@@ -135,9 +135,9 @@ function renderYoutube(data) {
 
     resultsElement.replaceChildren();
 
-    if (data.status === "idle" || data.status === "missing-key") {
+    if (data.status === "idle" || data.status === "missing-key" || data.status === "error") {
         const messageElement = document.createElement("div");
-        messageElement.textContent = data.message;
+        messageElement.textContent = data.message || "Recherche YouTube indisponible.";
         messageElement.style.marginBottom = "10px";
         resultsElement.appendChild(messageElement);
     }

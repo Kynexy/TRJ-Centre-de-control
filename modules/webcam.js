@@ -101,7 +101,7 @@ function chargerWebcam() {
 
     const source = webcams[webcamIndex];
 
-    if (Hls.isSupported()) {
+    if (typeof Hls !== "undefined" && Hls.isSupported()) {
 
         hls = new Hls(webcamHlsOptions);
 
@@ -147,13 +147,32 @@ function chargerWebcam() {
 
         });
 
-    } else {
+    } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
 
         video.src = source;
 
         updateWebcamStatus("connecting");
 
-        video.play().catch(console.error);
+        video.onloadedmetadata = () => {
+            updateWebcamStatus("connected");
+            video.play().catch(console.error);
+        };
+
+        video.onerror = () => {
+            webcamIndex++;
+
+            if (webcamIndex < webcams.length) {
+                updateWebcamStatus("switching");
+                setTimeout(chargerWebcam, webcamRetryDelayMs);
+            } else {
+                updateWebcamStatus("unavailable");
+            }
+        };
+
+    } else {
+
+        console.error("HLS indisponible dans ce navigateur.");
+        updateWebcamStatus("unavailable");
 
     }
 

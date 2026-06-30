@@ -435,7 +435,11 @@ function initAurel(modules) {
             return;
         }
 
-        initModule();
+        try {
+            initModule();
+        } catch (error) {
+            console.warn("Erreur pendant l'initialisation du module Aurel : " + moduleName, error);
+        }
 
     });
 

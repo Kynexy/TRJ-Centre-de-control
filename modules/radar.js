@@ -75,6 +75,8 @@ function renderRadar(data) {
     radarElement.style.position = "relative";
     radarElement.style.overflow = "hidden";
 
+    radarElement.appendChild(createRadarBaseLayer(data.center));
+
     radarFrames = data.frames.map((frame) => createRadarFrame(data.host, frame, data.center));
     radarFrameIndex = 0;
 
@@ -111,12 +113,11 @@ function renderRadar(data) {
 
 }
 
-function createRadarFrame(host, frame, center) {
+function createRadarBaseLayer(center) {
 
     const frameElement = document.createElement("div");
     frameElement.style.position = "absolute";
     frameElement.style.inset = "0";
-    frameElement.style.transition = "opacity .35s";
 
     [-1, 0, 1].forEach((offsetY) => {
         [-1, 0, 1].forEach((offsetX) => {
@@ -130,7 +131,22 @@ function createRadarFrame(host, frame, center) {
             baseTile.style.top = ((offsetY + 1) * 33.34) + "%";
             baseTile.style.objectFit = "cover";
             frameElement.appendChild(baseTile);
+        });
+    });
 
+    return frameElement;
+
+}
+
+function createRadarFrame(host, frame, center) {
+
+    const frameElement = document.createElement("div");
+    frameElement.style.position = "absolute";
+    frameElement.style.inset = "0";
+    frameElement.style.transition = "opacity .35s";
+
+    [-1, 0, 1].forEach((offsetY) => {
+        [-1, 0, 1].forEach((offsetX) => {
             const tile = document.createElement("img");
             tile.src = host + frame.path + "/256/" + center.zoom + "/" + (center.x + offsetX) + "/" + (center.y + offsetY) + "/" + defaultRadarConfig.colorScheme + "/" + defaultRadarConfig.smooth + "_" + defaultRadarConfig.snow + ".png";
             tile.alt = "";
@@ -163,6 +179,14 @@ function animateRadar() {
 function renderRadarError(error) {
 
     const radarElement = document.getElementById("radar");
+
+    if (radarAnimationTimer) {
+        clearInterval(radarAnimationTimer);
+        radarAnimationTimer = null;
+    }
+
+    radarFrames = [];
+    radarFrameIndex = 0;
 
     if (radarElement) {
         radarElement.replaceChildren();
