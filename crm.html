@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#07182d">
 
-<title>Kynex CRM TRJ</title>
+<title>Kynexy CRM TRJ</title>
 
 <style>
 
@@ -718,7 +718,7 @@ width:auto;
 
 <header class="topbar">
 <div class="title">
-<h1>Kynex CRM</h1>
+<h1>Kynexy CRM</h1>
 <p>Production commerciale et terrain TRJ</p>
 </div>
 <div class="status">
@@ -743,7 +743,7 @@ width:auto;
 <button data-view="aurel">Aurel</button>
 </nav>
 <div class="sidebar-note">
-CRM HTML V1 termine : structure autonome, donnees fictives de demonstration et points de connexion Glide via window.KYNEX_CRM_DATA.
+CRM HTML V1 termine : structure autonome, donnees fictives de demonstration et points de connexion Glide prets.
 </div>
 </aside>
 
@@ -752,7 +752,7 @@ CRM HTML V1 termine : structure autonome, donnees fictives de demonstration et p
 <section class="hero">
 <div>
 <h2 id="viewTitle">Accueil</h2>
-<p id="viewSubtitle">Bonjour Patron. Le CRM est pret pour piloter la journee, les chantiers, les clients et les devis sans quitter l'environnement Kynex.</p>
+<p id="viewSubtitle">Bonjour Patron. Le CRM est pret pour piloter la journee, les chantiers, les clients et les devis sans quitter l'environnement Kynexy.</p>
 </div>
 <div class="quick-actions">
 <button class="primary-btn" data-action="open-drawer" data-kind="job">Commencer</button>
@@ -1528,7 +1528,7 @@ function renderConnectionSummary() {
         <div class="list">
             ${renderRow({
                 title: "Mode donnees",
-                text: window.KYNEX_CRM_DATA ? "Les donnees sont chargees depuis window.KYNEX_CRM_DATA." : "Donnees fictives chargees pour finaliser le rendu V1.",
+                text: window.KYNEX_CRM_DATA ? "Les donnees sont chargees depuis la source Glide." : "Donnees fictives chargees pour finaliser le rendu V1.",
                 status: window.KYNEX_CRM_DATA ? "ready" : "warn",
                 label: window.KYNEX_CRM_DATA ? "connecte" : "demo"
             })}
