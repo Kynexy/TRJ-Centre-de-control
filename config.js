@@ -8,7 +8,16 @@ window.AUREL_CONFIG = {
         name: "Aurel",
         owner: "Tahiti Renov' Jardin"
     },
-    api: {},
+    api: {
+        youtubeApiKey: ""
+    },
+    youtube: {
+        endpoint: "https://www.googleapis.com/youtube/v3/search",
+        maxResults: 5,
+        regionCode: "PF",
+        relevanceLanguage: "fr",
+        defaultQuery: "Tahiti rénovation jardin"
+    },
     webcams: {
         streams: [
             "https://s81.ipcamlive.com/streams/51k8ybmjdfgkpx9uz/stream.m3u8",

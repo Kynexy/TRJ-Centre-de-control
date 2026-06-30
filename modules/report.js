@@ -33,8 +33,13 @@ function getReportData() {
         weather: getReportSummary(state.weather, "🌦️ Conditions de chantier : Indisponibles."),
         agenda: getReportSummary(state.agenda, "📅 Agenda indisponible."),
         agendaDetails: getReportDetails(state.agenda),
-        traffic: getPlaceholderTrafficReportData(),
-        prospects: getPlaceholderProspectsReportData()
+        traffic: getReportSummary(state.traffic, "🚦 Circulation indisponible."),
+        trafficDetails: getReportDetails(state.traffic),
+        photo: getReportSummary(state.photo, "📸 Photo du jour indisponible."),
+        youtube: getReportSummary(state.youtube, "▶ Aucune recherche récente."),
+        messenger: getReportSummary(state.messenger, "💬 Messenger indisponible."),
+        news: getReportSummary(state.news, "📰 Actualités indisponibles."),
+        prospects: getReportSummary(state.prospects, "📈 Prospects indisponibles.")
     };
 
 }
@@ -59,18 +64,6 @@ function getReportDetails(moduleState) {
 
 }
 
-function getPlaceholderTrafficReportData() {
-
-    return "🚦 Circulation fluide.";
-
-}
-
-function getPlaceholderProspectsReportData() {
-
-    return "📈 Aucun nouveau prospect.";
-
-}
-
 function renderReport(data) {
 
     const reportElement = document.getElementById("rapport");
@@ -88,6 +81,11 @@ function renderReport(data) {
         data.agenda,
         ...data.agendaDetails,
         data.traffic,
+        ...data.trafficDetails,
+        data.messenger,
+        data.photo,
+        data.youtube,
+        data.news,
         data.prospects
     ];
 

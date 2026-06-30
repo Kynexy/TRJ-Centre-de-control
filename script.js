@@ -189,7 +189,7 @@ function getDailyValue(values, index) {
 function formatWeatherValue(value, unit) {
 
     if (value === null || value === undefined || Number.isNaN(value)) {
-        return "--";
+        return "Indisponible";
     }
 
     return Math.round(value) + unit;
@@ -199,7 +199,7 @@ function formatWeatherValue(value, unit) {
 function formatWind(speed, gusts) {
 
     if (speed === null || speed === undefined || Number.isNaN(speed)) {
-        return "--";
+        return "Indisponible";
     }
 
     const roundedSpeed = Math.round(speed) + " km/h";
@@ -215,7 +215,7 @@ function formatWind(speed, gusts) {
 function formatWeatherTime(value) {
 
     if (!value) {
-        return "--";
+        return "Indisponible";
     }
 
     return value.slice(11, 16);
@@ -286,13 +286,34 @@ function renderWeather(data) {
     }
 
     const rows = [
-        "🌡 Température : " + data.temperature,
-        "☁️ Conditions : " + data.conditions,
-        "💧 Humidité : " + data.humidity,
-        "💨 Vent : " + data.wind,
-        "🌧 Risque de pluie : " + data.rainRisk,
-        "🌅 Lever / coucher du soleil : " + data.sunrise + " / " + data.sunset,
-        "🌿 Conditions de chantier : " + formatChantierStatus(data.chantier)
+        {
+            label: "🌡 Température actuelle",
+            value: data.temperature
+        },
+        {
+            label: "☁️ Météo actuelle",
+            value: data.conditions
+        },
+        {
+            label: "💧 Humidité",
+            value: data.humidity
+        },
+        {
+            label: "💨 Vent",
+            value: data.wind
+        },
+        {
+            label: "🌧 Risque de pluie",
+            value: data.rainRisk
+        },
+        {
+            label: "🌅 Lever / coucher du soleil",
+            value: data.sunrise + " / " + data.sunset
+        },
+        {
+            label: "🌿 Conditions de chantier",
+            value: formatChantierStatus(data.chantier)
+        }
     ];
 
     weatherElement.replaceChildren();
@@ -300,7 +321,8 @@ function renderWeather(data) {
     rows.forEach((row) => {
 
         const rowElement = document.createElement("div");
-        rowElement.textContent = row;
+        rowElement.textContent = row.label + " : " + row.value;
+        rowElement.style.marginBottom = "8px";
         weatherElement.appendChild(rowElement);
 
     });
@@ -312,6 +334,42 @@ function renderWeather(data) {
         summary: "🌦️ Conditions de chantier : " + formatChantierStatus(data.chantier).replace(/^[^ ]+ /, "") + ".",
         chantier: data.chantier,
         chantierLabel: formatChantierStatus(data.chantier).replace(/^[^ ]+ /, "")
+    };
+
+}
+
+function renderWeatherError(error) {
+
+    const weatherElement = document.getElementById("weather");
+
+    if (!weatherElement) {
+        console.warn("Module meteo indisponible : element #weather introuvable.");
+        return;
+    }
+
+    const rows = [
+        "⚠️ Météo indisponible",
+        "Impossible de récupérer les données Open-Meteo.",
+        "La carte météo se remettra à jour automatiquement."
+    ];
+
+    weatherElement.replaceChildren();
+
+    rows.forEach((row) => {
+
+        const rowElement = document.createElement("div");
+        rowElement.textContent = row;
+        rowElement.style.marginBottom = "8px";
+        weatherElement.appendChild(rowElement);
+
+    });
+
+    window.AurelState = window.AurelState || {};
+    window.AurelState.weather = {
+        raw: null,
+        status: "unavailable",
+        summary: "🌦️ Météo indisponible.",
+        error: error ? error.message : "Erreur météo inconnue"
     };
 
 }
@@ -340,21 +398,7 @@ async function refreshWeather() {
 
         console.warn("Erreur pendant la mise a jour meteo.", error);
 
-        if (lastValidWeatherData) {
-            renderWeather(lastValidWeatherData);
-            return;
-        }
-
-        renderWeather({
-            temperature: "--",
-            conditions: "Open-Meteo indisponible",
-            humidity: "--",
-            wind: "--",
-            rainRisk: "--",
-            sunrise: "--",
-            sunset: "--",
-            chantier: "warning"
-        });
+        renderWeatherError(error);
 
     }
 
@@ -367,8 +411,16 @@ async function refreshWeather() {
 const aurelModules = [
     "initWebcam",
     "initClock",
+    "initRadar",
     "initWeather",
     "initAgenda",
+    "initTraffic",
+    "initProspects",
+    "initMessenger",
+    "initPause",
+    "initNews",
+    "initPhoto",
+    "initYoutube",
     "initReport"
 ];
 

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">Photo de démonstration TRJ</title>
+  <desc id="desc">Paysage de jardin tropical utilisé comme image locale de démonstration.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#79c7ff"/>
+      <stop offset="0.58" stop-color="#dff5ff"/>
+      <stop offset="1" stop-color="#fff0c7"/>
+    </linearGradient>
+    <linearGradient id="hill" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#19553a"/>
+      <stop offset="1" stop-color="#27864e"/>
+    </linearGradient>
+    <linearGradient id="grass" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0" stop-color="#2b7a42"/>
+      <stop offset="1" stop-color="#66b96a"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="675" fill="url(#sky)"/>
+  <circle cx="1010" cy="120" r="62" fill="#ffd166"/>
+  <path d="M0 352 C190 250 310 300 455 232 C620 154 768 250 900 214 C1040 176 1120 238 1200 205 L1200 675 L0 675 Z" fill="url(#hill)"/>
+  <path d="M0 485 C160 420 330 450 505 405 C705 354 935 445 1200 384 L1200 675 L0 675 Z" fill="url(#grass)"/>
+  <path d="M175 675 C215 540 262 425 315 332 C374 432 407 548 432 675 Z" fill="#0f3d2a"/>
+  <path d="M306 340 C212 388 166 454 137 540 C228 520 296 468 337 386 Z" fill="#2ea457"/>
+  <path d="M326 346 C415 397 457 460 482 543 C394 521 332 471 294 390 Z" fill="#3dbb64"/>
+  <path d="M712 675 C742 565 778 476 817 404 C861 485 886 572 904 675 Z" fill="#123d2d"/>
+  <path d="M809 410 C740 442 695 500 667 573 C742 555 802 512 842 452 Z" fill="#36a85f"/>
+  <path d="M827 412 C904 448 947 504 972 579 C897 559 838 514 801 455 Z" fill="#4bc76f"/>
+  <rect x="76" y="548" width="1048" height="62" rx="31" fill="rgba(255,255,255,.24)"/>
+  <text x="600" y="586" text-anchor="middle" fill="#07321f" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700">Tahiti Rénov' Jardin</text>
+</svg>
