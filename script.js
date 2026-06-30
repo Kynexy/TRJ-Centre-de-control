@@ -1,36 +1,82 @@
 // =====================================
-// WEBCAM FAAA
+// WEBCAM FAAA V4
 // =====================================
 
-const webcam = "https://s60.ipcamlive.com/streams/3c12q8dvxkowcem5j/stream.m3u8";
+const webcams = [
+    "https://s81.ipcamlive.com/streams/51k8ybmjdfgkpx9uz/stream.m3u8",
+    "https://s60.ipcamlive.com/streams/3c0abpcqisnmkuxyn/stream.m3u8"
+];
 
-function chargerWebcam(){
+let webcamIndex = 0;
+let hls = null;
 
-    const video=document.getElementById("faaaCam");
+function chargerWebcam() {
 
-    if(!video) return;
+    const video = document.getElementById("faaaCam");
 
-    if(Hls.isSupported()){
+    if (!video) {
+        console.error("Vidéo introuvable.");
+        return;
+    }
 
-        const hls=new Hls();
+    if (hls) {
+        hls.destroy();
+        hls = null;
+    }
 
-        hls.loadSource(webcam);
+    console.clear();
+    console.log("🎥 Tentative webcam " + (webcamIndex + 1));
+
+    const source = webcams[webcamIndex];
+
+    if (Hls.isSupported()) {
+
+        hls = new Hls({
+            enableWorker: true,
+            lowLatencyMode: true
+        });
+
+        hls.loadSource(source);
 
         hls.attachMedia(video);
 
-        hls.on(Hls.Events.MANIFEST_PARSED,function(){
+        hls.on(Hls.Events.MANIFEST_PARSED, () => {
 
-            video.play().catch(()=>{});
+            console.log("✅ Webcam connectée");
+
+            video.play().catch(console.error);
 
         });
 
-    }
+        hls.on(Hls.Events.ERROR, (event, data) => {
 
-    else if(video.canPlayType("application/vnd.apple.mpegurl")){
+            console.warn(data);
 
-        video.src=webcam;
+            if (data.fatal) {
 
-        video.play().catch(()=>{});
+                webcamIndex++;
+
+                if (webcamIndex < webcams.length) {
+
+                    console.log("🔄 Changement de webcam...");
+
+                    setTimeout(chargerWebcam, 1500);
+
+                } else {
+
+                    console.error("❌ Aucune webcam disponible.");
+
+                }
+
+            }
+
+        });
+
+    } else {
+
+        video.src = source;
+
+        video.play().catch(console.error);
 
     }
 
