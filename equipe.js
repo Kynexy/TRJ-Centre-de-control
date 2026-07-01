@@ -112,18 +112,14 @@ function renderPresenceCalendar() {
         const presentMembers = TEAM_STATE.members.filter((member) => presentMemberIds.has(member.id)).slice(0, 12);
 
         return `
-            <button class="day-presence ${cell.isCurrentMonth ? "" : "outside"} ${cell.isToday ? "today" : ""}" type="button" data-day-date="${cell.isoDate}" aria-label="${escapeAttribute(formatDate(cell.isoDate))}">
+            <div class="day-presence ${cell.isCurrentMonth ? "" : "outside"} ${cell.isToday ? "today" : ""}" aria-label="${escapeAttribute(formatDate(cell.isoDate))}">
                 <span class="day-number">${cell.day}</span>
                 <span class="presence-dots" aria-hidden="true">
                     ${presentMembers.map((member) => `<span class="presence-dot" style="--dot-color:${escapeAttribute(member.color)}"></span>`).join("")}
                 </span>
-            </button>
+            </div>
         `;
     }).join("");
-
-    grid.querySelectorAll("[data-day-date]").forEach((button) => {
-        button.addEventListener("click", () => openDayView(button.dataset.dayDate));
-    });
 }
 
 function renderMemberCards() {
@@ -142,7 +138,7 @@ function renderMemberCards() {
     list.innerHTML = TEAM_STATE.members.map((member) => {
         const summary = getSummary(member.id);
         return `
-            <button class="member-card punch-card" style="--member-color:${escapeAttribute(member.color)}" type="button" data-member-id="${escapeAttribute(member.id)}">
+            <article class="member-card punch-card" style="--member-color:${escapeAttribute(member.color)}" data-member-id="${escapeAttribute(member.id)}">
                 <div class="member-main">
                     <div>
                         <div class="member-title">
@@ -152,12 +148,23 @@ function renderMemberCards() {
                     </div>
                 </div>
                 ${renderDashboardSummary(summary)}
-            </button>
+                <div class="card-actions">
+                    <button class="primary-btn card-action" type="button" data-punch-member="${escapeAttribute(member.id)}">Pointer</button>
+                    <button class="secondary-btn card-action" type="button" data-advance-member="${escapeAttribute(member.id)}">Acompte</button>
+                    ${TEAM_STATE.accessMode.role === "owner" ? `<button class="secondary-btn card-detail" type="button" data-detail-member="${escapeAttribute(member.id)}">Details</button>` : ""}
+                </div>
+            </article>
         `;
     }).join("");
 
-    list.querySelectorAll("[data-member-id]").forEach((button) => {
-        button.addEventListener("click", () => openMemberProfile(button.dataset.memberId));
+    list.querySelectorAll("[data-punch-member]").forEach((button) => {
+        button.addEventListener("click", () => openPunchForm(getMember(button.dataset.punchMember), toIsoDate(new Date())));
+    });
+    list.querySelectorAll("[data-advance-member]").forEach((button) => {
+        button.addEventListener("click", () => openAdvanceForm(getMember(button.dataset.advanceMember)));
+    });
+    list.querySelectorAll("[data-detail-member]").forEach((button) => {
+        button.addEventListener("click", () => openMemberProfile(button.dataset.detailMember));
     });
 }
 
@@ -178,7 +185,7 @@ function summaryTile(label, value) {
 }
 
 function openMemberProfile(memberId) {
-    const member = TEAM_STATE.members.find((item) => item.id === memberId);
+    const member = getMember(memberId);
     if (!member) {
         return;
     }
@@ -193,11 +200,7 @@ function openMemberProfile(memberId) {
                 <h3>${escapeHtml(member.name)}</h3>
                 <p>${escapeHtml(member.role || "Poste a definir")}${member.phone && isOwner ? " - " + escapeHtml(member.phone) : ""}</p>
             </section>
-            <div class="quick-actions ${isOwner ? "" : "single"}">
-                <button class="primary-btn big-action" type="button" id="punchToday">Pointer des heures</button>
-                <button class="secondary-btn big-action" type="button" id="recordAdvance">Ajouter un acompte</button>
-                ${isOwner ? `<button class="secondary-btn big-action subtle-action" type="button" id="editMember">Modifier profil</button>` : ""}
-            </div>
+            ${isOwner ? `<button class="secondary-btn big-action" type="button" id="editMember">Modifier profil</button>` : ""}
             <section class="history-block">
                 <h4>Heures</h4>
                 ${workEntries.map((entry) => renderWorkLine(entry, member)).join("") || `<div class="empty-state compact-empty">Aucune heure ce mois-ci.</div>`}
@@ -210,8 +213,6 @@ function openMemberProfile(memberId) {
     `;
 
     openPanel();
-    document.getElementById("punchToday").addEventListener("click", () => openPunchForm(member, toIsoDate(new Date())));
-    document.getElementById("recordAdvance").addEventListener("click", () => openAdvanceForm(member));
     if (isOwner) {
         document.getElementById("editMember").addEventListener("click", () => openMemberForm(member));
     }
@@ -287,23 +288,6 @@ function openAdvanceForm(member) {
     const form = document.getElementById("advanceForm");
     form.addEventListener("submit", (event) => saveAdvanceForm(event, member));
     setTimeout(() => form.elements.amount.focus(), 60);
-}
-
-function openDayView(isoDate) {
-    const entries = getEntriesForDate(isoDate);
-    document.getElementById("panelTitle").textContent = shortDate(isoDate);
-    document.getElementById("panelContent").innerHTML = `
-        <div class="panel-scroll">
-            <section class="history-block">
-                <h4>Pointage du jour</h4>
-                ${entries.map((entry) => {
-                    const member = TEAM_STATE.members.find((item) => item.id === entry.memberId);
-                    return member ? renderWorkLine(entry, member) : "";
-                }).join("") || `<div class="empty-state compact-empty">Aucun pointage ce jour.</div>`}
-            </section>
-        </div>
-    `;
-    openPanel();
 }
 
 async function saveMemberForm(event, memberId = null) {
@@ -406,6 +390,10 @@ function changeMonth(delta) {
 
 function getEntriesForDate(isoDate) {
     return TEAM_STATE.entriesByDate.get(isoDate) || [];
+}
+
+function getMember(memberId) {
+    return TEAM_STATE.members.find((member) => member.id === memberId) || null;
 }
 
 function getSummary(memberId) {
