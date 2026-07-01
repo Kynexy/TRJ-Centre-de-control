@@ -140,8 +140,14 @@ function bindNavigation() {
 
 function bindAurel() {
 
-    document.getElementById("aurelButton").addEventListener("click", () => {
-        const menu = document.getElementById("aurelMenu");
+    const button = document.getElementById("aurelButton");
+    const menu = document.getElementById("aurelMenu");
+
+    if (!button || !menu) {
+        return;
+    }
+
+    button.addEventListener("click", () => {
         menu.classList.toggle("open");
         menu.setAttribute("aria-hidden", String(!menu.classList.contains("open")));
     });
@@ -151,6 +157,9 @@ function bindAurel() {
 function closeAurelMenu() {
 
     const menu = document.getElementById("aurelMenu");
+    if (!menu) {
+        return;
+    }
     menu.classList.remove("open");
     menu.setAttribute("aria-hidden", "true");
 

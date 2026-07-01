@@ -165,6 +165,10 @@ function setAurelState(mode) {
         button.classList.toggle("active", button.dataset.state === AUREL_STATE.mode);
     });
 
+    if (window.KynexyAurel && typeof window.KynexyAurel.setState === "function") {
+        window.KynexyAurel.setState(AUREL_STATE.mode);
+    }
+
     publishAurelState();
 
 }
