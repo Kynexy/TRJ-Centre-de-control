@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#07182d">
+
+<title>Equipe - Kynexy TRJ OS</title>
+
+<link rel="stylesheet" href="equipe.css">
+
+</head>
+
+<body>
+
+<div class="team-shell">
+
+<header class="topbar">
+<div class="title">
+<h1>Equipe TRJ</h1>
+<p>Centre de commandement terrain</p>
+</div>
+<div class="status">
+<div class="pill" id="teamClock">Initialisation</div>
+<div class="pill">Source Glide : prête</div>
+</div>
+</header>
+
+<div class="layout">
+
+<aside class="sidebar">
+<div class="brand-mark">T</div>
+<nav class="nav" id="teamNav" aria-label="Compartiments équipe">
+<button class="active" data-view="today" type="button">👷 Equipe aujourd'hui</button>
+<button data-view="agenda" type="button">📅 Agenda Equipe</button>
+<button data-view="payroll" type="button">💰 Salaires</button>
+<button data-view="advances" type="button">💵 Acomptes</button>
+<button data-view="dashboard" type="button">📈 Tableau de bord</button>
+<button data-view="chat" type="button">💬 Chat Equipe</button>
+<button data-view="breakroom" type="button">🎮 Salle de pause</button>
+</nav>
+<div class="sidebar-note">
+Module autonome prêt pour Glide : données fictives, calculs locaux, chat local et jeux HTML5 natifs.
+</div>
+</aside>
+
+<main class="main">
+
+<section class="hero">
+<div>
+<h2 id="viewTitle">Equipe aujourd'hui</h2>
+<p id="viewSubtitle">Présences, statuts, horaires et actions rapides pour piloter l'équipe dès le matin.</p>
+</div>
+<div class="quick-actions">
+<button class="primary-btn" data-shortcut="chat" type="button">Message équipe</button>
+<button class="ghost-btn" data-shortcut="agenda" type="button">Planning</button>
+<button class="ghost-btn" data-shortcut="payroll" type="button">Calcul salaires</button>
+<button class="ghost-btn" data-shortcut="breakroom" type="button">Pause</button>
+</div>
+</section>
+
+<section class="grid" id="teamMetrics"></section>
+
+<section id="teamView"></section>
+
+</main>
+
+</div>
+
+</div>
+
+<aside class="aurel-cloud" aria-label="Aurel">
+<button class="aurel-orb" id="aurelButton" type="button" aria-label="Ouvrir le menu Aurel">
+<span class="aurel-lobe lobe-a"></span>
+<span class="aurel-lobe lobe-b"></span>
+<span class="aurel-lobe lobe-c"></span>
+<span class="aurel-eye eye-left"></span>
+<span class="aurel-eye eye-right"></span>
+<span class="aurel-smile"></span>
+</button>
+<div class="aurel-menu" id="aurelMenu" aria-hidden="true">
+<strong>Aurel</strong>
+<p>J'ouvre les compartiments équipe.</p>
+<div class="aurel-links">
+<button data-shortcut="today" type="button">Equipe</button>
+<button data-shortcut="agenda" type="button">Agenda</button>
+<button data-shortcut="chat" type="button">Chat</button>
+<button data-shortcut="breakroom" type="button">Jeux</button>
+</div>
+</div>
+</aside>
+
+<script src="equipe.js"></script>
+
+</body>
+
+</html>
