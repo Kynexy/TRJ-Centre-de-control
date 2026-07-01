@@ -7,61 +7,17 @@ const CATEGORY_META = {
 };
 
 const ACTIVE_CATEGORY_KEYS = ["chantier", "visite", "urgence", "devis", "suivi"];
-const DB_NAME = "kynexy-planning";
-const DB_VERSION = 1;
-const STORE_APPOINTMENTS = "appointments";
-const STORE_META = "meta";
-const LEGACY_SEED_KEY = "legacy-demo-skipped-v1";
 
 const PLANNING_STATE = {
     currentDate: startOfDay(new Date()),
     currentView: "month",
     appointments: [],
     appointmentsByDate: new Map(),
-    db: null,
-    storageMode: "indexeddb",
+    databaseReady: false,
+    databaseError: null,
     focusBeforePanel: null,
     scrollY: 0
 };
-
-const DEMO_APPOINTMENTS = [
-    {
-        id: "rdv-demo-001",
-        client: "Famille M.",
-        address: "PK 21 cote mer, Paea",
-        phone: "+689 87 00 00 01",
-        date: "2026-07-02",
-        timeRange: "07:30 - 10:30",
-        category: "chantier",
-        notes: "Exemple local. Modifie ou remplace ce rendez-vous pour commencer ton vrai planning."
-    }
-];
-
-const STORAGE_FALLBACK = {
-    key: "kynexy-planning-appointments-v1",
-    async getAllAppointments() {
-        const raw = localStorage.getItem(this.key);
-        return raw ? JSON.parse(raw) : [];
-    },
-    async saveAppointment(appointment) {
-        const appointments = await this.getAllAppointments();
-        const next = appointments.filter((item) => item.id !== appointment.id);
-        next.push(appointment);
-        localStorage.setItem(this.key, JSON.stringify(next));
-    },
-    async deleteAppointment(id) {
-        const appointments = await this.getAllAppointments();
-        localStorage.setItem(this.key, JSON.stringify(appointments.filter((item) => item.id !== id)));
-    },
-    async getMeta(key) {
-        return localStorage.getItem(`kynexy-planning-meta-${key}`);
-    },
-    async setMeta(key, value) {
-        localStorage.setItem(`kynexy-planning-meta-${key}`, value);
-    }
-};
-
-let PlanningStore = STORAGE_FALLBACK;
 
 document.addEventListener("DOMContentLoaded", initPlanning);
 
@@ -69,9 +25,23 @@ async function initPlanning() {
     bindShellActions();
     renderPlanning();
 
-    await initStorage();
-    await loadAppointments();
+    try {
+        assertPlanningDatabase();
+        await window.KynexyPlanningDB.open();
+        PLANNING_STATE.databaseReady = true;
+        await reloadAppointmentsFromDatabase();
+    } catch (error) {
+        PLANNING_STATE.databaseError = error;
+        console.error("Planning database unavailable", error);
+    }
+
     renderPlanning();
+}
+
+function assertPlanningDatabase() {
+    if (!window.KynexyPlanningDB) {
+        throw new Error("KynexyPlanningDB is not loaded. planning-db.js must be loaded before planning.js.");
+    }
 }
 
 function bindShellActions() {
@@ -91,109 +61,14 @@ function bindShellActions() {
     });
 }
 
-async function initStorage() {
-    if (!window.indexedDB) {
-        PLANNING_STATE.storageMode = "localStorage";
-        PlanningStore = STORAGE_FALLBACK;
-        return;
-    }
-
-    try {
-        const db = await openPlanningDatabase();
-        PLANNING_STATE.db = db;
-        PlanningStore = createIndexedDbStore(db);
-        PLANNING_STATE.storageMode = "indexeddb";
-    } catch (error) {
-        console.warn("IndexedDB indisponible, fallback localStorage", error);
-        PLANNING_STATE.storageMode = "localStorage";
-        PlanningStore = STORAGE_FALLBACK;
-    }
-}
-
-function openPlanningDatabase() {
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, DB_VERSION);
-        const timeout = setTimeout(() => reject(new Error("IndexedDB init timeout")), 1200);
-
-        request.onupgradeneeded = () => {
-            const db = request.result;
-            if (!db.objectStoreNames.contains(STORE_APPOINTMENTS)) {
-                const store = db.createObjectStore(STORE_APPOINTMENTS, { keyPath: "id" });
-                store.createIndex("date", "date", { unique: false });
-                store.createIndex("dateTime", ["date", "timeStart"], { unique: false });
-                store.createIndex("category", "category", { unique: false });
-            }
-            if (!db.objectStoreNames.contains(STORE_META)) {
-                db.createObjectStore(STORE_META, { keyPath: "key" });
-            }
-        };
-
-        request.onsuccess = () => {
-            clearTimeout(timeout);
-            resolve(request.result);
-        };
-        request.onerror = () => {
-            clearTimeout(timeout);
-            reject(request.error);
-        };
-    });
-}
-
-function createIndexedDbStore(db) {
-    return {
-        getAllAppointments() {
-            return txRequest(db, STORE_APPOINTMENTS, "readonly", (store) => store.getAll());
-        },
-        saveAppointment(appointment) {
-            return txRequest(db, STORE_APPOINTMENTS, "readwrite", (store) => store.put(appointment));
-        },
-        deleteAppointment(id) {
-            return txRequest(db, STORE_APPOINTMENTS, "readwrite", (store) => store.delete(id));
-        },
-        async getMeta(key) {
-            const record = await txRequest(db, STORE_META, "readonly", (store) => store.get(key));
-            return record ? record.value : null;
-        },
-        setMeta(key, value) {
-            return txRequest(db, STORE_META, "readwrite", (store) => store.put({ key, value }));
-        }
-    };
-}
-
-function txRequest(db, storeName, mode, action) {
-    return new Promise((resolve, reject) => {
-        const tx = db.transaction(storeName, mode);
-        const store = tx.objectStore(storeName);
-        const request = action(store);
-        request.onsuccess = () => {
-            clearTimeout(timeout);
-            resolve(request.result);
-        };
-        request.onerror = () => {
-            clearTimeout(timeout);
-            reject(request.error);
-        };
-        tx.onerror = () => reject(tx.error);
-    });
-}
-
-async function loadAppointments() {
-    let appointments = await PlanningStore.getAllAppointments();
-
-    if (!appointments.length) {
-        const alreadySkippedDemo = await PlanningStore.getMeta(LEGACY_SEED_KEY);
-        if (!alreadySkippedDemo) {
-            await PlanningStore.setMeta(LEGACY_SEED_KEY, "true");
-            appointments = [];
-        }
-    }
-
-    setAppointments(appointments.map(normalizeAppointment).filter(Boolean));
+async function reloadAppointmentsFromDatabase() {
+    const appointments = await window.KynexyPlanningDB.listAppointments();
+    setAppointments(appointments);
 }
 
 function setAppointments(appointments) {
-    PLANNING_STATE.appointments = appointments.sort(compareAppointments);
-    PLANNING_STATE.appointmentsByDate = appointments.reduce((map, appointment) => {
+    PLANNING_STATE.appointments = appointments.slice().sort(compareAppointments);
+    PLANNING_STATE.appointmentsByDate = PLANNING_STATE.appointments.reduce((map, appointment) => {
         if (!map.has(appointment.date)) {
             map.set(appointment.date, []);
         }
@@ -220,6 +95,11 @@ function renderMonthLabel() {
 }
 
 function renderCalendarView() {
+    if (PLANNING_STATE.databaseError) {
+        renderDatabaseError();
+        return;
+    }
+
     if (PLANNING_STATE.currentView === "week") {
         renderWeekView();
         return;
@@ -233,6 +113,20 @@ function renderCalendarView() {
         return;
     }
     renderMonthGrid();
+}
+
+function renderDatabaseError() {
+    const grid = document.getElementById("monthGrid");
+    document.getElementById("weekdayRow").hidden = true;
+    grid.className = "month-grid day-view";
+    grid.innerHTML = `
+        <article class="day-focus">
+            <div class="detail-row">
+                <span>Base Planning indisponible</span>
+                <p>${escapeHtml(PLANNING_STATE.databaseError.message)}</p>
+            </div>
+        </article>
+    `;
 }
 
 function renderMonthGrid() {
@@ -326,7 +220,7 @@ function renderAppointmentStrip(appointment) {
     return `
         <button class="appointment-strip ${meta.className}" data-appointment-id="${escapeAttribute(appointment.id)}" type="button">
             <span class="appointment-client">${escapeHtml(appointment.client)}</span>
-            <span class="appointment-time">${escapeHtml(getTimeStart(appointment))}</span>
+            <span class="appointment-time">${escapeHtml(appointment.start)}</span>
         </button>
     `;
 }
@@ -335,7 +229,7 @@ function renderAgendaAppointment(appointment) {
     const meta = CATEGORY_META[appointment.category] || CATEGORY_META.chantier;
     return `
         <article class="agenda-item ${meta.className}">
-            <div class="agenda-time">${escapeHtml(getTimeStart(appointment))}</div>
+            <div class="agenda-time">${escapeHtml(appointment.start)}</div>
             <button data-appointment-id="${escapeAttribute(appointment.id)}" type="button">
                 <strong>${escapeHtml(appointment.client)}</strong>
                 <p class="muted">${escapeHtml(formatDate(appointment.date))} · ${escapeHtml(appointment.address || "Adresse à préciser")}</p>
@@ -367,9 +261,11 @@ function bindCalendarActions(root) {
     });
 }
 
-function openAppointment(id) {
-    const appointment = PLANNING_STATE.appointments.find((item) => item.id === id);
+async function openAppointment(id) {
+    const appointment = await window.KynexyPlanningDB.getAppointment(id);
     if (!appointment) {
+        await reloadAppointmentsFromDatabase();
+        renderPlanning();
         return;
     }
 
@@ -418,8 +314,8 @@ function openCreateAppointment(isoDate) {
     });
 }
 
-function openEditAppointment(id) {
-    const appointment = PLANNING_STATE.appointments.find((item) => item.id === id);
+async function openEditAppointment(id) {
+    const appointment = await window.KynexyPlanningDB.getAppointment(id);
     if (!appointment) {
         return;
     }
@@ -437,8 +333,8 @@ function renderAppointmentForm(appointment = {}) {
         <form class="detail-list" id="appointmentForm">
             ${inputRow("Date", "date", appointment.date || toIsoDate(PLANNING_STATE.currentDate), "date")}
             <div class="time-grid">
-                ${inputRow("Début", "start", appointment.start || getTimeStart(appointment) || "08:00", "time")}
-                ${inputRow("Fin", "end", appointment.end || getTimeEnd(appointment) || "09:00", "time")}
+                ${inputRow("Début", "start", appointment.start || "08:00", "time")}
+                ${inputRow("Fin", "end", appointment.end || "09:00", "time")}
             </div>
             <div class="detail-row">
                 <span>Catégorie</span>
@@ -464,31 +360,30 @@ function renderAppointmentForm(appointment = {}) {
 
 async function saveAppointmentForm(form, existingId = null) {
     const data = Object.fromEntries(new FormData(form).entries());
-    const appointment = normalizeAppointment({
-        id: existingId || `rdv-${crypto.randomUUID ? crypto.randomUUID() : Date.now()}`,
-        client: data.client || "Nouveau client",
-        address: data.address || "",
-        phone: data.phone || "",
+    const payload = {
+        client: data.client,
+        address: data.address,
+        phone: data.phone,
         date: data.date,
-        start: data.start || "08:00",
-        end: data.end || "09:00",
-        timeRange: `${data.start || "08:00"} - ${data.end || "09:00"}`,
-        category: data.category || "chantier",
-        notes: data.notes || "",
-        updatedAt: new Date().toISOString(),
-        createdAt: existingId ? undefined : new Date().toISOString()
-    });
+        start: data.start,
+        end: data.end,
+        category: data.category,
+        notes: data.notes
+    };
 
-    await PlanningStore.saveAppointment(appointment);
-    await loadAppointments();
+    const appointment = existingId
+        ? await window.KynexyPlanningDB.updateAppointment(existingId, payload)
+        : await window.KynexyPlanningDB.createAppointment(payload);
+
+    await reloadAppointmentsFromDatabase();
     PLANNING_STATE.currentDate = new Date(appointment.date + "T00:00:00");
     closePanel();
     renderPlanning();
 }
 
 async function deleteAppointment(id) {
-    await PlanningStore.deleteAppointment(id);
-    await loadAppointments();
+    await window.KynexyPlanningDB.deleteAppointment(id);
+    await reloadAppointmentsFromDatabase();
     closePanel();
     renderPlanning();
 }
@@ -618,46 +513,8 @@ function getVisibleMonthAppointments() {
     }).sort(compareAppointments);
 }
 
-function normalizeAppointment(appointment) {
-    if (!appointment || !appointment.date) {
-        return null;
-    }
-
-    const start = appointment.start || getTimeStart(appointment) || "08:00";
-    const end = appointment.end || getTimeEnd(appointment) || "09:00";
-    return {
-        id: appointment.id || `rdv-${Date.now()}`,
-        client: appointment.client || "Nouveau client",
-        address: appointment.address || "",
-        phone: appointment.phone || "",
-        date: appointment.date,
-        start,
-        end,
-        timeStart: start,
-        timeRange: `${start} - ${end}`,
-        category: CATEGORY_META[appointment.category] ? appointment.category : "chantier",
-        notes: appointment.notes || "",
-        createdAt: appointment.createdAt || new Date().toISOString(),
-        updatedAt: appointment.updatedAt || new Date().toISOString()
-    };
-}
-
 function compareAppointments(a, b) {
-    return (a.date + a.timeStart + a.client).localeCompare(b.date + b.timeStart + b.client);
-}
-
-function getTimeStart(appointment) {
-    if (appointment.start) {
-        return appointment.start;
-    }
-    return appointment.timeRange ? appointment.timeRange.split(" - ")[0] : "";
-}
-
-function getTimeEnd(appointment) {
-    if (appointment.end) {
-        return appointment.end;
-    }
-    return appointment.timeRange && appointment.timeRange.includes(" - ") ? appointment.timeRange.split(" - ")[1] : "";
+    return `${a.date}${a.start}${a.client}`.localeCompare(`${b.date}${b.start}${b.client}`);
 }
 
 function startOfDay(date) {
@@ -672,10 +529,7 @@ function toIsoDate(date) {
 }
 
 function formatMonth(date) {
-    return date.toLocaleDateString("fr-FR", {
-        month: "long",
-        year: "numeric"
-    });
+    return date.toLocaleDateString("fr-FR", { month: "long", year: "numeric" });
 }
 
 function formatDate(value) {
@@ -707,7 +561,8 @@ function publishPlanningContext() {
     const tomorrow = toIsoDate(tomorrowDate);
 
     window.KynexyPlanningState = {
-        storageMode: PLANNING_STATE.storageMode,
+        database: window.KynexyPlanningDB ? window.KynexyPlanningDB.name : null,
+        databaseReady: PLANNING_STATE.databaseReady,
         appointmentsCount: PLANNING_STATE.appointments.length,
         today: getAppointmentsForDate(today),
         tomorrow: getAppointmentsForDate(tomorrow),
@@ -721,20 +576,13 @@ function publishPlanningContext() {
 window.KynexyPlanning = {
     refresh: renderPlanning,
     reload: async () => {
-        await loadAppointments();
+        await reloadAppointmentsFromDatabase();
         renderPlanning();
     },
     getState: () => ({
         currentDate: PLANNING_STATE.currentDate.toISOString(),
         currentView: PLANNING_STATE.currentView,
-        storageMode: PLANNING_STATE.storageMode,
+        databaseReady: PLANNING_STATE.databaseReady,
         appointments: PLANNING_STATE.appointments.slice()
-    }),
-    seedDemo: async () => {
-        for (const appointment of DEMO_APPOINTMENTS.map(normalizeAppointment)) {
-            await PlanningStore.saveAppointment(appointment);
-        }
-        await loadAppointments();
-        renderPlanning();
-    }
+    })
 };

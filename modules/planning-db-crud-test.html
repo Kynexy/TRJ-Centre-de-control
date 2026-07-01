@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Planning DB CRUD Test</title>
+</head>
+<body>
+<pre id="result">RUNNING</pre>
+<script src="../planning-db.js"></script>
+<script>
+(async function () {
+    const result = document.getElementById("result");
+    try {
+        await window.KynexyPlanningDB.open();
+        await window.KynexyPlanningDB.clearForTests();
+
+        const created = await window.KynexyPlanningDB.createAppointment({
+            client: "Client test Kynexy",
+            address: "Adresse test",
+            phone: "+689 87 00 00 00",
+            date: "2026-07-15",
+            start: "08:15",
+            end: "09:45",
+            category: "chantier",
+            notes: "Creation test"
+        });
+
+        const read = await window.KynexyPlanningDB.getAppointment(created.id);
+        const updated = await window.KynexyPlanningDB.updateAppointment(created.id, {
+            client: "Client test modifie",
+            notes: "Modification test"
+        });
+        const listed = await window.KynexyPlanningDB.listAppointments({
+            from: "2026-07-01",
+            to: "2026-07-31"
+        });
+        await window.KynexyPlanningDB.deleteAppointment(created.id);
+        const afterDelete = await window.KynexyPlanningDB.getAppointment(created.id);
+        const events = await window.KynexyPlanningDB.listContextEvents();
+
+        const ok = Boolean(
+            created.id &&
+            read &&
+            read.client === "Client test Kynexy" &&
+            updated.client === "Client test modifie" &&
+            listed.length === 1 &&
+            !afterDelete &&
+            events.length === 3
+        );
+
+        result.textContent = ok
+            ? "PASS CRUD PlanningDB create/read/update/list/delete/events"
+            : "FAIL CRUD PlanningDB " + JSON.stringify({ created, read, updated, listed, afterDelete, events }, null, 2);
+    } catch (error) {
+        result.textContent = "ERROR " + (error && error.stack ? error.stack : error);
+    }
+}());
+</script>
+</body>
+</html>
