@@ -1,10 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#07182d">
 
 <title>Planning Kynexy</title>
@@ -16,19 +16,19 @@
 
 <body>
 
-<main class="calendar-shell">
+<main class="calendar-shell" id="planningApp">
 
-<section class="calendar-card">
+<section class="calendar-card" aria-label="Planning Kynexy">
 <div class="calendar-toolbar">
 <div class="month-picker" aria-label="Navigation du mois">
 <button class="nav-pill" id="prevMonth" type="button" aria-label="Mois précédent">&lt;</button>
 <div id="monthLabel">Initialisation</div>
 <button class="nav-pill" id="nextMonth" type="button" aria-label="Mois suivant">&gt;</button>
 </div>
-<button class="view-menu" id="viewCycle" type="button">Mois</button>
+<button class="view-menu" id="viewCycle" type="button" aria-label="Changer de vue">Mois</button>
 </div>
 
-<div class="weekday-row">
+<div class="weekday-row" id="weekdayRow">
 <span>Lun</span>
 <span>Mar</span>
 <span>Mer</span>
@@ -43,13 +43,13 @@
 
 </main>
 
-<aside class="appointment-panel" id="appointmentPanel" aria-hidden="true">
-<div class="panel-card">
+<aside class="appointment-panel" id="appointmentPanel" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="panelTitle">
+<div class="panel-card" role="document">
 <div class="panel-header">
-<h2>Rendez-vous</h2>
+<h2 id="panelTitle">Rendez-vous</h2>
 <button class="icon-btn" id="closePanel" type="button" aria-label="Fermer">&times;</button>
 </div>
-<div id="appointmentDetails"></div>
+<div id="appointmentDetails" class="panel-content"></div>
 </div>
 </aside>
 
