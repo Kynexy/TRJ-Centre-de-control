@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#07182d">
+
+<title>Planning - Kynexy TRJ OS</title>
+
+<link rel="stylesheet" href="planning.css">
+
+</head>
+
+<body>
+
+<div class="planning-shell">
+
+<header class="topbar">
+<div class="title">
+<h1>Planning Kynexy</h1>
+<p>Centre de planification terrain TRJ</p>
+</div>
+<div class="status">
+<div class="pill" id="planningClock">Initialisation</div>
+<div class="pill">Source Glide : prête</div>
+</div>
+</header>
+
+<div class="layout">
+
+<aside class="sidebar">
+<div class="brand-mark">P</div>
+<nav class="nav" id="planningNav" aria-label="Compartiments planning">
+<button class="active" data-view="today" type="button">🏠 Aujourd'hui</button>
+<button data-view="calendar" type="button">📅 Agenda</button>
+<button data-view="mission" type="button">🚧 Mission</button>
+<button data-view="team" type="button">👷 Affectation équipe</button>
+<button data-view="vehicles" type="button">🚚 Véhicules</button>
+<button data-view="conditions" type="button">🌦 Conditions</button>
+<button data-view="dashboard" type="button">📊 Tableau de bord</button>
+</nav>
+<div class="sidebar-note">
+Agenda terrain autonome : données fictives, champs indépendants, composants prêts pour une future connexion Glide.
+</div>
+</aside>
+
+<main class="main">
+
+<section class="hero">
+<div>
+<h2 id="viewTitle">Aujourd'hui</h2>
+<p id="viewSubtitle">Toutes les missions de la journée, triées par heure, priorité et état terrain.</p>
+</div>
+<div class="quick-actions">
+<button class="primary-btn" data-shortcut="mission" type="button">Ouvrir mission</button>
+<button class="ghost-btn" data-shortcut="calendar" type="button">Agenda</button>
+<button class="ghost-btn" data-shortcut="team" type="button">Affecter équipe</button>
+<button class="ghost-btn" data-shortcut="conditions" type="button">Conditions</button>
+</div>
+</section>
+
+<section class="grid" id="planningMetrics"></section>
+
+<section id="planningView"></section>
+
+</main>
+
+</div>
+
+</div>
+
+<aside class="aurel-cloud" aria-label="Aurel">
+<button class="aurel-orb" id="aurelButton" type="button" aria-label="Ouvrir Aurel">
+<span class="aurel-lobe lobe-a"></span>
+<span class="aurel-lobe lobe-b"></span>
+<span class="aurel-lobe lobe-c"></span>
+<span class="aurel-eye eye-left"></span>
+<span class="aurel-eye eye-right"></span>
+<span class="aurel-smile"></span>
+</button>
+<div class="aurel-menu" id="aurelMenu" aria-hidden="true">
+<strong>Aurel</strong>
+<p>Je garde le planning terrain sous contrôle.</p>
+<div class="aurel-links">
+<button data-shortcut="today" type="button">Aujourd'hui</button>
+<button data-shortcut="mission" type="button">Mission</button>
+<button data-shortcut="team" type="button">Equipe</button>
+<button data-shortcut="dashboard" type="button">Stats</button>
+</div>
+</div>
+</aside>
+
+<script src="planning.js"></script>
+
+</body>
+
+</html>
