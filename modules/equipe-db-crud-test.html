@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Team DB CRUD Test</title>
+</head>
+<body>
+<pre id="result">RUNNING</pre>
+<script src="../equipe-db.js"></script>
+<script>
+(async function () {
+    const result = document.getElementById("result");
+    try {
+        await window.KynexyTeamDB.open();
+        await window.KynexyTeamDB.clearForTests();
+
+        const member = await window.KynexyTeamDB.createMember({
+            name: "Test",
+            color: "#5ee37d",
+            phone: "123",
+            role: "Poseur",
+            hourlyRate: 2000
+        });
+        const entry = await window.KynexyTeamDB.upsertWorkEntry({
+            memberId: member.id,
+            date: "2026-07-01",
+            hours: 7.5,
+            advance: 1000,
+            salaryPaid: 2000,
+            note: "Matin"
+        });
+        await window.KynexyTeamDB.upsertWorkEntry({
+            memberId: member.id,
+            date: "2026-07-02",
+            absent: true,
+            note: "Absent"
+        });
+
+        const members = await window.KynexyTeamDB.listMembers();
+        const entries = await window.KynexyTeamDB.listWorkEntries({ from: "2026-07-01", to: "2026-07-31" });
+        const summary = window.KynexyTeamDB.calculateSummary(member, entries, "2026-07-01");
+        const updated = await window.KynexyTeamDB.updateMember(member.id, { hourlyRate: 2500 });
+        await window.KynexyTeamDB.deleteWorkEntry(entry.id);
+        const afterDelete = await window.KynexyTeamDB.listWorkEntries({ memberId: member.id });
+        const events = await window.KynexyTeamDB.listContextEvents();
+
+        const pass = members.length === 1
+            && entries.length === 2
+            && summary.weekHours === 7.5
+            && summary.calculatedSalary === 15000
+            && summary.advances === 1000
+            && summary.salaryPaid === 2000
+            && summary.remaining === 12000
+            && updated.hourlyRate === 2500
+            && afterDelete.length === 1
+            && events.length >= 5;
+
+        await window.KynexyTeamDB.clearForTests();
+
+        result.textContent = pass
+            ? "PASS CRUD TeamDB create/read/update/delete/calculate/events"
+            : "FAIL CRUD TeamDB " + JSON.stringify({ members, entries, summary, updated, afterDelete, events }, null, 2);
+    } catch (error) {
+        result.textContent = "ERROR " + (error && error.stack ? error.stack : error);
+    }
+}());
+</script>
+</body>
+</html>

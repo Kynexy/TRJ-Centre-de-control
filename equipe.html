@@ -1,23 +1,65 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#07182d">
-<title>Équipe Kynexy</title>
+<title>Equipe Kynexy</title>
 <link rel="stylesheet" href="equipe.css">
 <link rel="stylesheet" href="aurel-system.css">
 </head>
+
 <body>
-<div class="team-app">
-<header class="top"><h1>Équipe</h1><p>Heures, acomptes et paiements des salariés.</p><div class="status"><span class="pill" id="teamClock">Initialisation</span><span class="pill">Semaine active</span></div></header>
-<nav class="tabs"><button class="active" data-view="week">Semaine</button><button data-view="pay">Paiements</button><button data-view="advance">Acomptes</button></nav>
-<section class="panel"><h2 id="viewTitle">Semaine</h2><p id="viewIntro">Une ligne par salarié. Les chiffres importants restent visibles immédiatement.</p><button class="action" id="addEmployee" type="button">Ajouter un salarié</button></section>
-<section class="metrics" id="teamMetrics"></section>
-<main id="teamContent"></main>
+<main class="team-shell" id="teamApp">
+<header class="team-top">
+<div>
+<span class="eyebrow">Equipe</span>
+<h1>Presence et paie simple</h1>
 </div>
-<section class="sheet" id="employeeSheet"><div class="sheet-card"><div class="sheet-head"><h2>Salarié</h2><button class="secondary" id="closeEmployee" type="button">Retour</button></div><form class="form" id="employeeForm"><label>Prénom<input id="employeeName" required></label><label>Heures semaine<input id="employeeHours" type="number" min="0" step="0.5" value="35"></label><label>Acompte<input id="employeeAdvance" type="number" min="0" step="1000" value="0"></label><label>Total payé<input id="employeePaid" type="number" min="0" step="1000" value="0"></label><button class="action" type="submit">Enregistrer</button></form></div></section>
+<button class="primary-btn compact" id="addMember" type="button">Ajouter</button>
+</header>
+
+<section class="presence-section" aria-label="Calendrier de presence">
+<div class="section-toolbar">
+<button class="nav-btn" id="prevMonth" type="button" aria-label="Mois precedent">&lt;</button>
+<strong id="monthLabel">Initialisation</strong>
+<button class="nav-btn" id="nextMonth" type="button" aria-label="Mois suivant">&gt;</button>
+</div>
+<div class="weekday-row" aria-hidden="true">
+<span>Lun</span>
+<span>Mar</span>
+<span>Mer</span>
+<span>Jeu</span>
+<span>Ven</span>
+<span>Sam</span>
+<span>Dim</span>
+</div>
+<div class="presence-grid" id="presenceGrid"></div>
+</section>
+
+<section class="people-section" aria-label="Fiches salaries">
+<div class="section-head">
+<h2>Fiches salaries</h2>
+<span id="storageStatus">Chargement</span>
+</div>
+<div class="member-list" id="memberList"></div>
+</section>
+</main>
+
+<aside class="team-panel" id="teamPanel" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="panelTitle">
+<div class="panel-card" role="document">
+<div class="panel-header">
+<h2 id="panelTitle">Equipe</h2>
+<button class="icon-btn" id="closePanel" type="button" aria-label="Fermer">&times;</button>
+</div>
+<div class="panel-content" id="panelContent"></div>
+</div>
+</aside>
+
+<script src="equipe-db.js"></script>
 <script src="equipe.js"></script>
 <script src="aurel-system.js"></script>
 </body>
+
 </html>
