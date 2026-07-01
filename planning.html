@@ -15,64 +15,61 @@
 
 <body>
 
-<div class="planning-shell">
+<main class="calendar-shell">
 
 <header class="topbar">
 <div class="title">
 <h1>Planning Kynexy</h1>
-<p>Centre de planification terrain TRJ</p>
+<p>Calendrier mensuel des rendez-vous TRJ</p>
 </div>
 <div class="status">
-<div class="pill" id="planningClock">Initialisation</div>
-<div class="pill">Source Glide : prête</div>
+<button class="pill nav-pill" id="prevMonth" type="button">‹</button>
+<div class="pill" id="monthLabel">Initialisation</div>
+<button class="pill nav-pill" id="nextMonth" type="button">›</button>
 </div>
 </header>
 
-<div class="layout">
-
-<aside class="sidebar">
-<div class="brand-mark">P</div>
-<nav class="nav" id="planningNav" aria-label="Compartiments planning">
-<button class="active" data-view="today" type="button">🏠 Aujourd'hui</button>
-<button data-view="calendar" type="button">📅 Agenda</button>
-<button data-view="mission" type="button">🚧 Mission</button>
-<button data-view="team" type="button">👷 Affectation équipe</button>
-<button data-view="vehicles" type="button">🚚 Véhicules</button>
-<button data-view="conditions" type="button">🌦 Conditions</button>
-<button data-view="dashboard" type="button">📊 Tableau de bord</button>
-</nav>
-<div class="sidebar-note">
-Agenda terrain autonome : données fictives, champs indépendants, composants prêts pour une future connexion Glide.
-</div>
-</aside>
-
-<main class="main">
-
 <section class="hero">
 <div>
-<h2 id="viewTitle">Aujourd'hui</h2>
-<p id="viewSubtitle">Toutes les missions de la journée, triées par heure, priorité et état terrain.</p>
+<h2>Calendrier mensuel</h2>
+<p>Une vue claire, lisible et rapide pour organiser les rendez-vous de l'entreprise sans bruit inutile.</p>
 </div>
-<div class="quick-actions">
-<button class="primary-btn" data-shortcut="mission" type="button">Ouvrir mission</button>
-<button class="ghost-btn" data-shortcut="calendar" type="button">Agenda</button>
-<button class="ghost-btn" data-shortcut="team" type="button">Affecter équipe</button>
-<button class="ghost-btn" data-shortcut="conditions" type="button">Conditions</button>
-</div>
+<div class="month-summary" id="monthSummary"></div>
 </section>
 
-<section class="grid" id="planningMetrics"></section>
+<section class="calendar-card">
+<div class="calendar-toolbar">
+<div class="legend" id="categoryLegend"></div>
+<button class="ghost-btn" id="todayButton" type="button">Aujourd'hui</button>
+</div>
 
-<section id="planningView"></section>
+<div class="weekday-row">
+<span>Lun</span>
+<span>Mar</span>
+<span>Mer</span>
+<span>Jeu</span>
+<span>Ven</span>
+<span>Sam</span>
+<span>Dim</span>
+</div>
+
+<div class="month-grid" id="monthGrid" aria-label="Calendrier mensuel"></div>
+</section>
 
 </main>
 
+<aside class="appointment-panel" id="appointmentPanel" aria-hidden="true">
+<div class="panel-card">
+<div class="panel-header">
+<h2>Rendez-vous</h2>
+<button class="icon-btn" id="closePanel" type="button" aria-label="Fermer">×</button>
 </div>
-
+<div id="appointmentDetails"></div>
 </div>
+</aside>
 
 <aside class="aurel-cloud" aria-label="Aurel">
-<button class="aurel-orb" id="aurelButton" type="button" aria-label="Ouvrir Aurel">
+<button class="aurel-orb" id="aurelButton" type="button" aria-label="Aurel">
 <span class="aurel-lobe lobe-a"></span>
 <span class="aurel-lobe lobe-b"></span>
 <span class="aurel-lobe lobe-c"></span>
@@ -80,16 +77,6 @@ Agenda terrain autonome : données fictives, champs indépendants, composants pr
 <span class="aurel-eye eye-right"></span>
 <span class="aurel-smile"></span>
 </button>
-<div class="aurel-menu" id="aurelMenu" aria-hidden="true">
-<strong>Aurel</strong>
-<p>Je garde le planning terrain sous contrôle.</p>
-<div class="aurel-links">
-<button data-shortcut="today" type="button">Aujourd'hui</button>
-<button data-shortcut="mission" type="button">Mission</button>
-<button data-shortcut="team" type="button">Equipe</button>
-<button data-shortcut="dashboard" type="button">Stats</button>
-</div>
-</div>
 </aside>
 
 <script src="planning.js"></script>
