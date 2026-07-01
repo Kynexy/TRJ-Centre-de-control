@@ -670,6 +670,11 @@ border-radius:20px;
 padding:18px;
 }
 
+.topbar{
+flex-direction:column;
+align-items:flex-start;
+}
+
 .status,
 .quick-actions,
 .grid,
@@ -682,6 +687,13 @@ grid-template-columns:1fr;
 .status,
 .toolbar{
 flex-direction:column;
+align-items:stretch;
+width:100%;
+}
+
+.pill{
+max-width:100%;
+overflow-wrap:anywhere;
 }
 
 .toolbar input,
@@ -719,8 +731,8 @@ width:auto;
 
 <header class="topbar">
 <div class="title">
-<h1>Kynexy CRM</h1>
-<p>Production commerciale et terrain TRJ</p>
+<h1>CRM</h1>
+<p>Clients, devis et factures</p>
 </div>
 <div class="status">
 <div class="pill" id="crmSourceStatus">Clients a jour</div>
@@ -731,17 +743,13 @@ width:auto;
 <div class="layout">
 
 <aside class="sidebar">
-<div class="brand-mark">K</div>
 <nav class="nav" id="crmNav">
-<button class="active" data-view="home">Accueil</button>
-<button data-view="today">Aujourd'hui</button>
-<button data-view="jobs">Chantiers</button>
-<button data-view="clients">Clients</button>
+<button class="active" data-view="clients">Clients</button>
 <button data-view="quotes">Devis</button>
-<button data-view="stats">Statistiques</button>
+<button data-view="invoices">Factures</button>
 </nav>
 <div class="sidebar-note">
-CRM dedie aux clients, chantiers et devis. Le reste vit dans son module.
+Un CRM volontairement simple : fiches clients, répertoire, devis et factures.
 </div>
 </aside>
 
@@ -749,13 +757,13 @@ CRM dedie aux clients, chantiers et devis. Le reste vit dans son module.
 
 <section class="hero">
 <div>
-<h2 id="viewTitle">Accueil</h2>
-<p id="viewSubtitle">Bonjour Patron. Le CRM est pret pour piloter la journee, les chantiers, les clients et les devis sans quitter l'environnement Kynexy.</p>
+<h2 id="viewTitle">Clients</h2>
+<p id="viewSubtitle">Répertoire client, devis et factures au même endroit.</p>
 </div>
 <div class="quick-actions">
-<button class="primary-btn" data-action="open-drawer" data-kind="job">Commencer</button>
-<button class="ghost-btn" data-action="open-drawer" data-kind="client">Nouveau client</button>
-<button class="ghost-btn" data-action="open-drawer" data-kind="quote">Creer un devis</button>
+<button class="primary-btn" data-action="open-drawer" data-kind="client">Nouveau client</button>
+<button class="ghost-btn" data-action="open-drawer" data-kind="quote">Créer un devis</button>
+<button class="ghost-btn" data-action="open-drawer" data-kind="invoice">Créer une facture</button>
 </div>
 </section>
 
@@ -778,9 +786,9 @@ CRM dedie aux clients, chantiers et devis. Le reste vit dans son module.
 <label>
 Type
 <select id="formType">
-<option value="job">Chantier</option>
 <option value="client">Client</option>
 <option value="quote">Devis</option>
+<option value="invoice">Facture</option>
 </select>
 </label>
 <label>
@@ -796,8 +804,18 @@ Adresse
 <input id="formAddress" type="text" placeholder="Commune, quartier, repere">
 </label>
 <label>
+TVA
+<select id="formTaxRate">
+<option value="0">0%</option>
+<option value="5">5%</option>
+<option value="13">13%</option>
+<option value="16">16%</option>
+<option value="20">20%</option>
+</select>
+</label>
+<label>
 Notes
-<textarea id="formNotes" placeholder="Besoin, urgence, prochaine action"></textarea>
+<textarea id="formNotes" placeholder="Besoin, montant, prochaine action"></textarea>
 </label>
 <button class="primary-btn" type="submit">Enregistrer l'action</button>
 <p class="footer-note" id="formFeedback">Action preparee localement.</p>
@@ -813,46 +831,32 @@ const CRM_TABLES = [
     "clients",
     "quotes",
     "stats",
+    "invoices",
 ];
 
 const CRM_OBJECT_TABLES = ["summary", "stats"];
 
 const CRM_STATE = {
-    view: "home",
+    view: "clients",
     data: getInitialData(),
     draftQueue: []
 };
 
 const CRM_VIEWS = {
-    home: {
-        title: "Accueil",
-        subtitle: "Bonjour Patron. Clients, chantiers et devis a traiter aujourd'hui.",
-        render: renderHome
-    },
-    today: {
-        title: "Aujourd'hui",
-        subtitle: "Les chantiers du jour avec depart, priorite, temps estime et lancement terrain.",
-        render: renderToday
-    },
-    jobs: {
-        title: "Chantiers",
-        subtitle: "Liste des chantiers, recherche, etat couleur, telephone, GPS et photos.",
-        render: renderJobs
-    },
-    clients: {
+clients: {
         title: "Clients",
         subtitle: "Coordonnees, historique, notes, photos et devis associes.",
         render: renderClients
     },
     quotes: {
         title: "Devis",
-        subtitle: "Devis en attente, acceptes, refuses et creation de devis.",
+        subtitle: "Créer et suivre les devis avec le taux de TVA choisi.",
         render: renderQuotes
     },
-    stats: {
-        title: "Statistiques",
-        subtitle: "CA du mois, devis envoyes, taux d'acceptation et chantiers termines.",
-        render: renderStats
+    invoices: {
+        title: "Factures",
+        subtitle: "Créer et suivre les factures client avec TVA.",
+        render: renderInvoices
     }
 };
 
@@ -900,81 +904,10 @@ function getDemoData() {
     return {
         summary: {
             patronName: "Patron",
-            dayResume: "3 chantiers a suivre, 2 devis a relancer, clients prioritaires a rappeler."
+            dayResume: "Clients, devis et factures a traiter."
         },
-        today: [
-            {
-                id: "job-1",
-                title: "Toiture Paea",
-                client: "Famille M.",
-                start: "07:30",
-                departure: "06:55",
-                priority: "Haute",
-                estimate: "3h30",
-                address: "Paea - PK 21",
-                status: "ready",
-                phone: "+689 87 00 00 01",
-                gps: "https://maps.google.com/?q=Paea"
-            },
-            {
-                id: "job-2",
-                title: "Controle fuite Punaauia",
-                client: "SCI Vai",
-                start: "11:15",
-                departure: "10:45",
-                priority: "Moyenne",
-                estimate: "1h20",
-                address: "Punaauia",
-                status: "warn",
-                phone: "+689 87 00 00 02",
-                gps: "https://maps.google.com/?q=Punaauia"
-            },
-            {
-                id: "job-3",
-                title: "Photos fin chantier",
-                client: "Mairie",
-                start: "15:00",
-                departure: "14:20",
-                priority: "Basse",
-                estimate: "45 min",
-                address: "Papeete",
-                status: "ready",
-                phone: "+689 87 00 00 03",
-                gps: "https://maps.google.com/?q=Papeete"
-            }
-        ],
-        jobs: [
-            {
-                title: "Toiture Paea",
-                client: "Famille M.",
-                status: "ready",
-                state: "Pret",
-                address: "Paea - PK 21",
-                phone: "+689 87 00 00 01",
-                gps: "https://maps.google.com/?q=Paea",
-                photos: 8
-            },
-            {
-                title: "Fuite Punaauia",
-                client: "SCI Vai",
-                status: "warn",
-                state: "A verifier",
-                address: "Punaauia",
-                phone: "+689 87 00 00 02",
-                gps: "https://maps.google.com/?q=Punaauia",
-                photos: 3
-            },
-            {
-                title: "Extension terrasse",
-                client: "Hotel T.",
-                status: "blocked",
-                state: "Piece manquante",
-                address: "Mahina",
-                phone: "+689 87 00 00 04",
-                gps: "https://maps.google.com/?q=Mahina",
-                photos: 0
-            }
-        ],
+        today: [],
+        jobs: [],
         clients: [
             {
                 name: "Famille M.",
@@ -1000,27 +933,19 @@ function getDemoData() {
             }
         ],
         quotes: [
-            { number: "DEV-1042", client: "Famille M.", amount: "485 000 F", status: "accepted", label: "Accepte" },
-            { number: "DEV-1051", client: "SCI Vai", amount: "96 000 F", status: "pending", label: "En attente" },
-            { number: "DEV-1038", client: "Hotel T.", amount: "720 000 F", status: "refused", label: "Refuse" },
-            { number: "DEV-1053", client: "Particulier Mahina", amount: "158 000 F", status: "pending", label: "En attente" }
+            { number: "DEV-1042", client: "Famille M.", amount: "485 000 F", taxRate: "13%", status: "accepted", label: "Accepte" },
+            { number: "DEV-1051", client: "SCI Vai", amount: "96 000 F", taxRate: "13%", status: "pending", label: "En attente" },
+            { number: "DEV-1053", client: "Particulier Mahina", amount: "158 000 F", taxRate: "13%", status: "pending", label: "En attente" }
         ],
-        team: [
-            { name: "Tane", role: "Chef chantier", status: "En chantier", hours: "6h15", state: "ready" },
-            { name: "Moana", role: "Technicien", status: "Present", hours: "5h40", state: "ready" },
-            { name: "Hiro", role: "Aide", status: "Absent", hours: "0h00", state: "blocked" },
-            { name: "Ari", role: "Support", status: "En route", hours: "2h10", state: "warn" }
-        ],
-        messages: [
-            { from: "Famille M.", time: "08:12", text: "Portail ouvert, vous pouvez entrer.", unread: true },
-            { from: "SCI Vai", time: "09:04", text: "La fuite revient quand la pluie est forte.", unread: true },
-            { from: "Fournisseur", time: "10:18", text: "Materiaux disponibles cet apres-midi.", unread: false }
+        invoices: [
+            { number: "FAC-2084", client: "Famille M.", amount: "485 000 F", taxRate: "13%", status: "paid", label: "Payee" },
+            { number: "FAC-2085", client: "SCI Vai", amount: "96 000 F", taxRate: "13%", status: "pending", label: "A regler" }
         ],
         stats: {
-            revenue: "2,4 M F",
-            quotesSent: 18,
-            acceptanceRate: 64,
-            jobsDone: 11
+            revenue: "0 F",
+            quotesSent: 3,
+            acceptanceRate: 0,
+            jobsDone: 0
         }
     };
 
@@ -1064,7 +989,7 @@ function renderCrm() {
     renderNav();
     renderHeader();
     renderMetrics();
-    const view = CRM_VIEWS[CRM_STATE.view] || CRM_VIEWS.home;
+    const view = CRM_VIEWS[CRM_STATE.view] || CRM_VIEWS.clients;
     view.render(document.getElementById("crmView"));
 
 }
@@ -1079,7 +1004,7 @@ function renderNav() {
 
 function renderHeader() {
 
-    const view = CRM_VIEWS[CRM_STATE.view] || CRM_VIEWS.home;
+    const view = CRM_VIEWS[CRM_STATE.view] || CRM_VIEWS.clients;
     document.getElementById("viewTitle").textContent = view.title;
     document.getElementById("viewSubtitle").textContent = view.subtitle;
 
@@ -1090,12 +1015,11 @@ function renderHeader() {
 
 function renderMetrics() {
 
-    const stats = CRM_STATE.data.stats || {};
     const metrics = [
-        { label: "CA du mois", value: stats.revenue || "0 F", detail: "Suivi commercial" },
-        { label: "Chantiers du jour", value: CRM_STATE.data.today.length, detail: "Depart et priorite" },
-        { label: "Devis envoyes", value: stats.quotesSent || CRM_STATE.data.quotes.length, detail: "Suivi commercial" },
-        { label: "Actions du jour", value: CRM_STATE.draftQueue.length, detail: "A traiter" }
+        { label: "Clients", value: CRM_STATE.data.clients.length, detail: "Fiches actives" },
+        { label: "Devis", value: CRM_STATE.data.quotes.length, detail: "Avec TVA" },
+        { label: "Factures", value: CRM_STATE.data.invoices.length, detail: "Suivi client" },
+        { label: "Brouillons", value: CRM_STATE.draftQueue.length, detail: "A enregistrer" }
     ];
 
     document.getElementById("crmMetrics").innerHTML = metrics.map((metric) => `
@@ -1184,9 +1108,12 @@ function renderClients(target) {
 
     target.innerHTML = `
         <section class="card">
-            <h2>Client</h2>
+            <h2>Répertoire clients</h2>
             ${renderToolbar("Rechercher un client", "Tous les clients")}
-            ${selectedClient ? renderClientProfile(selectedClient) : renderEmpty("Aucun client charge.")}
+            <div class="list" style="margin-bottom:16px">
+                ${CRM_STATE.data.clients.map(renderClientCard).join("") || renderEmpty("Aucun client charge.")}
+            </div>
+            ${selectedClient ? renderClientProfile(selectedClient) : ""}
         </section>
     `;
 
@@ -1344,12 +1271,40 @@ function renderQuoteLane(lane) {
 
 }
 
+function renderInvoices(target) {
+
+    target.innerHTML = `
+        <section class="card">
+            <div class="toolbar">
+                <button class="primary-btn" data-action="open-drawer" data-kind="invoice" type="button">Créer une facture</button>
+            </div>
+            <div class="list">
+                ${CRM_STATE.data.invoices.map(renderQuoteCard).join("") || renderEmpty("Aucune facture.")}
+            </div>
+        </section>
+    `;
+
+    target.querySelector("[data-action='open-drawer']").addEventListener("click", () => openDrawer("invoice"));
+
+}
+
+function renderClientCard(client) {
+
+    return renderRow({
+        title: client.name || "Client",
+        text: (client.phone || "Téléphone") + " - " + (client.address || "Adresse"),
+        status: "ready",
+        label: client.status || "client"
+    });
+
+}
+
 function renderQuoteCard(quote) {
 
     return `
         <article class="quote-card">
             <h3>${escapeHtml(quote.number || "DEV")}</h3>
-            <p>${escapeHtml(quote.client || "Client")}<br>${escapeHtml(quote.amount || "Montant")}</p>
+            <p>${escapeHtml(quote.client || "Client")}<br>${escapeHtml(quote.amount || "Montant")} · TVA ${escapeHtml(quote.taxRate || "0%")}</p>
             <span class="tag ${getQuoteClass(quote.status)}">${escapeHtml(quote.label || quote.status || "statut")}</span>
         </article>
     `;
@@ -1466,7 +1421,7 @@ function openDrawer(kind) {
     const drawer = document.getElementById("crmDrawer");
     const formType = document.getElementById("formType");
 
-    formType.value = kind || "job";
+    formType.value = kind || "client";
     document.getElementById("drawerTitle").textContent = getDrawerTitle(formType.value);
     document.getElementById("formFeedback").textContent = "Action preparee localement.";
 
@@ -1490,6 +1445,7 @@ function saveDraft() {
         name: document.getElementById("formName").value.trim(),
         phone: document.getElementById("formPhone").value.trim(),
         address: document.getElementById("formAddress").value.trim(),
+        taxRate: document.getElementById("formTaxRate").value + "%",
         notes: document.getElementById("formNotes").value.trim(),
         createdAt: new Date().toISOString()
     };
@@ -1504,11 +1460,9 @@ function saveDraft() {
 function getDrawerTitle(kind) {
 
     const titles = {
-        job: "Nouveau chantier",
         client: "Nouveau client",
         quote: "Nouveau devis",
-        message: "Nouveau message",
-        photo: "Photo chantier"
+        invoice: "Nouvelle facture"
     };
 
     return titles[kind] || "Nouvelle action";

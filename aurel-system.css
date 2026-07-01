@@ -31,9 +31,8 @@ justify-content:center;
 .kx-aurel-button{
 width:var(--aurel-size);
 height:var(--aurel-size);
-border-radius:50%;
 cursor:pointer;
-filter:drop-shadow(0 0 18px var(--aurel-glow));
+filter:drop-shadow(0 12px 20px rgba(0,0,0,.32)) drop-shadow(0 0 16px var(--aurel-glow));
 animation:kxAurelFloat 5.8s ease-in-out infinite;
 }
 
@@ -42,7 +41,9 @@ display:block;
 width:100%;
 height:100%;
 object-fit:contain;
-border-radius:50%;
+border-radius:0;
+background:transparent;
+box-shadow:none;
 }
 
 .kx-aurel-presence{

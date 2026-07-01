@@ -175,8 +175,68 @@ function mapOpenMeteoData(apiData, weatherConfig) {
             windSpeed: windSpeed,
             windGusts: windGusts,
             rain: rain
-        }, weatherConfig.chantierThresholds)
+        }, weatherConfig.chantierThresholds),
+        tomorrow: mapTomorrowForecast(apiData)
     };
+
+}
+
+function mapTomorrowForecast(apiData) {
+
+    const daily = apiData.daily || {};
+    const hourly = apiData.hourly || {};
+    const tomorrowDate = getDailyValue(daily.time, 1);
+    const hourlyRows = [];
+
+    if (tomorrowDate && Array.isArray(hourly.time)) {
+        [6, 9, 12, 15, 18].forEach((hour) => {
+            const marker = tomorrowDate + "T" + String(hour).padStart(2, "0") + ":00";
+            const index = hourly.time.indexOf(marker);
+            if (index >= 0) {
+                hourlyRows.push({
+                    hour: String(hour).padStart(2, "0") + "h",
+                    temperature: formatWeatherValue(getHourlyValue(hourly.temperature_2m, index), "°C"),
+                    rain: formatWeatherValue(getHourlyValue(hourly.precipitation_probability, index), "%"),
+                    wind: formatWeatherValue(getHourlyValue(hourly.wind_speed_10m, index), " km/h")
+                });
+            }
+        });
+    }
+
+    return {
+        date: tomorrowDate,
+        min: formatWeatherValue(getDailyValue(daily.temperature_2m_min, 1), "°C"),
+        max: formatWeatherValue(getDailyValue(daily.temperature_2m_max, 1), "°C"),
+        rain: formatWeatherValue(getDailyValue(daily.precipitation_probability_max, 1), "%"),
+        wind: formatWeatherValue(getDailyValue(daily.wind_speed_10m_max, 1), " km/h"),
+        humidity: getTomorrowAverageHumidity(hourly, tomorrowDate),
+        hours: hourlyRows
+    };
+
+}
+
+function getHourlyValue(values, index) {
+
+    return Array.isArray(values) ? values[index] : null;
+
+}
+
+function getTomorrowAverageHumidity(hourly, tomorrowDate) {
+
+    if (!tomorrowDate || !Array.isArray(hourly.time) || !Array.isArray(hourly.relative_humidity_2m)) {
+        return "Indisponible";
+    }
+
+    const values = hourly.time
+        .map((time, index) => time.startsWith(tomorrowDate) ? hourly.relative_humidity_2m[index] : null)
+        .filter((value) => value !== null && value !== undefined && !Number.isNaN(value));
+
+    if (!values.length) {
+        return "Indisponible";
+    }
+
+    const average = values.reduce((sum, value) => sum + value, 0) / values.length;
+    return formatWeatherValue(average, "%");
 
 }
 
@@ -324,6 +384,7 @@ function renderWeather(data) {
         chantierLabel: formatChantierStatus(data.chantier).replace(/^[^ ]+ /, "")
     };
 
+    renderTomorrowForecast(data.tomorrow);
     notifyAurelStateUpdatedIfAvailable();
     return;
 
@@ -382,6 +443,62 @@ function renderWeather(data) {
 
 }
 
+function renderTomorrowForecast(tomorrow) {
+
+    const forecastElement = document.getElementById("tomorrowForecast");
+
+    if (!forecastElement) {
+        return;
+    }
+
+    if (!tomorrow) {
+        forecastElement.textContent = "Prévisions indisponibles.";
+        return;
+    }
+
+    forecastElement.innerHTML = `
+        <div class="forecast-summary">
+            ${renderForecastMetric("Minimum", tomorrow.min)}
+            ${renderForecastMetric("Maximum", tomorrow.max)}
+            ${renderForecastMetric("Pluie", tomorrow.rain)}
+            ${renderForecastMetric("Vent", tomorrow.wind)}
+            ${renderForecastMetric("Humidité", tomorrow.humidity)}
+        </div>
+        <div class="forecast-hours">
+            ${(tomorrow.hours || []).map((hour) => `
+                <article class="forecast-hour">
+                    <span>${escapeWeatherHtml(hour.hour)}</span>
+                    <strong>${escapeWeatherHtml(hour.temperature)}</strong>
+                    <small>Pluie ${escapeWeatherHtml(hour.rain)} · Vent ${escapeWeatherHtml(hour.wind)}</small>
+                </article>
+            `).join("") || "<div class='forecast-metric'>Evolution horaire indisponible.</div>"}
+        </div>
+    `;
+
+}
+
+function renderForecastMetric(label, value) {
+
+    return `
+        <article class="forecast-metric">
+            <span>${escapeWeatherHtml(label)}</span>
+            <strong>${escapeWeatherHtml(value)}</strong>
+        </article>
+    `;
+
+}
+
+function escapeWeatherHtml(value) {
+
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+
+}
+
 function renderWeatherError(error) {
 
     const weatherElement = document.getElementById("weather");
@@ -416,6 +533,7 @@ function renderWeatherError(error) {
         error: error ? error.message : "Erreur météo inconnue"
     };
 
+    renderTomorrowForecast(null);
     notifyAurelStateUpdatedIfAvailable();
 
 }
@@ -459,10 +577,8 @@ const aurelModules = [
     "initClock",
     "initRadar",
     "initWeather",
-    "initTraffic",
     "initPause",
-    "initYoutube",
-    "initReport"
+    "initYoutube"
 ];
 
 function initAurel(modules) {

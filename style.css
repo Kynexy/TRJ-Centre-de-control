@@ -175,23 +175,50 @@ min-height:100px;
 }
 
 /* ===========================
-CIRCULATION
+PREVISIONS
 =========================== */
 
-.traffic{
-
-background:linear-gradient(135deg,#19553a,#27864e);
-
+.forecast{
+background:linear-gradient(135deg,#0b2b4e,#164b82);
 }
 
-#traffic{
+#tomorrowForecast{
+display:flex;
+flex-direction:column;
+gap:16px;
+}
 
-font-size:26px;
+.forecast-summary{
+display:grid;
+grid-template-columns:repeat(2,minmax(0,1fr));
+gap:12px;
+}
 
-text-align:center;
+.forecast-metric,
+.forecast-hour{
+background:rgba(255,255,255,.08);
+border:1px solid rgba(255,255,255,.10);
+border-radius:14px;
+padding:14px;
+}
 
-padding:30px;
+.forecast-metric span,
+.forecast-hour span{
+display:block;
+font-size:12px;
+color:rgba(255,255,255,.72);
+margin-bottom:6px;
+}
 
+.forecast-metric strong,
+.forecast-hour strong{
+font-size:20px;
+}
+
+.forecast-hours{
+display:grid;
+grid-template-columns:repeat(4,minmax(0,1fr));
+gap:10px;
 }
 
 /* ===========================
@@ -536,10 +563,10 @@ gap:8px;
 
 }
 
-.games{
-
+.games,
+.forecast-summary,
+.forecast-hours{
 grid-template-columns:1fr;
-
 }
 
 #prospectGauge{

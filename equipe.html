@@ -20,8 +20,8 @@
 
 <header class="topbar">
 <div class="title">
-<h1>Equipe TRJ</h1>
-<p>Centre de commandement terrain</p>
+<h1>Équipe</h1>
+<p>Salariés, heures et paiements</p>
 </div>
 <div class="status">
 <div class="pill" id="teamClock">Initialisation</div>
@@ -32,16 +32,13 @@
 <div class="layout">
 
 <aside class="sidebar">
-<div class="brand-mark">T</div>
-<nav class="nav" id="teamNav" aria-label="Compartiments équipe">
-<button class="active" data-view="today" type="button">👷 Equipe aujourd'hui</button>
-<button data-view="agenda" type="button">📅 Agenda Equipe</button>
-<button data-view="payroll" type="button">💰 Salaires</button>
-<button data-view="advances" type="button">💵 Acomptes</button>
-<button data-view="dashboard" type="button">📈 Tableau de bord</button>
+<nav class="nav" id="teamNav" aria-label="Gestion équipe">
+<button class="active" data-view="weekly" type="button">Semaine</button>
+<button data-view="payroll" type="button">Salaires</button>
+<button data-view="advances" type="button">Acomptes</button>
 </nav>
 <div class="sidebar-note">
-Un seul espace pour suivre les personnes, les horaires, les salaires et les acomptes.
+Un module concentré sur les salariés : heures, acomptes et total payé.
 </div>
 </aside>
 
@@ -49,12 +46,11 @@ Un seul espace pour suivre les personnes, les horaires, les salaires et les acom
 
 <section class="hero">
 <div>
-<h2 id="viewTitle">Equipe aujourd'hui</h2>
-<p id="viewSubtitle">Présences, statuts, horaires et actions rapides pour piloter l'équipe dès le matin.</p>
+<h2 id="viewTitle">Semaine</h2>
+<p id="viewSubtitle">Chaque salarié sur une ligne, avec ses heures, son acompte et le total payé.</p>
 </div>
 <div class="quick-actions">
-<button class="primary-btn" data-shortcut="today" type="button">Voir l'�quipe</button>
-<button class="ghost-btn" data-shortcut="agenda" type="button">Horaires</button>
+<button class="primary-btn" data-shortcut="weekly" type="button">Voir la semaine</button>
 <button class="ghost-btn" data-shortcut="payroll" type="button">Salaires</button>
 <button class="ghost-btn" data-shortcut="advances" type="button">Acomptes</button>
 </div>

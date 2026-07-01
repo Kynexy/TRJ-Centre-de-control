@@ -1,5 +1,5 @@
 const TEAM_STATE = {
-    view: "today",
+    view: "weekly",
     selectedGame: "2048",
     data: getDemoData(),
     chat: [
@@ -24,15 +24,10 @@ const TEAM_STATE = {
 };
 
 const TEAM_VIEWS = {
-    today: {
-        title: "Equipe aujourd'hui",
-        subtitle: "Présences, statuts, horaires et actions rapides pour piloter l'équipe dès le matin.",
-        render: renderToday
-    },
-    agenda: {
-        title: "Agenda Equipe",
-        subtitle: "Planning terrain complet : horaires, pauses, chantiers, notes et validation patron.",
-        render: renderAgenda
+    weekly: {
+        title: "Semaine",
+        subtitle: "Chaque salarié sur une ligne, avec ses heures, son acompte et le total payé.",
+        render: renderWeekly
     },
     payroll: {
         title: "Gestion des salaires",
@@ -40,14 +35,9 @@ const TEAM_VIEWS = {
         render: renderPayroll
     },
     advances: {
-        title: "Gestion des acomptes",
-        subtitle: "Historique des avances, motifs et soldes restants calculés automatiquement.",
+        title: "Acomptes",
+        subtitle: "Historique des avances et soldes restants.",
         render: renderAdvances
-    },
-    dashboard: {
-        title: "Tableau de bord équipe",
-        subtitle: "Vue synthétique des heures, coûts, retards, absences et productivité.",
-        render: renderDashboard
     }
 };
 
@@ -186,9 +176,9 @@ function renderMetrics() {
 
     const dashboard = getDashboardStats();
     const metrics = [
-        { label: "Présents", value: dashboard.present, detail: "Equipe active aujourd'hui" },
-        { label: "Heures semaine", value: dashboard.weekHours + "h", detail: "Agenda planifié" },
-        { label: "Coût estimé", value: formatMoney(dashboard.payrollCost), detail: "Net estimé du mois" },
+        { label: "Salariés", value: TEAM_STATE.data.payroll.length, detail: "Fiches suivies" },
+        { label: "Heures semaine", value: dashboard.weekHours + "h", detail: "Horaires saisis" },
+        { label: "Total payé", value: formatMoney(getWeeklyPaidTotal()), detail: "Acomptes inclus" },
     ];
 
     document.getElementById("teamMetrics").innerHTML = metrics.map((metric) => `
@@ -198,6 +188,46 @@ function renderMetrics() {
             <small>${escapeHtml(metric.detail)}</small>
         </article>
     `).join("");
+
+}
+
+function renderWeekly(target) {
+
+    target.innerHTML = `
+        <section class="card">
+            <h2>Semaine salariés</h2>
+            <div class="salary-table">
+                ${TEAM_STATE.data.payroll.map(renderWeeklyEmployeeRow).join("")}
+            </div>
+        </section>
+    `;
+
+}
+
+function renderWeeklyEmployeeRow(row) {
+
+    const calc = calculateSalary(row);
+    return `
+        <article class="salary-row">
+            <div class="salary-person">
+                <strong>${escapeHtml(row.name)}</strong>
+                <span class="tag info">${escapeHtml(row.hours)}h</span>
+            </div>
+            <div class="salary-result">
+                <span>Acompte ${formatMoney(row.advance || 0)}</span>
+                <strong>Total payé ${formatMoney(calc.gross - calc.remaining)}</strong>
+            </div>
+        </article>
+    `;
+
+}
+
+function getWeeklyPaidTotal() {
+
+    return TEAM_STATE.data.payroll.reduce((sum, row) => {
+        const calc = calculateSalary(row);
+        return sum + (calc.gross - calc.remaining);
+    }, 0);
 
 }
 
