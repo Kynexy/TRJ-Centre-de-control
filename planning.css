@@ -33,6 +33,10 @@ padding:16px;
 body.panel-open{
 overflow:hidden;
 touch-action:none;
+position:fixed;
+left:0;
+right:0;
+width:100%;
 }
 
 button{
@@ -211,6 +215,17 @@ background:rgba(255,255,255,.12);
 color:white;
 }
 
+#closePanel{
+min-width:48px;
+min-height:48px;
+border-radius:50%;
+font-size:24px;
+line-height:1;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
 .weekday-row,
 .month-grid{
 display:grid;
@@ -384,7 +399,7 @@ text-align:left;
 .appointment-panel{
 position:fixed;
 inset:0;
-background:rgba(0,0,0,.46);
+background:rgba(0,0,0,.58);
 display:flex;
 align-items:center;
 justify-content:center;
@@ -392,17 +407,18 @@ padding:16px;
 z-index:50;
 overflow:hidden;
 overscroll-behavior:contain;
+touch-action:none;
 opacity:0;
 visibility:hidden;
 pointer-events:none;
-transition:opacity .18s ease, visibility 0s linear .18s;
+transition:opacity .22s ease, visibility 0s linear .22s;
 }
 
 .appointment-panel.open{
 opacity:1;
 visibility:visible;
 pointer-events:auto;
-transition:opacity .18s ease, visibility 0s;
+transition:opacity .22s ease, visibility 0s;
 }
 
 .panel-card{
@@ -412,14 +428,15 @@ display:flex;
 flex-direction:column;
 overflow:hidden;
 overscroll-behavior:contain;
+touch-action:auto;
 scrollbar-width:thin;
 background:linear-gradient(135deg,rgba(15,47,88,.98),rgba(18,61,116,.98));
 border:1px solid rgba(255,255,255,.14);
 border-radius:22px;
 box-shadow:0 22px 60px rgba(0,0,0,.52);
 padding:22px;
-transform:translateY(10px) scale(.985);
-transition:transform .18s ease;
+transform:translateY(18px) scale(.98);
+transition:transform .22s ease;
 }
 
 .appointment-panel.open .panel-card{
@@ -450,7 +467,9 @@ flex-direction:column;
 gap:8px;
 overflow:auto;
 overscroll-behavior:contain;
+-webkit-overflow-scrolling:touch;
 padding-right:2px;
+min-height:0;
 }
 
 .detail-row{
@@ -945,12 +964,12 @@ bottom:10px;
 padding:0;
 align-items:flex-end;
 justify-content:center;
-background:rgba(0,0,0,.54);
+background:rgba(0,0,0,.64);
 }
 
 .panel-card{
 width:100%;
-max-height:82dvh;
+max-height:88dvh;
 padding:18px 14px 14px;
 border-radius:22px 22px 0 0;
 border-bottom:0;
@@ -976,7 +995,7 @@ transform:translateY(0);
 
 .panel-header{
 margin-bottom:8px;
-padding-top:2px;
+padding:10px 0 8px;
 position:sticky;
 top:0;
 z-index:2;

@@ -48,16 +48,6 @@ const TEAM_VIEWS = {
         title: "Tableau de bord équipe",
         subtitle: "Vue synthétique des heures, coûts, retards, absences et productivité.",
         render: renderDashboard
-    },
-    chat: {
-        title: "Chat Equipe",
-        subtitle: "Messagerie interne rapide, lisible et prête pour les médias terrain.",
-        render: renderChat
-    },
-    breakroom: {
-        title: "Salle de pause",
-        subtitle: "Jeux HTML5 natifs, extensibles et prêts à recevoir d'autres modules.",
-        render: renderBreakroom
     }
 };
 
@@ -199,7 +189,6 @@ function renderMetrics() {
         { label: "Présents", value: dashboard.present, detail: "Equipe active aujourd'hui" },
         { label: "Heures semaine", value: dashboard.weekHours + "h", detail: "Agenda planifié" },
         { label: "Coût estimé", value: formatMoney(dashboard.payrollCost), detail: "Net estimé du mois" },
-        { label: "Messages", value: TEAM_STATE.chat.length, detail: "Chat équipe local" }
     ];
 
     document.getElementById("teamMetrics").innerHTML = metrics.map((metric) => `
@@ -266,7 +255,6 @@ function renderMemberCard(member) {
             <div class="row-actions">
                 <a class="icon-btn" href="tel:${escapeAttribute(member.phone)}">Appeler</a>
                 <a class="icon-btn" href="sms:${escapeAttribute(member.phone)}">SMS</a>
-                <button class="icon-btn" type="button" data-message-member="${escapeAttribute(member.name)}">Messenger</button>
             </div>
         </article>
     `;
@@ -345,9 +333,6 @@ function renderPayroll(target) {
         <section class="card">
             <h2>Gestion des salaires</h2>
             <div class="salary-table">
-                <div class="salary-head">
-                    <span>Nom</span><span>Taux</span><span>Heures</span><span>Sup.</span><span>Prime</span><span>Acompte</span><span>Retenues</span><span>Brut</span><span>Reste</span>
-                </div>
                 <div id="salaryRows"></div>
                 <div class="salary-total" id="salaryTotal"></div>
             </div>
@@ -364,15 +349,22 @@ function renderSalaryRows() {
         const calc = calculateSalary(row);
         return `
             <article class="salary-row" data-payroll-index="${index}">
-                <strong>${escapeHtml(row.name)}</strong>
-                ${salaryInput("rate", row.rate)}
-                ${salaryInput("hours", row.hours)}
-                ${salaryInput("overtime", row.overtime)}
-                ${salaryInput("bonus", row.bonus)}
-                ${salaryInput("advance", row.advance)}
-                ${salaryInput("deductions", row.deductions)}
-                <span>${formatMoney(calc.gross)}</span>
-                <span>${formatMoney(calc.remaining)}</span>
+                <div class="salary-person">
+                    <strong>${escapeHtml(row.name)}</strong>
+                    <span class="tag info">${formatMoney(calc.remaining)} reste</span>
+                </div>
+                <div class="salary-fields">
+                    ${salaryInput("Taux", "rate", row.rate)}
+                    ${salaryInput("Heures", "hours", row.hours)}
+                    ${salaryInput("Sup.", "overtime", row.overtime)}
+                    ${salaryInput("Prime", "bonus", row.bonus)}
+                    ${salaryInput("Acompte", "advance", row.advance)}
+                    ${salaryInput("Retenues", "deductions", row.deductions)}
+                </div>
+                <div class="salary-result">
+                    <span>Brut ${formatMoney(calc.gross)}</span>
+                    <strong>Reste ${formatMoney(calc.remaining)}</strong>
+                </div>
             </article>
         `;
     }).join("");
@@ -396,9 +388,14 @@ function renderSalaryRows() {
 
 }
 
-function salaryInput(field, value) {
+function salaryInput(label, field, value) {
 
-    return `<input data-field="${field}" type="number" value="${escapeAttribute(value)}">`;
+    return `
+        <label class="salary-field">
+            <span>${escapeHtml(label)}</span>
+            <input data-field="${field}" type="number" value="${escapeAttribute(value)}">
+        </label>
+    `;
 
 }
 
@@ -490,147 +487,6 @@ function statCard(title, value, detail, progress) {
             <div class="progress"><span style="width:${Math.max(0, Math.min(100, progress))}%"></span></div>
         </article>
     `;
-
-}
-
-function renderChat(target) {
-
-    target.innerHTML = `
-        <section class="card">
-            <h2>Chat Equipe</h2>
-            <div class="chat-shell">
-                <aside class="chat-members">
-                    ${TEAM_STATE.data.members.map((member) => `
-                        <article class="row">
-                            <div>
-                                <h3>${escapeHtml(member.name)}</h3>
-                                <p>${escapeHtml(member.label)} · ${escapeHtml(member.location)}</p>
-                            </div>
-                        </article>
-                    `).join("")}
-                </aside>
-                <div class="chat-room">
-                    <div class="chat-top">
-                        <strong>Canal équipe TRJ</strong>
-                        <span class="tag ready">Notifications actives</span>
-                    </div>
-                    <div class="chat-log" id="chatLog"></div>
-                    <form class="chat-composer" id="chatForm">
-                        <button type="button" data-chat-tool="photo">📷</button>
-                        <button type="button" data-chat-tool="video">🎥</button>
-                        <button type="button" data-chat-tool="document">📎</button>
-                        <button type="button" data-chat-tool="voice">🎤</button>
-                        <input id="chatInput" placeholder="Message à l'équipe...">
-                        <button class="send" type="submit">➤</button>
-                    </form>
-                </div>
-            </div>
-        </section>
-    `;
-
-    renderChatLog();
-    document.getElementById("chatForm").addEventListener("submit", (event) => {
-        event.preventDefault();
-        const input = document.getElementById("chatInput");
-        if (!input.value.trim()) {
-            return;
-        }
-        TEAM_STATE.chat.push({
-            author: "boss",
-            name: "Patron",
-            text: input.value.trim(),
-            quote: TEAM_STATE.chat.at(-1)?.text || "",
-            status: "envoyé",
-            time: getShortTime()
-        });
-        input.value = "";
-        renderChatLog();
-        renderMetrics();
-    });
-
-    document.querySelectorAll("[data-chat-tool]").forEach((button) => {
-        button.addEventListener("click", () => {
-            TEAM_STATE.chat.push({
-                author: "boss",
-                name: "Patron",
-                text: getChatToolText(button.dataset.chatTool),
-                quote: "",
-                status: "préparé",
-                time: getShortTime()
-            });
-            renderChatLog();
-            renderMetrics();
-        });
-    });
-
-}
-
-function renderChatLog() {
-
-    const log = document.getElementById("chatLog");
-    log.innerHTML = TEAM_STATE.chat.map((message) => `
-        <article class="chat-message ${escapeAttribute(message.author)}">
-            ${message.quote ? `<div class="quote">${escapeHtml(message.quote)}</div>` : ""}
-            ${escapeHtml(message.text)}
-            <small>${escapeHtml(message.name)} · ${escapeHtml(message.time)} · ${escapeHtml(message.status)}</small>
-        </article>
-    `).join("");
-    log.scrollTop = log.scrollHeight;
-
-}
-
-function renderBreakroom(target) {
-
-    target.innerHTML = `
-        <section class="card">
-            <h2>Salle de pause</h2>
-            <div class="games-layout">
-                <div class="game-library">
-                    ${GAME_LIBRARY.map((game) => `
-                        <button class="game-card ${game.id === TEAM_STATE.selectedGame ? "active" : ""}" data-game="${escapeAttribute(game.id)}" type="button">
-                            <h3>${escapeHtml(game.title)}</h3>
-                            <p class="muted">${escapeHtml(game.desc)}</p>
-                        </button>
-                    `).join("")}
-                </div>
-                <div class="game-stage" id="gameStage"></div>
-            </div>
-        </section>
-    `;
-
-    document.querySelectorAll("[data-game]").forEach((button) => {
-        button.addEventListener("click", () => {
-            TEAM_STATE.selectedGame = button.dataset.game;
-            renderBreakroom(target);
-        });
-    });
-
-    renderSelectedGame();
-
-}
-
-function renderSelectedGame() {
-
-    const game = TEAM_STATE.selectedGame;
-    const stage = document.getElementById("gameStage");
-    const renderer = {
-        "2048": render2048,
-        snake: renderSnake,
-        chess: renderChess,
-        sudoku: renderSudoku,
-        mines: renderMines,
-        tetris: renderTetris,
-        pacman: renderPacman,
-        breakout: renderBreakout,
-        solitaire: renderSolitaire,
-        memory: renderMemory,
-        morpion: renderMorpion,
-        connect4: renderConnect4,
-        cards: renderCards,
-        logic: renderLogic
-    }[game];
-
-    renderer(stage);
 
 }
 

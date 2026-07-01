@@ -14,6 +14,8 @@ const PLANNING_STATE = {
     appointments: getDemoAppointments()
 };
 
+let PANEL_SCROLL_Y = 0;
+
 document.addEventListener("DOMContentLoaded", initPlanning);
 
 function initPlanning() {
@@ -426,7 +428,7 @@ function openAppointment(id) {
     const panel = document.getElementById("appointmentPanel");
     panel.classList.add("open");
     panel.setAttribute("aria-hidden", "false");
-    document.body.classList.add("panel-open");
+    lockPanelScroll();
 
 }
 
@@ -460,7 +462,7 @@ function openCreateAppointment(isoDate) {
     panel.querySelector(".panel-header h2").textContent = "Nouveau rendez-vous";
     panel.classList.add("open");
     panel.setAttribute("aria-hidden", "false");
-    document.body.classList.add("panel-open");
+    lockPanelScroll();
 
     document.getElementById("createAppointmentForm").addEventListener("submit", (event) => {
         event.preventDefault();
@@ -474,8 +476,32 @@ function closePanel() {
     const panel = document.getElementById("appointmentPanel");
     panel.classList.remove("open");
     panel.setAttribute("aria-hidden", "true");
-    document.body.classList.remove("panel-open");
+    unlockPanelScroll();
     panel.querySelector(".panel-header h2").textContent = "Rendez-vous";
+
+}
+
+function lockPanelScroll() {
+
+    if (document.body.classList.contains("panel-open")) {
+        return;
+    }
+
+    PANEL_SCROLL_Y = window.scrollY || document.documentElement.scrollTop || 0;
+    document.body.style.top = `-${PANEL_SCROLL_Y}px`;
+    document.body.classList.add("panel-open");
+
+}
+
+function unlockPanelScroll() {
+
+    if (!document.body.classList.contains("panel-open")) {
+        return;
+    }
+
+    document.body.classList.remove("panel-open");
+    document.body.style.top = "";
+    window.scrollTo(0, PANEL_SCROLL_Y);
 
 }
 

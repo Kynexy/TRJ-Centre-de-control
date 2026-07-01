@@ -391,9 +391,8 @@ color:#0f2f58;
 
 .agenda-board{
 display:grid;
-grid-template-columns:repeat(5,minmax(190px,1fr));
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
 gap:14px;
-overflow:auto;
 padding-bottom:2px;
 }
 
@@ -436,29 +435,49 @@ resize:vertical;
 .salary-table{
 display:grid;
 gap:11px;
-overflow:auto;
 }
 
-.salary-head,
 .salary-row{
 display:grid;
-grid-template-columns:1.2fr repeat(8,minmax(96px,1fr));
-gap:8px;
-align-items:center;
-min-width:1040px;
-}
-
-.salary-head{
-padding:0 16px 4px;
-font-size:12px;
-color:var(--blue-soft);
-font-weight:700;
-text-transform:uppercase;
+gap:14px;
 }
 
 .salary-row strong,
 .salary-total strong{
 font-size:16px;
+}
+
+.salary-person,
+.salary-result{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:10px;
+flex-wrap:wrap;
+}
+
+.salary-fields{
+display:grid;
+grid-template-columns:repeat(3,minmax(0,1fr));
+gap:10px;
+}
+
+.salary-field{
+display:grid;
+gap:5px;
+color:var(--muted);
+font-size:12px;
+}
+
+.salary-result{
+background:rgba(0,0,0,.12);
+border-radius:13px;
+padding:11px;
+color:var(--muted);
+}
+
+.salary-result strong{
+color:var(--blue-soft);
 }
 
 .salary-total{
@@ -868,15 +887,15 @@ grid-template-columns:repeat(2,minmax(0,1fr));
 
 @media(max-width:720px){
 body{
-padding:10px;
+padding:8px;
 }
 
 .topbar,
 .sidebar,
 .card,
 .hero{
-border-radius:20px;
-padding:18px;
+border-radius:16px;
+padding:14px;
 }
 
 .status,
@@ -897,12 +916,37 @@ grid-template-columns:1fr;
 grid-template-columns:1fr;
 }
 
+.member-card{
+gap:10px;
+align-items:start;
+}
+
+.avatar{
+width:46px;
+height:46px;
+font-size:16px;
+}
+
 .row-actions{
 justify-content:flex-start;
 }
 
 .agenda-board{
-grid-template-columns:repeat(5,86vw);
+grid-template-columns:1fr;
+overflow:visible;
+}
+
+.agenda-day{
+min-height:0;
+}
+
+.salary-fields{
+grid-template-columns:repeat(2,minmax(0,1fr));
+}
+
+.salary-total{
+display:grid;
+grid-template-columns:1fr;
 }
 
 .chat-composer{

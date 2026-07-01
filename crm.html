@@ -723,7 +723,7 @@ width:auto;
 <p>Production commerciale et terrain TRJ</p>
 </div>
 <div class="status">
-<div class="pill" id="crmSourceStatus">Source Glide : prete</div>
+<div class="pill" id="crmSourceStatus">Clients a jour</div>
 <div class="pill" id="crmClock">Initialisation</div>
 </div>
 </header>
@@ -738,13 +738,10 @@ width:auto;
 <button data-view="jobs">Chantiers</button>
 <button data-view="clients">Clients</button>
 <button data-view="quotes">Devis</button>
-<button data-view="team">Equipe</button>
-<button data-view="messenger">Messenger</button>
 <button data-view="stats">Statistiques</button>
-<button data-view="aurel">Aurel</button>
 </nav>
 <div class="sidebar-note">
-CRM HTML V1 termine : structure autonome, donnees fictives de demonstration et points de connexion Glide prets.
+CRM dedie aux clients, chantiers et devis. Le reste vit dans son module.
 </div>
 </aside>
 
@@ -759,20 +756,12 @@ CRM HTML V1 termine : structure autonome, donnees fictives de demonstration et p
 <button class="primary-btn" data-action="open-drawer" data-kind="job">Commencer</button>
 <button class="ghost-btn" data-action="open-drawer" data-kind="client">Nouveau client</button>
 <button class="ghost-btn" data-action="open-drawer" data-kind="quote">Creer un devis</button>
-<button class="ghost-btn" data-view-shortcut="aurel">Bouton Aurel</button>
 </div>
 </section>
 
 <section class="grid" id="crmMetrics"></section>
 
 <section id="crmView"></section>
-
-<section class="card">
-<h2>Connexion Glide</h2>
-<p class="footer-note">
-Chaque carte est rendue depuis un objet de donnees normalise. Glide pourra remplacer progressivement les donnees fictives sans changer la structure HTML.
-</p>
-</section>
 
 </main>
 
@@ -792,8 +781,6 @@ Type
 <option value="job">Chantier</option>
 <option value="client">Client</option>
 <option value="quote">Devis</option>
-<option value="message">Message</option>
-<option value="photo">Photo chantier</option>
 </select>
 </label>
 <label>
@@ -812,8 +799,8 @@ Adresse
 Notes
 <textarea id="formNotes" placeholder="Besoin, urgence, prochaine action"></textarea>
 </label>
-<button class="primary-btn" type="submit">Preparer pour Glide</button>
-<p class="footer-note" id="formFeedback">Aucune donnee n'est envoyee tant que la connexion Glide n'est pas configuree.</p>
+<button class="primary-btn" type="submit">Enregistrer l'action</button>
+<p class="footer-note" id="formFeedback">Action preparee localement.</p>
 </form>
 </aside>
 
@@ -825,13 +812,10 @@ const CRM_TABLES = [
     "jobs",
     "clients",
     "quotes",
-    "team",
-    "messages",
     "stats",
-    "aurel"
 ];
 
-const CRM_OBJECT_TABLES = ["summary", "stats", "aurel"];
+const CRM_OBJECT_TABLES = ["summary", "stats"];
 
 const CRM_STATE = {
     view: "home",
@@ -842,7 +826,7 @@ const CRM_STATE = {
 const CRM_VIEWS = {
     home: {
         title: "Accueil",
-        subtitle: "Bonjour Patron. Resume de la journee, priorites et acces rapide a Aurel.",
+        subtitle: "Bonjour Patron. Clients, chantiers et devis a traiter aujourd'hui.",
         render: renderHome
     },
     today: {
@@ -865,25 +849,10 @@ const CRM_VIEWS = {
         subtitle: "Devis en attente, acceptes, refuses et creation de devis.",
         render: renderQuotes
     },
-    team: {
-        title: "Equipe",
-        subtitle: "Presents, absents, en chantier et temps de travail.",
-        render: renderTeam
-    },
-    messenger: {
-        title: "Messenger",
-        subtitle: "Derniers messages, notifications et reponses rapides.",
-        render: renderMessenger
-    },
     stats: {
         title: "Statistiques",
         subtitle: "CA du mois, devis envoyes, taux d'acceptation et chantiers termines.",
         render: renderStats
-    },
-    aurel: {
-        title: "Aurel",
-        subtitle: "Le nuage bleu toujours visible. Present, pas encore intelligent.",
-        render: renderAurel
     }
 };
 
@@ -931,8 +900,7 @@ function getDemoData() {
     return {
         summary: {
             patronName: "Patron",
-            dayResume: "3 chantiers a suivre, 2 devis a relancer, equipe terrain operationnelle.",
-            aurelText: "Je garde le cockpit CRM visible. La vraie intelligence arrivera apres la connexion Glide."
+            dayResume: "3 chantiers a suivre, 2 devis a relancer, clients prioritaires a rappeler."
         },
         today: [
             {
@@ -1025,7 +993,7 @@ function getDemoData() {
                 email: "contact@example.com",
                 address: "Punaauia",
                 status: "En cours",
-                history: ["Demande Messenger", "Diagnostic planifie"],
+                history: ["Demande client", "Diagnostic planifie"],
                 notes: "Verifier infiltration apres pluie.",
                 photos: ["Fuite", "Plafond", "Acces"],
                 quotes: ["DEV-1051"]
@@ -1053,10 +1021,6 @@ function getDemoData() {
             quotesSent: 18,
             acceptanceRate: 64,
             jobsDone: 11
-        },
-        aurel: {
-            status: "present",
-            text: "Aurel reste visible sur toutes les vues. Il ne decide rien encore : il prepare seulement l'espace pour la suite."
         }
     };
 
@@ -1100,8 +1064,6 @@ function renderCrm() {
     renderNav();
     renderHeader();
     renderMetrics();
-    renderAurelCloud();
-
     const view = CRM_VIEWS[CRM_STATE.view] || CRM_VIEWS.home;
     view.render(document.getElementById("crmView"));
 
@@ -1122,7 +1084,7 @@ function renderHeader() {
     document.getElementById("viewSubtitle").textContent = view.subtitle;
 
     const hasExternalData = Boolean(window.KYNEX_CRM_DATA);
-    document.getElementById("crmSourceStatus").textContent = hasExternalData ? "Source Glide : connectee" : "Source Glide : prete";
+    document.getElementById("crmSourceStatus").textContent = hasExternalData ? "Clients synchronises" : "Clients a jour";
 
 }
 
@@ -1130,10 +1092,10 @@ function renderMetrics() {
 
     const stats = CRM_STATE.data.stats || {};
     const metrics = [
-        { label: "CA du mois", value: stats.revenue || "0 F", detail: "Pret pour Glide" },
+        { label: "CA du mois", value: stats.revenue || "0 F", detail: "Suivi commercial" },
         { label: "Chantiers du jour", value: CRM_STATE.data.today.length, detail: "Depart et priorite" },
         { label: "Devis envoyes", value: stats.quotesSent || CRM_STATE.data.quotes.length, detail: "Suivi commercial" },
-        { label: "Actions preparees", value: CRM_STATE.draftQueue.length, detail: "File locale Glide" }
+        { label: "Actions du jour", value: CRM_STATE.draftQueue.length, detail: "A traiter" }
     ];
 
     document.getElementById("crmMetrics").innerHTML = metrics.map((metric) => `
@@ -1154,7 +1116,7 @@ function renderHome(target) {
         <div class="module-grid">
             <section class="card">
                 <h2>Bonjour ${escapeHtml(summary.patronName || "Patron")}</h2>
-                <p class="card-copy">${escapeHtml(summary.dayResume || "Resume de la journee pret a recevoir les donnees Glide.")}</p>
+                <p class="card-copy">${escapeHtml(summary.dayResume || "Clients et devis a traiter aujourd'hui.")}</p>
                 <div class="list" style="margin-top:16px">
                     ${renderRow({
                         title: "Aujourd'hui",
@@ -1163,16 +1125,16 @@ function renderHome(target) {
                         label: "pret"
                     })}
                     ${renderRow({
-                        title: "Aurel",
-                        text: "Bouton Aurel disponible et nuage bleu toujours visible.",
+                        title: "Devis",
+                        text: CRM_STATE.data.quotes.length + " devis a suivre ou relancer.",
                         status: "info",
-                        label: "present"
+                        label: "suivi"
                     })}
                     ${renderRow({
-                        title: "Glide",
-                        text: window.KYNEX_CRM_DATA ? "Donnees externes chargees." : "Donnees fictives actives, structure prete a connecter.",
-                        status: window.KYNEX_CRM_DATA ? "ready" : "warn",
-                        label: window.KYNEX_CRM_DATA ? "connecte" : "pret"
+                        title: "Clients",
+                        text: CRM_STATE.data.clients.length + " fiches client disponibles.",
+                        status: "ready",
+                        label: "clients"
                     })}
                 </div>
             </section>
@@ -1253,45 +1215,6 @@ function renderQuotes(target) {
 
 }
 
-function renderTeam(target) {
-
-    target.innerHTML = `
-        <section class="card">
-            <h2>Equipe</h2>
-            <div class="tri-grid">
-                ${CRM_STATE.data.team.map(renderTeamMember).join("") || renderEmpty("Aucun membre d'equipe charge.")}
-            </div>
-        </section>
-    `;
-
-}
-
-function renderMessenger(target) {
-
-    target.innerHTML = `
-        <div class="module-grid">
-            <section class="card">
-                <h2>Derniers messages</h2>
-                <div class="list">
-                    ${CRM_STATE.data.messages.map(renderMessage).join("") || renderEmpty("Aucun message charge.")}
-                </div>
-            </section>
-            <section class="card">
-                <h2>Reponse rapide</h2>
-                <div class="list">
-                    ${["Je vous rappelle dans la journee.", "Pouvez-vous envoyer une photo ?", "Nous confirmons le passage de l'equipe."].map((text) => renderRow({
-                        title: text,
-                        text: "Modele pret a envoyer depuis Messenger apres connexion.",
-                        status: "info",
-                        label: "modele"
-                    })).join("")}
-                </div>
-            </section>
-        </div>
-    `;
-
-}
-
 function renderStats(target) {
 
     const stats = CRM_STATE.data.stats || {};
@@ -1306,30 +1229,6 @@ function renderStats(target) {
                 ${renderStatCard("Chantiers termines", stats.jobsDone || 0, "Production finalisee", 66)}
             </div>
         </section>
-    `;
-
-}
-
-function renderAurel(target) {
-
-    const aurel = CRM_STATE.data.aurel || {};
-
-    target.innerHTML = `
-        <div class="module-grid">
-            <section class="card">
-                <h2>Nuage bleu</h2>
-                <p class="card-copy">${escapeHtml(aurel.text || "Aurel est present. Pas encore intelligent.")}</p>
-                <div class="list" style="margin-top:16px">
-                    ${renderRow({ title: "Toujours visible", text: "Le nuage reste fixe en bas de l'interface.", status: "ready", label: "ok" })}
-                    ${renderRow({ title: "Pas encore intelligent", text: "Aurel ne prend aucune decision avant la connexion des donnees.", status: "warn", label: "attente" })}
-                    ${renderRow({ title: "Prochaine etape", text: "Brancher Glide, puis remplacer les donnees fictives.", status: "info", label: "suite" })}
-                </div>
-            </section>
-            <section class="card">
-                <h2>Etat Aurel</h2>
-                ${renderConnectionSummary()}
-            </section>
-        </div>
     `;
 
 }
@@ -1415,7 +1314,7 @@ function renderClientProfile(client) {
             <div class="profile-panel">
                 <h3>Historique</h3>
                 <div class="list" style="margin:12px 0">
-                    ${(client.history || []).map((item) => renderRow({ title: item, text: "Evenement client pret pour Glide.", status: "info", label: "historique" })).join("")}
+                    ${(client.history || []).map((item) => renderRow({ title: item, text: "Evenement client.", status: "info", label: "historique" })).join("")}
                 </div>
                 <p class="card-copy">${escapeHtml(client.notes || "Aucune note.")}</p>
                 <div class="photo-strip">
@@ -1520,20 +1419,20 @@ function renderConnectionSummary() {
     return `
         <div class="list">
             ${renderRow({
-                title: "Mode donnees",
-                text: window.KYNEX_CRM_DATA ? "Les donnees sont chargees depuis la source Glide." : "Donnees fictives chargees pour finaliser le rendu V1.",
-                status: window.KYNEX_CRM_DATA ? "ready" : "warn",
-                label: window.KYNEX_CRM_DATA ? "connecte" : "demo"
-            })}
-            ${renderRow({
-                title: "Tables",
-                text: CRM_TABLES.join(", "),
+                title: "Suivi client",
+                text: "Clients, chantiers et devis au meme endroit.",
                 status: "ready",
-                label: "normalise"
+                label: "clair"
             })}
             ${renderRow({
-                title: "Aucun framework",
-                text: "HTML, CSS et JavaScript natifs uniquement.",
+                title: "Priorites",
+                text: "Relances, devis et chantiers restent visibles sans messagerie parasite.",
+                status: "ready",
+                label: "utile"
+            })}
+            ${renderRow({
+                title: "Action",
+                text: "Chaque fiche mene vers appel, GPS, devis ou suivi.",
                 status: "ready",
                 label: "v1"
             })}
@@ -1562,17 +1461,6 @@ function renderEmpty(text) {
 
 }
 
-function renderAurelCloud() {
-
-    const summary = CRM_STATE.data.summary || {};
-    const cloudText = document.getElementById("aurelCloudText");
-
-    if (cloudText) {
-        cloudText.textContent = summary.aurelText || "Je suis present. Pas encore intelligent, mais pret a recevoir les donnees Glide.";
-    }
-
-}
-
 function openDrawer(kind) {
 
     const drawer = document.getElementById("crmDrawer");
@@ -1580,7 +1468,7 @@ function openDrawer(kind) {
 
     formType.value = kind || "job";
     document.getElementById("drawerTitle").textContent = getDrawerTitle(formType.value);
-    document.getElementById("formFeedback").textContent = "Aucune donnee n'est envoyee tant que la connexion Glide n'est pas configuree.";
+    document.getElementById("formFeedback").textContent = "Action preparee localement.";
 
     drawer.classList.add("open");
     drawer.setAttribute("aria-hidden", "false");
@@ -1608,7 +1496,7 @@ function saveDraft() {
 
     CRM_STATE.draftQueue.unshift(draft);
     document.getElementById("crmForm").reset();
-    document.getElementById("formFeedback").textContent = "Action preparee localement. Elle pourra etre envoyee vers Glide quand la connexion sera active.";
+    document.getElementById("formFeedback").textContent = "Action ajoutee au suivi du jour.";
     renderCrm();
 
 }
