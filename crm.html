@@ -1,47 +1,62 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#07182d">
-<title>CRM Kynexy</title>
+<title>Clients Kynexy</title>
+<link rel="stylesheet" href="crm.css">
 <link rel="stylesheet" href="aurel-system.css">
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif}
-:root{--bg:#07182d;--panel:#0f2f58;--card:#123d74;--blue:#2ca9ff;--soft:#9fd4ff;--text:#fff;--muted:rgba(255,255,255,.72);--line:rgba(255,255,255,.12);--ok:#5ee37d;--warn:#ffd166;--bad:#ff6b6b}
-html,body{max-width:100%;overflow-x:hidden}body{min-height:100vh;background:#07182d;color:var(--text);padding:12px}button,input,select,textarea{font:inherit}button{cursor:pointer}a{color:inherit;text-decoration:none}.app{width:calc(100vw - 24px);max-width:520px;margin:0 auto;padding-bottom:84px;overflow:hidden}.top{background:linear-gradient(135deg,#123d74,#1c5fb6);border-radius:20px;padding:20px;margin-bottom:14px;box-shadow:0 10px 28px rgba(0,0,0,.3)}.top h1{font-size:34px;line-height:1}.top p{margin-top:8px;color:rgba(255,255,255,.86)}.status{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.pill{border:1px solid var(--line);background:rgba(255,255,255,.12);border-radius:999px;padding:9px 12px;font-size:13px}.tabs{position:sticky;top:8px;z-index:4;background:rgba(7,24,45,.92);backdrop-filter:blur(12px);display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:8px 0 14px}.tabs button,.action,.secondary{border:0;border-radius:14px;min-height:48px;color:#fff;min-width:0}.action,.secondary{width:100%}.tabs button{background:rgba(255,255,255,.1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px;padding:0 8px}.tabs button.active,.action{background:var(--blue);font-weight:700}.secondary{background:rgba(255,255,255,.12)}.panel{background:var(--card);border-radius:20px;padding:18px;margin-bottom:14px;box-shadow:0 8px 24px rgba(0,0,0,.24)}.panel h2{color:var(--soft);font-size:24px;margin-bottom:8px}.panel p{color:var(--muted);line-height:1.45}.actions{display:grid;gap:10px;margin-top:16px}.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px}.metric{background:rgba(255,255,255,.08);border:1px solid var(--line);border-radius:16px;padding:12px;min-width:0;overflow:hidden}.metric span{display:block;font-size:12px;color:var(--muted)}.metric strong{display:block;font-size:22px;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.list{display:grid;gap:10px}.row{background:rgba(0,0,0,.14);border:1px solid var(--line);border-radius:16px;padding:14px;display:grid;gap:8px}.row h3{font-size:18px}.row p{font-size:14px;color:var(--muted)}.row-actions{display:flex;gap:8px;flex-wrap:wrap}.chip{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:7px 10px;background:rgba(255,255,255,.12);font-size:12px}.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}.search{width:100%;border:1px solid var(--line);background:rgba(0,0,0,.16);border-radius:14px;color:white;padding:13px;margin:14px 0}.sheet{position:fixed;inset:0;z-index:20;background:#07182d;display:none;padding:12px;overflow:auto}.sheet.open{display:block}.sheet-card{max-width:520px;margin:0 auto;background:var(--card);border-radius:22px;padding:18px;min-height:calc(100vh - 24px)}.sheet-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}.sheet-head h2{color:var(--soft)}.form{display:grid;gap:12px}.form label{display:grid;gap:6px;color:var(--muted);font-size:14px}.form input,.form select,.form textarea{width:100%;border:1px solid var(--line);background:rgba(0,0,0,.18);border-radius:14px;color:white;padding:13px}.form textarea{min-height:110px;resize:vertical}.empty{color:var(--muted);padding:18px;text-align:center}.footer-nav{position:fixed;left:0;right:0;bottom:0;background:rgba(7,24,45,.94);backdrop-filter:blur(12px);padding:10px 12px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.footer-nav button{border:0;border-radius:14px;background:rgba(255,255,255,.1);color:white;min-height:46px;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px}.footer-nav button.active{background:var(--blue);font-weight:700}@media(min-width:760px){.app{max-width:920px}.desktop-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.footer-nav{display:none}.tabs{position:static}.actions{grid-template-columns:repeat(3,1fr)}}
-</style>
 </head>
+
 <body>
-<div class="app">
-<header class="top"><h1>CRM</h1><p>Clients, devis et factures. Rien de plus.</p><div class="status"><span class="pill" id="clock">Initialisation</span><span class="pill">Données locales</span></div></header>
-<nav class="tabs" aria-label="Navigation CRM"><button class="active" data-view="clients">Clients</button><button data-view="quotes">Devis</button><button data-view="invoices">Factures</button></nav>
-<section class="panel"><h2 id="viewTitle">Clients</h2><p id="viewIntro">Le répertoire et les fiches client, accessibles sans détour.</p><div class="actions"><button class="action" data-create="client">Nouveau client</button><button class="secondary" data-create="quote">Créer un devis</button><button class="secondary" data-create="invoice">Créer une facture</button></div></section>
-<section class="metrics" id="metrics"></section>
-<main id="content"></main>
+<main class="client-shell" id="clientApp">
+<header class="client-top">
+<div>
+<span class="eyebrow">Administration</span>
+<h1>Clients, devis, factures</h1>
 </div>
-<nav class="footer-nav" aria-label="Navigation rapide"><button class="active" data-view="clients">Clients</button><button data-view="quotes">Devis</button><button data-view="invoices">Factures</button></nav>
-<section class="sheet" id="sheet" aria-hidden="true"><div class="sheet-card"><div class="sheet-head"><h2 id="sheetTitle">Nouvelle fiche</h2><button class="secondary" id="closeSheet" type="button">Retour</button></div><form class="form" id="form"><label>Type<select id="type"><option value="client">Client</option><option value="quote">Devis</option><option value="invoice">Facture</option></select></label><label>Nom / client<input id="name" required placeholder="Nom du client"></label><label>Téléphone<input id="phone" placeholder="+689 ..."></label><label>Adresse<input id="address" placeholder="Commune, quartier, repère"></label><label>Montant<input id="amount" placeholder="Ex : 158 000 F"></label><label>TVA<select id="tax"><option value="0%">0%</option><option value="5%">5%</option><option value="13%" selected>13%</option><option value="16%">16%</option><option value="20%">20%</option></select></label><label>Notes<textarea id="notes" placeholder="Besoin, précision, prochaine action"></textarea></label><button class="action" type="submit">Enregistrer</button></form></div></section>
-<script>
-const state={view:'clients',clients:[{name:'Famille M.',phone:'+689 87 00 00 01',address:'Paea - PK 21',status:'Actif',notes:'Client prioritaire. Accès par portail côté mer.'},{name:'SCI Vai',phone:'+689 87 00 00 02',address:'Punaauia',status:'En cours',notes:'Vérifier infiltration après pluie.'}],quotes:[{number:'DEV-1042',client:'Famille M.',amount:'485 000 F',tax:'13%',status:'Accepté'},{number:'DEV-1051',client:'SCI Vai',amount:'96 000 F',tax:'13%',status:'En attente'}],invoices:[{number:'FAC-2084',client:'Famille M.',amount:'485 000 F',tax:'13%',status:'Payée'}]};
-const labels={clients:['Clients','Le répertoire et les fiches client, accessibles sans détour.'],quotes:['Devis','Créer et suivre les devis avec un taux de TVA clair.'],invoices:['Factures','Suivre les factures sans mélanger le reste du CRM.']};
-document.addEventListener('DOMContentLoaded',()=>{bind();tick();setInterval(tick,30000);render();});
-function bind(){document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));document.querySelectorAll('[data-create]').forEach(b=>b.addEventListener('click',()=>openSheet(b.dataset.create)));closeSheet.addEventListener('click',()=>sheet.classList.remove('open'));form.addEventListener('submit',save)}
-function tick(){clock.textContent=new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'2-digit',month:'long'})+' - '+new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}
-function setView(view){state.view=view;render()}
-function render(){document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===state.view));viewTitle.textContent=labels[state.view][0];viewIntro.textContent=labels[state.view][1];metrics.innerHTML=`<article class="metric"><span>Clients</span><strong>${state.clients.length}</strong></article><article class="metric"><span>Devis</span><strong>${state.quotes.length}</strong></article><article class="metric"><span>Factures</span><strong>${state.invoices.length}</strong></article>`;content.innerHTML=state.view==='clients'?clientsView():docsView(state.view)}
-function clientsView(){return `<section class="panel"><h2>Répertoire</h2><input class="search" id="search" placeholder="Rechercher un client"><div class="list" id="clientList">${state.clients.map(clientRow).join('')}</div></section>`}
-function clientRow(c){return `<article class="row"><h3>${esc(c.name)}</h3><p>${esc(c.phone)} · ${esc(c.address)}</p><p>${esc(c.notes)}</p><div class="row-actions"><a class="chip" href="tel:${esc(c.phone.replace(/\s/g,''))}">Appeler</a><span class="chip ok">${esc(c.status)}</span></div></article>`}
-function docsView(kind){const rows=state[kind].map(d=>`<article class="row"><h3>${esc(d.number)}</h3><p>${esc(d.client)} · ${esc(d.amount)} · TVA ${esc(d.tax)}</p><span class="chip ${d.status==='Payée'||d.status==='Accepté'?'ok':'warn'}">${esc(d.status)}</span></article>`).join('');return `<section class="panel"><h2>${labels[kind][0]}</h2><div class="list">${rows||'<div class="empty">Aucun élément.</div>'}</div></section>`}
-function openSheet(kind){type.value=kind;sheetTitle.textContent={client:'Nouveau client',quote:'Nouveau devis',invoice:'Nouvelle facture'}[kind];amount.parentElement.style.display=kind==='client'?'none':'grid';sheet.classList.add('open');sheet.setAttribute('aria-hidden','false')}
-function save(e){e.preventDefault();const kind=type.value;if(kind==='client')state.clients.unshift({name:name.value,phone:phone.value,address:address.value,status:'Actif',notes:notes.value||'Aucune note.'});if(kind==='quote')state.quotes.unshift({number:'DEV-'+Date.now().toString().slice(-4),client:name.value,amount:amount.value||'Montant à définir',tax:tax.value,status:'En attente'});if(kind==='invoice')state.invoices.unshift({number:'FAC-'+Date.now().toString().slice(-4),client:name.value,amount:amount.value||'Montant à définir',tax:tax.value,status:'A régler'});form.reset();sheet.classList.remove('open');setView(kind==='client'?'clients':kind+'s')}
-function esc(v){return String(v||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
-</script>
+<button class="primary-btn compact" id="newClient" type="button">Nouveau client</button>
+</header>
+
+<section class="quick-section" aria-label="Actions rapides">
+<button class="primary-btn big" id="newQuote" type="button">Créer un devis</button>
+<button class="secondary-btn big" id="newInvoice" type="button">Créer une facture</button>
+</section>
+
+<section class="summary-section" id="summarySection"></section>
+
+<section class="content-section">
+<div class="section-head">
+<h2>Clients</h2>
+<input id="clientSearch" type="search" placeholder="Rechercher">
+</div>
+<div class="client-list" id="clientList"></div>
+</section>
+
+<section class="content-section">
+<div class="section-head">
+<h2>Documents récents</h2>
+<span id="storageStatus">Chargement</span>
+</div>
+<div class="document-list" id="documentList"></div>
+</section>
+</main>
+
+<aside class="client-panel" id="clientPanel" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="panelTitle">
+<div class="panel-card" role="document">
+<div class="panel-header">
+<h2 id="panelTitle">Clients</h2>
+<button class="icon-btn" id="closePanel" type="button" aria-label="Fermer">&times;</button>
+</div>
+<div class="panel-content" id="panelContent"></div>
+</div>
+</aside>
+
+<script src="client-db.js"></script>
+<script src="crm.js"></script>
 <script src="aurel-system.js"></script>
 </body>
+
 </html>
-<style>@media(max-width:520px){.tabs,.metrics,.footer-nav{width:100%;max-width:100%;}.tabs button,.footer-nav button{font-size:13px}.panel,.top{max-width:100%;overflow:hidden}}</style>
-
-<style>@media(max-width:760px){.tabs{grid-template-columns:1fr;position:static}.tabs button{font-size:16px}.metrics{grid-template-columns:1fr}.footer-nav{display:none}.app{padding-bottom:24px}.metric strong{font-size:26px}.panel p{overflow-wrap:anywhere}}</style>
-
-<style>@media(max-width:760px){.panel p,.top p{max-width:31ch}.panel{padding:18px}.actions{margin-top:18px}}</style>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Client DB CRUD Test</title>
+</head>
+<body>
+<pre id="result">RUNNING</pre>
+<script src="../client-db.js"></script>
+<script>
+(async function () {
+    const result = document.getElementById("result");
+    try {
+        await window.ClientDB.open();
+        await window.ClientDB.clearForTests();
+
+        const client = await window.ClientDB.createClient({
+            name: "Client Test",
+            phone: "+689 87 00 00 00",
+            email: "client@test.local",
+            address: "Punaauia",
+            notes: "Portail bleu"
+        });
+
+        const quote = await window.ClientDB.createDocument({
+            type: "quote",
+            clientId: client.id,
+            clientName: client.name,
+            clientPhone: client.phone,
+            clientEmail: client.email,
+            clientAddress: client.address,
+            description: "Taille complète des haies",
+            totalTtc: 113000,
+            taxRate: 13
+        });
+
+        const invoice = await window.ClientDB.createDocument({
+            type: "invoice",
+            clientId: client.id,
+            clientName: client.name,
+            description: "Forfait entretien",
+            totalTtc: 50000,
+            taxRate: 0
+        });
+
+        const clients = await window.ClientDB.listClients();
+        const docs = await window.ClientDB.listDocuments({ clientId: client.id });
+        const quotes = await window.ClientDB.listDocuments({ type: "quote" });
+        const updated = await window.ClientDB.updateClient(client.id, { phone: "+689 89 11 22 33" });
+        const totals = window.ClientDB.calculateTotals(113000, 13);
+
+        await window.ClientDB.deleteDocument(invoice.id);
+        const afterDelete = await window.ClientDB.listDocuments({ clientId: client.id });
+
+        const pass = clients.length === 1
+            && docs.length === 2
+            && quotes.length === 1
+            && quote.number.startsWith("DEV-")
+            && invoice.number.startsWith("FAC-")
+            && totals.totalHt === 100000
+            && totals.taxAmount === 13000
+            && totals.totalTtc === 113000
+            && updated.phone.includes("89")
+            && afterDelete.length === 1;
+
+        await window.ClientDB.clearForTests();
+
+        result.textContent = pass
+            ? "PASS ClientDB clients/documents/totals"
+            : "FAIL ClientDB " + JSON.stringify({ clients, docs, quotes, quote, invoice, updated, totals, afterDelete }, null, 2);
+    } catch (error) {
+        result.textContent = "ERROR " + (error && error.stack ? error.stack : error);
+    }
+}());
+</script>
+</body>
+</html>
