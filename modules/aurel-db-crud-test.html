@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Aurel DB Core Test</title>
+</head>
+<body>
+<pre id="result">RUNNING</pre>
+<script src="../planning-db.js"></script>
+<script src="../equipe-db.js"></script>
+<script src="../aurel-db.js"></script>
+<script>
+(async function () {
+    const result = document.getElementById("result");
+    try {
+        await window.AurelDB.open();
+        await window.AurelDB.clearForTests();
+        await window.KynexyPlanningDB.open();
+        await window.KynexyPlanningDB.clearForTests();
+        await window.KynexyTeamDB.open();
+        await window.KynexyTeamDB.clearForTests();
+
+        await window.KynexyPlanningDB.createAppointment({
+            client: "Client test",
+            date: new Date().toISOString().slice(0, 10),
+            start: "08:00",
+            end: "09:00",
+            notes: "Verifier acces"
+        });
+        const member = await window.KynexyTeamDB.createMember({
+            name: "Maeva",
+            color: "#2ca9ff",
+            role: "Poseur",
+            hourlyRate: 2500
+        });
+        await window.KynexyTeamDB.upsertWorkEntry({
+            memberId: member.id,
+            date: new Date().toISOString().slice(0, 10),
+            hours: 8
+        });
+        await window.KynexyTeamDB.createAdvance({
+            memberId: member.id,
+            date: new Date().toISOString().slice(0, 10),
+            amount: 5000
+        });
+
+        const memory = await window.AurelDB.remember({ type: "pinned", title: "Priorite", content: "Appeler le client", pinned: true });
+        await window.AurelDB.setContext({ page: "aurel", selectedMemberId: member.id, displayedMonth: "2026-07" });
+        await window.AurelDB.addConversationMessage({ author: "user", text: "C'est quoi le topo ?" });
+
+        const context = await window.AurelDB.getContext();
+        const memories = await window.AurelDB.listMemory({ type: "pinned" });
+        const conversation = await window.AurelDB.listConversation();
+        const planning = await window.AurelDB.connectors.planning.read();
+        const team = await window.AurelDB.connectors.team.read();
+        const brief = await window.AurelDB.buildOperationalBrief("topo");
+
+        const pass = memory.id
+            && context.page === "aurel"
+            && context.selectedMemberId === member.id
+            && memories.length === 1
+            && conversation.length === 1
+            && planning.status === "ready"
+            && planning.today.length >= 1
+            && team.status === "ready"
+            && team.summaries.length === 1
+            && brief.answer.includes("Topo Kynexy");
+
+        await window.AurelDB.clearForTests();
+        await window.KynexyPlanningDB.clearForTests();
+        await window.KynexyTeamDB.clearForTests();
+
+        result.textContent = pass
+            ? "PASS AurelDB memory/context/connectors/brief"
+            : "FAIL AurelDB " + JSON.stringify({ context, memories, conversation, planning, team, brief }, null, 2);
+    } catch (error) {
+        result.textContent = "ERROR " + (error && error.stack ? error.stack : error);
+    }
+}());
+</script>
+</body>
+</html>

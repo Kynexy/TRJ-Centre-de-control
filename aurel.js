@@ -4,46 +4,61 @@ const AUREL_STATES = {
     THINKING: "thinking",
     ANSWERING: "answering",
     HAPPY: "happy",
-    NOTIFICATION: "notification"
+    ALERT: "alert"
 };
 
 const AUREL_STATE_LABELS = {
-    rest: "Repos",
-    listening: "Écoute",
-    thinking: "Réflexion",
-    answering: "Réponse",
+    rest: "Veille",
+    listening: "Ecoute",
+    thinking: "Reflexion",
+    answering: "Reponse",
     happy: "Content",
-    notification: "Notification"
+    alert: "Alerte"
 };
 
 const AUREL_STATE = {
     mode: AUREL_STATES.REST,
-    messages: []
+    messages: [],
+    context: null,
+    voice: createVoicePipeline()
 };
 
 document.addEventListener("DOMContentLoaded", initAurel);
 
-function initAurel() {
-
+async function initAurel() {
     bindStateDock();
     bindComposer();
     bindAttachmentButtons();
-    publishAurelState();
 
+    try {
+        assertAurelDatabase();
+        await window.AurelDB.open();
+        AUREL_STATE.context = await window.AurelDB.getContext();
+        AUREL_STATE.messages = await window.AurelDB.listConversation({ limit: 40 });
+    } catch (error) {
+        console.error("Aurel core unavailable", error);
+        AUREL_STATE.messages = [];
+    }
+
+    renderConversation();
+    publishAurelState();
+}
+
+function assertAurelDatabase() {
+    if (!window.AurelDB) {
+        throw new Error("AurelDB is not loaded. aurel-db.js must be loaded before aurel.js.");
+    }
 }
 
 function bindStateDock() {
-
     document.querySelectorAll("[data-state]").forEach((button) => {
         button.addEventListener("click", () => {
             setAurelState(button.dataset.state);
         });
     });
-
 }
 
 function bindComposer() {
-
     const form = document.getElementById("aurelForm");
     const input = document.getElementById("messageInput");
 
@@ -52,73 +67,83 @@ function bindComposer() {
         setAurelState(input.value.trim() ? AUREL_STATES.LISTENING : AUREL_STATES.REST);
     });
 
-    form.addEventListener("submit", (event) => {
+    form.addEventListener("submit", async (event) => {
         event.preventDefault();
-        sendMessage(input.value.trim());
+        const text = input.value.trim();
         input.value = "";
         autoResizeInput(input);
+        await sendMessage(text);
     });
-
 }
 
 function bindAttachmentButtons() {
-
     document.querySelectorAll("[data-action]").forEach((button) => {
-        button.addEventListener("click", () => {
+        button.addEventListener("click", async () => {
             const action = button.dataset.action;
 
             if (action === "micro") {
-                setAurelState(AUREL_STATES.LISTENING);
-                addAurelMessage("Je t'écoute. Les commandes vocales seront branchées ici.");
+                await runVoiceTurn();
                 return;
             }
 
-            setAurelState(AUREL_STATES.NOTIFICATION);
-            addAurelMessage(getAttachmentMessage(action));
+            setAurelState(AUREL_STATES.ALERT);
+            await addAurelMessage(getAttachmentMessage(action));
         });
     });
-
 }
 
-function sendMessage(text) {
-
+async function sendMessage(text) {
     if (!text) {
         setAurelState(AUREL_STATES.REST);
         return;
     }
 
-    addMessage("user", text);
+    await addMessage("user", text);
     setAurelState(AUREL_STATES.THINKING);
 
-    window.setTimeout(() => {
+    try {
+        const result = await window.AurelDB.ask(text);
         setAurelState(AUREL_STATES.ANSWERING);
-        addAurelMessage("J'ai bien reçu. Cette interface est prête à recevoir la mémoire Aurel, Glide, OpenAI et les fichiers terrain.");
+        await addMessage("aurel", result.answer, { alreadyPersisted: true });
         window.setTimeout(() => setAurelState(AUREL_STATES.REST), 1200);
-    }, 520);
-
+    } catch (error) {
+        setAurelState(AUREL_STATES.ALERT);
+        await addAurelMessage("Je n'arrive pas encore a relier les modules. Le noyau est charge, mais un connecteur repond mal.");
+        console.error(error);
+    }
 }
 
-function addAurelMessage(text) {
-
-    addMessage("aurel", text);
-
+async function runVoiceTurn() {
+    setAurelState(AUREL_STATES.LISTENING);
+    const text = await AUREL_STATE.voice.speechToText.listen();
+    if (!text) {
+        await addAurelMessage("La conversation vocale est prete cote architecture. Il reste a brancher le moteur Speech To Text.");
+        return;
+    }
+    await sendMessage(text);
 }
 
-function addMessage(author, text) {
+async function addAurelMessage(text) {
+    await addMessage("aurel", text);
+}
 
-    AUREL_STATE.messages.push({
+async function addMessage(author, text, options = {}) {
+    const message = {
         author,
         text,
         createdAt: new Date().toISOString()
-    });
+    };
+
+    AUREL_STATE.messages.push(message);
+    if (window.AurelDB && !options.alreadyPersisted) {
+        await window.AurelDB.addConversationMessage(message);
+    }
 
     renderConversation();
     publishAurelState();
-
 }
 
 function renderConversation() {
-
     const log = document.getElementById("conversationLog");
 
     log.classList.toggle("empty", AUREL_STATE.messages.length === 0);
@@ -126,8 +151,8 @@ function renderConversation() {
     if (!AUREL_STATE.messages.length) {
         log.innerHTML = `
             <div class="empty-conversation">
-                <strong>Aurel est prêt.</strong>
-                <span>La conversation apparaîtra ici.</span>
+                <strong>Aurel est pret.</strong>
+                <span>Demande le topo pour relier meteo, planning et equipe.</span>
             </div>
         `;
         return;
@@ -135,11 +160,9 @@ function renderConversation() {
 
     log.innerHTML = AUREL_STATE.messages.map(renderMessage).join("");
     log.scrollTop = log.scrollHeight;
-
 }
 
 function renderMessage(message) {
-
     const label = message.author === "user" ? "Patron" : "Aurel";
     const time = new Date(message.createdAt).toLocaleTimeString("fr-FR", {
         hour: "2-digit",
@@ -152,13 +175,14 @@ function renderMessage(message) {
             <small>${label} - ${time}</small>
         </article>
     `;
-
 }
 
 function setAurelState(mode) {
-
     AUREL_STATE.mode = Object.values(AUREL_STATES).includes(mode) ? mode : AUREL_STATES.REST;
     document.querySelector(".aurel-shell").dataset.aurelState = AUREL_STATE.mode;
+    document.querySelectorAll("[data-aurel-presence]").forEach((node) => {
+        node.dataset.aurelState = AUREL_STATE.mode;
+    });
     document.getElementById("stateLabel").textContent = AUREL_STATE_LABELS[AUREL_STATE.mode];
 
     document.querySelectorAll("[data-state]").forEach((button) => {
@@ -170,59 +194,59 @@ function setAurelState(mode) {
     }
 
     publishAurelState();
+}
 
+function createVoicePipeline() {
+    return {
+        speechToText: {
+            listen: async () => ""
+        },
+        textToSpeech: {
+            speak: async () => true
+        }
+    };
 }
 
 function getAttachmentMessage(action) {
-
     const messages = {
-        document: "Document reçu en attente. Le connecteur fichiers sera ajouté ici.",
-        photo: "Photo prête. Elle pourra rejoindre les chantiers et la mémoire Aurel.",
-        video: "Vidéo prête. Le module vidéo attend la connexion Glide."
+        document: "Le connecteur documents sera une source, pas une memoire metier.",
+        photo: "La photo pourra enrichir le contexte quand le module terrain sera branche.",
+        video: "La video restera un connecteur remplacable dans le pipeline Aurel."
     };
 
-    return messages[action] || "Action préparée pour une connexion future.";
-
+    return messages[action] || "Action preparee pour une connexion future.";
 }
 
 function autoResizeInput(input) {
-
     input.style.height = "auto";
     input.style.height = Math.min(input.scrollHeight, 116) + "px";
-
 }
 
 function publishAurelState() {
-
     window.AurelPageState = {
         mode: AUREL_STATE.mode,
         messages: AUREL_STATE.messages.slice(),
+        context: window.KynexyAurelContext || AUREL_STATE.context,
         integrations: {
-            openai: "ready-later",
-            glide: "ready-later",
-            memory: "ready-later",
-            voice: "ready-later",
-            documents: "ready-later",
-            photos: "ready-later",
-            videos: "ready-later"
+            memory: window.AurelDB ? window.AurelDB.engineType : "unavailable",
+            planning: Boolean(window.KynexyPlanningDB),
+            team: Boolean(window.KynexyTeamDB),
+            weather: "connector-ready",
+            voice: "pipeline-ready",
+            responseEngine: "provider-neutral"
         }
     };
-
 }
 
 function escapeHtml(value) {
-
     return String(value)
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
-
 }
 
 function escapeAttribute(value) {
-
     return escapeHtml(value).replace(/`/g, "&#096;");
-
 }

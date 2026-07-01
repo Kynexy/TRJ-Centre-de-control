@@ -1,21 +1,28 @@
 (function () {
-    const AUREL_ASSET = "assets/aurel/aurel-official.gif";
     const DEFAULT_STATE = "rest";
 
-    function createAurelImage(className) {
-        const image = document.createElement("img");
-        image.className = className || "kx-aurel-media";
-        image.src = AUREL_ASSET;
-        image.alt = "Aurel";
-        image.decoding = "async";
-        image.loading = "eager";
-        return image;
+    function createAurelAvatar(className) {
+        const avatar = document.createElement("div");
+        avatar.className = className || "kx-aurel-avatar";
+        avatar.setAttribute("aria-hidden", "true");
+        avatar.innerHTML = `
+            <div class="kx-cloud-shape">
+                <span class="kx-cloud-lobe one"></span>
+                <span class="kx-cloud-lobe two"></span>
+                <span class="kx-cloud-lobe three"></span>
+                <span class="kx-cloud-face eye left"></span>
+                <span class="kx-cloud-face eye right"></span>
+                <span class="kx-cloud-face smile"></span>
+            </div>
+            <span class="kx-cloud-orbit"></span>
+        `;
+        return avatar;
     }
 
     function hydratePresence(target) {
         target.innerHTML = "";
         target.dataset.aurelState = target.dataset.aurelState || DEFAULT_STATE;
-        target.appendChild(createAurelImage("kx-aurel-media"));
+        target.appendChild(createAurelAvatar("kx-aurel-avatar large"));
     }
 
     function createFloatingAurel() {
@@ -33,7 +40,7 @@
         button.type = "button";
         button.dataset.aurelState = DEFAULT_STATE;
         button.setAttribute("aria-label", "Ouvrir Aurel");
-        button.appendChild(createAurelImage("kx-aurel-media"));
+        button.appendChild(createAurelAvatar("kx-aurel-avatar"));
         button.addEventListener("click", () => {
             window.dispatchEvent(new CustomEvent("kynexy:aurel:open", {
                 detail: {
@@ -61,7 +68,6 @@
         }
 
         window.KynexyAurel = {
-            asset: AUREL_ASSET,
             setState: setAurelState,
             open: () => window.dispatchEvent(new CustomEvent("kynexy:aurel:open", {
                 detail: { source: window.location.pathname }

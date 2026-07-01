@@ -56,6 +56,7 @@ justify-content:center;
 gap:22px;
 text-align:center;
 min-height:0;
+overflow:hidden;
 }
 
 .aurel-stage::after{
@@ -76,6 +77,7 @@ pointer-events:none;
 .aurel-heading{
 position:relative;
 z-index:2;
+max-width:100%;
 animation:softReveal .7s ease both;
 }
 
@@ -92,6 +94,7 @@ margin-bottom:8px;
 font-size:clamp(38px,6.4vw,70px);
 line-height:1;
 margin-bottom:14px;
+overflow-wrap:anywhere;
 }
 
 .aurel-heading p{
@@ -490,6 +493,7 @@ height:18px;
 border-bottom-width:4px;
 }
 
+[data-aurel-state="alert"] .state-ring,
 [data-aurel-state="notification"] .state-ring{
 border-color:rgba(255,107,107,.65);
 box-shadow:0 0 38px rgba(255,107,107,.38);
@@ -541,12 +545,15 @@ from{opacity:0;transform:translateY(8px);}
 to{opacity:1;transform:translateY(0);}
 }
 
-@media(max-width:760px){
+@media(max-width:900px){
 body{
 padding:10px 10px 116px;
 }
 
 .aurel-shell{
+width:100%;
+max-width:370px;
+margin:0;
 min-height:calc(100vh - 126px);
 grid-template-rows:minmax(0,1fr) auto;
 gap:12px;
@@ -554,6 +561,15 @@ gap:12px;
 
 .aurel-stage{
 gap:16px;
+}
+
+.aurel-heading h1{
+font-size:34px;
+}
+
+.aurel-heading p,
+.aurel-question{
+max-width:32ch;
 }
 
 .conversation-card{
@@ -566,8 +582,10 @@ height:190px;
 }
 
 .action-bar{
+left:10px;
+transform:none;
 bottom:10px;
-width:calc(100% - 20px);
+width:min(370px,calc(100% - 20px));
 grid-template-columns:auto 1fr auto auto;
 border-radius:20px;
 }
