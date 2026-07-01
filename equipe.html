@@ -1,74 +1,23 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#07182d">
-
-<title>Equipe Kynexy</title>
-
+<title>Équipe Kynexy</title>
 <link rel="stylesheet" href="equipe.css">
 <link rel="stylesheet" href="aurel-system.css">
-
 </head>
-
 <body>
-
-<div class="team-shell">
-
-<header class="topbar">
-<div class="title">
-<h1>Équipe</h1>
-<p>Salariés, heures et paiements</p>
+<div class="team-app">
+<header class="top"><h1>Équipe</h1><p>Heures, acomptes et paiements des salariés.</p><div class="status"><span class="pill" id="teamClock">Initialisation</span><span class="pill">Semaine active</span></div></header>
+<nav class="tabs"><button class="active" data-view="week">Semaine</button><button data-view="pay">Paiements</button><button data-view="advance">Acomptes</button></nav>
+<section class="panel"><h2 id="viewTitle">Semaine</h2><p id="viewIntro">Une ligne par salarié. Les chiffres importants restent visibles immédiatement.</p><button class="action" id="addEmployee" type="button">Ajouter un salarié</button></section>
+<section class="metrics" id="teamMetrics"></section>
+<main id="teamContent"></main>
 </div>
-<div class="status">
-<div class="pill" id="teamClock">Initialisation</div>
-<div class="pill">Equipe a jour</div>
-</div>
-</header>
-
-<div class="layout">
-
-<aside class="sidebar">
-<nav class="nav" id="teamNav" aria-label="Gestion équipe">
-<button class="active" data-view="weekly" type="button">Semaine</button>
-<button data-view="payroll" type="button">Salaires</button>
-<button data-view="advances" type="button">Acomptes</button>
-</nav>
-<div class="sidebar-note">
-Un module concentré sur les salariés : heures, acomptes et total payé.
-</div>
-</aside>
-
-<main class="main">
-
-<section class="hero">
-<div>
-<h2 id="viewTitle">Semaine</h2>
-<p id="viewSubtitle">Chaque salarié sur une ligne, avec ses heures, son acompte et le total payé.</p>
-</div>
-<div class="quick-actions">
-<button class="primary-btn" data-shortcut="weekly" type="button">Voir la semaine</button>
-<button class="ghost-btn" data-shortcut="payroll" type="button">Salaires</button>
-<button class="ghost-btn" data-shortcut="advances" type="button">Acomptes</button>
-</div>
-</section>
-
-<section class="grid" id="teamMetrics"></section>
-
-<section id="teamView"></section>
-
-</main>
-
-</div>
-
-</div>
-
+<section class="sheet" id="employeeSheet"><div class="sheet-card"><div class="sheet-head"><h2>Salarié</h2><button class="secondary" id="closeEmployee" type="button">Retour</button></div><form class="form" id="employeeForm"><label>Prénom<input id="employeeName" required></label><label>Heures semaine<input id="employeeHours" type="number" min="0" step="0.5" value="35"></label><label>Acompte<input id="employeeAdvance" type="number" min="0" step="1000" value="0"></label><label>Total payé<input id="employeePaid" type="number" min="0" step="1000" value="0"></label><button class="action" type="submit">Enregistrer</button></form></div></section>
 <script src="equipe.js"></script>
 <script src="aurel-system.js"></script>
-
 </body>
-
 </html>

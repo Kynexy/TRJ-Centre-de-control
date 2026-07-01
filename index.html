@@ -1,125 +1,26 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Aurel - Tableau de bord TRJ</title>
-
+<title>Aurel - Kynexy</title>
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="aurel-system.css">
-
 </head>
-
 <body>
-
-<!-- ========================= -->
-<!-- HEADER -->
-<!-- ========================= -->
-
-<header class="topbar">
-
-<div class="title">
-
-<h1>Aurel</h1>
-
-<p>Centre de controle TRJ</p>
-
+<div class="home-app">
+<header class="top"><h1>Aurel</h1><p>Vue terrain claire : caméra, radar, conditions et demain.</p><div class="status"><span id="heure">Initialisation</span><span id="date">Initialisation</span></div></header>
+<section class="panel webcam"><h2>Caméras de Tahiti</h2><video id="faaaCam" autoplay muted playsinline controls></video><div id="webcamSelector"></div><div id="webcamStatus">Vérification du flux...</div></section>
+<section class="panel weather"><h2>Conditions chantier</h2><div id="weather">Chargement météo...</div></section>
+<section class="panel"><h2>Radar</h2><div id="radar">Radar Tahiti</div></section>
+<section class="panel forecast"><h2>Prévisions de demain</h2><div id="tomorrowForecast">Chargement des prévisions...</div></section>
 </div>
-
-<div class="status">
-
-<div>Heure <span id="heure">Initialisation</span></div>
-
-<div>Date <span id="date">Initialisation</span></div>
-
-</div>
-
-</header>
-
-<main>
-
-<!-- ========================= -->
-<!-- CAMERAS -->
-<!-- ========================= -->
-
-<section class="card webcam">
-
-<h2>Cameras de Tahiti</h2>
-
-<video
-id="faaaCam"
-autoplay
-muted
-playsinline
-controls>
-</video>
-
-<div id="webcamSelector"></div>
-
-<div id="webcamStatus">Verification du flux...</div>
-
-</section>
-
-<!-- ========================= -->
-<!-- RADAR ET METEO -->
-<!-- ========================= -->
-
-<section class="card weather">
-
-<h2>Radar & conditions chantier</h2>
-
-<div id="radar">
-
-Radar Tahiti
-
-</div>
-
-<div id="weather">
-
-Conditions chantier
-
-</div>
-
-</section>
-
-<!-- ========================= -->
-<!-- PREVISIONS DE DEMAIN -->
-<!-- ========================= -->
-
-<section class="card forecast">
-
-<h2>Prévisions de demain</h2>
-
-<div id="tomorrowForecast">
-
-Chargement des prévisions...
-
-</div>
-
-</section>
-
-</main>
-
 <script src="https://cdn.jsdelivr.net/npm/hls.js@1.6.7/dist/hls.min.js"></script>
-
 <script src="config.js"></script>
-
 <script src="modules/webcam.js"></script>
-
 <script src="modules/clock.js"></script>
-
 <script src="modules/radar.js"></script>
-
-
-
-
-
 <script src="script.js"></script>
 <script src="aurel-system.js"></script>
-
 </body>
-
 </html>
