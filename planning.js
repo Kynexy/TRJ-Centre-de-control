@@ -8,6 +8,7 @@ const CATEGORY_META = {
 
 const PLANNING_STATE = {
     currentDate: new Date(2026, 5, 30),
+    currentView: "month",
     appointments: getDemoAppointments()
 };
 
@@ -19,6 +20,9 @@ function initPlanning() {
     document.getElementById("nextMonth").addEventListener("click", () => changeMonth(1));
     document.getElementById("todayButton").addEventListener("click", goToToday);
     document.getElementById("closePanel").addEventListener("click", closePanel);
+    document.querySelectorAll("[data-calendar-view]").forEach((button) => {
+        button.addEventListener("click", () => changeView(button.dataset.calendarView));
+    });
     document.getElementById("appointmentPanel").addEventListener("click", (event) => {
         if (event.target.id === "appointmentPanel") {
             closePanel();
@@ -174,9 +178,18 @@ function getDemoAppointments() {
 function renderPlanning() {
 
     renderMonthLabel();
+    renderViewSwitch();
     renderLegend();
     renderSummary();
-    renderMonthGrid();
+    renderCalendarView();
+
+}
+
+function renderViewSwitch() {
+
+    document.querySelectorAll("[data-calendar-view]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.calendarView === PLANNING_STATE.currentView);
+    });
 
 }
 
@@ -216,10 +229,33 @@ function renderSummary() {
 
 }
 
+function renderCalendarView() {
+
+    if (PLANNING_STATE.currentView === "week") {
+        renderWeekView();
+        return;
+    }
+
+    if (PLANNING_STATE.currentView === "day") {
+        renderDayView();
+        return;
+    }
+
+    if (PLANNING_STATE.currentView === "agenda") {
+        renderAgendaView();
+        return;
+    }
+
+    renderMonthGrid();
+
+}
+
 function renderMonthGrid() {
 
     const grid = document.getElementById("monthGrid");
     const cells = getCalendarCells(PLANNING_STATE.currentDate);
+    grid.className = "month-grid";
+    document.querySelector(".weekday-row").style.display = "grid";
 
     grid.innerHTML = cells.map((cell) => {
         const appointments = getAppointmentsForDate(cell.isoDate);
@@ -227,7 +263,7 @@ function renderMonthGrid() {
         const extra = appointments.length - visible.length;
 
         return `
-            <article class="day-cell ${cell.isCurrentMonth ? "" : "outside"} ${cell.isToday ? "today" : ""} ${cell.isSunday ? "sunday" : ""}">
+            <article class="day-cell ${cell.isCurrentMonth ? "" : "outside"} ${cell.isToday ? "today" : ""} ${cell.isSunday ? "sunday" : ""} ${appointments.length ? "" : "empty-day"}" ${appointments.length ? "" : `data-empty-date="${cell.isoDate}"`}>
                 <div class="day-head">
                     <span class="day-number">${cell.day}</span>
                     ${appointments.length ? `<span class="day-count">${appointments.length} rdv</span>` : ""}
@@ -242,6 +278,9 @@ function renderMonthGrid() {
 
     grid.querySelectorAll("[data-appointment-id]").forEach((button) => {
         button.addEventListener("click", () => openAppointment(button.dataset.appointmentId));
+    });
+    grid.querySelectorAll("[data-empty-date]").forEach((day) => {
+        day.addEventListener("click", () => openCreateAppointment(day.dataset.emptyDate));
     });
 
 }
@@ -258,6 +297,96 @@ function renderAppointmentStrip(appointment) {
 
 }
 
+function renderWeekView() {
+
+    const grid = document.getElementById("monthGrid");
+    const cells = getWeekCells(PLANNING_STATE.currentDate);
+    grid.className = "month-grid week-view";
+    document.querySelector(".weekday-row").style.display = "grid";
+
+    grid.innerHTML = cells.map((cell) => {
+        const appointments = getAppointmentsForDate(cell.isoDate);
+        return `
+            <article class="day-cell ${cell.isToday ? "today" : ""} ${cell.isSunday ? "sunday" : ""} ${appointments.length ? "" : "empty-day"}" ${appointments.length ? "" : `data-empty-date="${cell.isoDate}"`}>
+                <div class="day-head">
+                    <span class="day-number">${cell.day}</span>
+                    ${appointments.length ? `<span class="day-count">${appointments.length} rdv</span>` : ""}
+                </div>
+                <div class="appointments">
+                    ${appointments.map(renderAppointmentStrip).join("")}
+                </div>
+            </article>
+        `;
+    }).join("");
+
+    bindCalendarActions(grid);
+
+}
+
+function renderDayView() {
+
+    const grid = document.getElementById("monthGrid");
+    const isoDate = toIsoDate(PLANNING_STATE.currentDate);
+    const appointments = getAppointmentsForDate(isoDate);
+    grid.className = "month-grid day-view";
+    document.querySelector(".weekday-row").style.display = "none";
+
+    grid.innerHTML = `
+        <article class="day-cell ${appointments.length ? "" : "empty-day"}" ${appointments.length ? "" : `data-empty-date="${isoDate}"`}>
+            <div class="day-head">
+                <span class="day-number">${formatDate(isoDate)}</span>
+                ${appointments.length ? `<span class="day-count">${appointments.length} rdv</span>` : ""}
+            </div>
+            <div class="appointments">
+                ${appointments.map(renderAppointmentStrip).join("") || `<p class="muted">Aucun rendez-vous. Clique ici pour créer.</p>`}
+            </div>
+        </article>
+    `;
+
+    bindCalendarActions(grid);
+
+}
+
+function renderAgendaView() {
+
+    const grid = document.getElementById("monthGrid");
+    const appointments = getVisibleMonthAppointments().slice().sort((a, b) => {
+        return (a.date + a.timeRange).localeCompare(b.date + b.timeRange);
+    });
+    grid.className = "month-grid agenda-view";
+    document.querySelector(".weekday-row").style.display = "none";
+
+    grid.innerHTML = appointments.map((appointment) => {
+        const meta = CATEGORY_META[appointment.category];
+        return `
+            <article class="agenda-item ${meta.className}">
+                <div class="agenda-time">${escapeHtml(appointment.timeRange.split(" - ")[0])}</div>
+                <button data-appointment-id="${escapeAttribute(appointment.id)}" type="button">
+                    <strong>${escapeHtml(appointment.client)}</strong>
+                    <p class="muted">${escapeHtml(formatDate(appointment.date))} · ${escapeHtml(appointment.address)}</p>
+                </button>
+            </article>
+        `;
+    }).join("") || `<article class="agenda-item"><p class="muted">Aucun rendez-vous ce mois-ci.</p></article>`;
+
+    bindCalendarActions(grid);
+
+}
+
+function bindCalendarActions(root) {
+
+    root.querySelectorAll("[data-appointment-id]").forEach((button) => {
+        button.addEventListener("click", (event) => {
+            event.stopPropagation();
+            openAppointment(button.dataset.appointmentId);
+        });
+    });
+    root.querySelectorAll("[data-empty-date]").forEach((day) => {
+        day.addEventListener("click", () => openCreateAppointment(day.dataset.emptyDate));
+    });
+
+}
+
 function openAppointment(id) {
 
     const appointment = PLANNING_STATE.appointments.find((item) => item.id === id);
@@ -266,6 +395,7 @@ function openAppointment(id) {
     }
 
     const meta = CATEGORY_META[appointment.category];
+    document.querySelector("#appointmentPanel .panel-header h2").textContent = "Rendez-vous";
     document.getElementById("appointmentDetails").innerHTML = `
         <div class="detail-list">
             ${detailRow("Client", appointment.client)}
@@ -297,12 +427,81 @@ function openAppointment(id) {
 
 }
 
+function openCreateAppointment(isoDate) {
+
+    document.getElementById("appointmentDetails").innerHTML = `
+        <form class="detail-list" id="createAppointmentForm">
+            ${inputRow("Date", "date", isoDate, "date")}
+            ${inputRow("Tranche horaire", "timeRange", "", "text", "08:00 - 09:00")}
+            <div class="detail-row">
+                <span>Catégorie</span>
+                <select name="category">
+                    ${Object.entries(CATEGORY_META).map(([key, meta]) => `<option value="${escapeAttribute(key)}">${escapeHtml(meta.label)}</option>`).join("")}
+                </select>
+            </div>
+            ${inputRow("Nom du client", "client", "", "text", "Nom client")}
+            ${inputRow("Adresse", "address", "", "text", "Adresse")}
+            ${inputRow("Téléphone", "phone", "", "tel", "+689 ...")}
+            <div class="detail-row">
+                <span>Notes</span>
+                <textarea name="notes" placeholder="Notes du rendez-vous"></textarea>
+            </div>
+            <button class="save-btn" type="submit">Préparer le rendez-vous</button>
+        </form>
+    `;
+
+    const panel = document.getElementById("appointmentPanel");
+    panel.querySelector(".panel-header h2").textContent = "Nouveau rendez-vous";
+    panel.classList.add("open");
+    panel.setAttribute("aria-hidden", "false");
+    document.body.classList.add("panel-open");
+
+    document.getElementById("createAppointmentForm").addEventListener("submit", (event) => {
+        event.preventDefault();
+        saveCreatedAppointment(event.currentTarget);
+    });
+
+}
+
 function closePanel() {
 
     const panel = document.getElementById("appointmentPanel");
     panel.classList.remove("open");
     panel.setAttribute("aria-hidden", "true");
     document.body.classList.remove("panel-open");
+    panel.querySelector(".panel-header h2").textContent = "Rendez-vous";
+
+}
+
+function inputRow(label, name, value, type = "text", placeholder = "") {
+
+    return `
+        <div class="detail-row">
+            <span>${escapeHtml(label)}</span>
+            <input name="${escapeAttribute(name)}" type="${escapeAttribute(type)}" value="${escapeAttribute(value)}" placeholder="${escapeAttribute(placeholder)}">
+        </div>
+    `;
+
+}
+
+function saveCreatedAppointment(form) {
+
+    const data = Object.fromEntries(new FormData(form).entries());
+    const appointment = {
+        id: "rdv-" + Date.now(),
+        client: data.client || "Nouveau client",
+        address: data.address || "",
+        phone: data.phone || "",
+        date: data.date,
+        timeRange: data.timeRange || "08:00 - 09:00",
+        category: data.category || "chantier",
+        notes: data.notes || ""
+    };
+
+    PLANNING_STATE.appointments.push(appointment);
+    PLANNING_STATE.currentDate = new Date(appointment.date + "T00:00:00");
+    closePanel();
+    renderPlanning();
 
 }
 
@@ -324,6 +523,13 @@ function changeMonth(delta) {
         PLANNING_STATE.currentDate.getMonth() + delta,
         1
     );
+    renderPlanning();
+
+}
+
+function changeView(view) {
+
+    PLANNING_STATE.currentView = ["month", "week", "day", "agenda"].includes(view) ? view : "month";
     renderPlanning();
 
 }
@@ -352,6 +558,26 @@ function getCalendarCells(date) {
             isoDate,
             day: cellDate.getDate(),
             isCurrentMonth: cellDate.getMonth() === month,
+            isToday: isoDate === "2026-06-30",
+            isSunday: cellDate.getDay() === 0
+        };
+    });
+
+}
+
+function getWeekCells(date) {
+
+    const startOffset = (date.getDay() + 6) % 7;
+    const start = new Date(date.getFullYear(), date.getMonth(), date.getDate() - startOffset);
+
+    return Array.from({ length: 7 }, (_, index) => {
+        const cellDate = new Date(start);
+        cellDate.setDate(start.getDate() + index);
+        const isoDate = toIsoDate(cellDate);
+        return {
+            date: cellDate,
+            isoDate,
+            day: cellDate.getDate(),
             isToday: isoDate === "2026-06-30",
             isSunday: cellDate.getDay() === 0
         };
@@ -428,6 +654,7 @@ window.KynexyPlanning = {
     refresh: renderPlanning,
     getState: () => ({
         currentDate: PLANNING_STATE.currentDate.toISOString(),
+        currentView: PLANNING_STATE.currentView,
         appointments: PLANNING_STATE.appointments.slice()
     })
 };

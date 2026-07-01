@@ -39,6 +39,12 @@
 
 <section class="calendar-card">
 <div class="calendar-toolbar">
+<div class="view-switch" id="viewSwitch" aria-label="Vues du calendrier">
+<button class="active" data-calendar-view="month" type="button">📅 Mois</button>
+<button data-calendar-view="week" type="button">📆 Semaine</button>
+<button data-calendar-view="day" type="button">🗓 Jour</button>
+<button data-calendar-view="agenda" type="button">📋 Agenda</button>
+</div>
 <div class="legend" id="categoryLegend"></div>
 <button class="ghost-btn" id="todayButton" type="button">Aujourd'hui</button>
 </div>
