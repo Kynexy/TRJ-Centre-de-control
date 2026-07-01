@@ -1,374 +1,157 @@
-// Aujourd'hui
-// Independent terrain-first experience. Glide can inject window.TRJ_TODAY_DATA.
+const DOMAIN_BLUEPRINT = [
+    { id:'planning', name:'Temps', mission:'Comprendre les rendez-vous, les départs et les conflits.', required:['prochain rendez-vous','heure','lieu'] },
+    { id:'terrain', name:'Terrain', mission:'Lire les conditions réelles qui peuvent bloquer l’action.', required:['météo','trajet','site'] },
+    { id:'clients', name:'Clients', mission:'Relier chaque action à une personne, un besoin et une urgence.', required:['fiche client','contact','historique'] },
+    { id:'team', name:'Humain', mission:'Savoir qui travaille, qui doit être payé, qui manque.', required:['présences','heures','paiements'] },
+    { id:'finance', name:'Argent', mission:'Comprendre trésorerie, factures, risques et décisions financières.', required:['factures','soldes','échéances'] }
+];
 
-const TODAY_STATUS = {
-    READY: "ready",
-    MISSING_DATA: "missing-data",
-    ERROR: "error"
+const DEFAULT_CONTEXT = {
+    planning: { connected:false, signals:[] },
+    terrain: { connected:false, signals:[] },
+    clients: { connected:false, signals:[] },
+    team: { connected:false, signals:[] },
+    finance: { connected:false, signals:[] }
 };
 
-const TRJ_TODAY_STATE = {
-    status: TODAY_STATUS.MISSING_DATA,
-    data: null,
-    events: [],
-    engines: {
-        context: null,
-        quote: null,
-        photo: null,
-        planning: null,
-        communication: null,
-        timeSaved: null
-    }
-};
+const state = { context:null, analysis:null, events:[] };
 
-document.addEventListener("DOMContentLoaded", initToday);
+document.addEventListener('DOMContentLoaded', initContext);
 
-function initToday() {
-
-    try {
-        const data = getTodayData();
-        TRJ_TODAY_STATE.data = data;
-        TRJ_TODAY_STATE.status = data.source === "glide" ? TODAY_STATUS.READY : TODAY_STATUS.MISSING_DATA;
-
-        bindActions();
-        renderToday(data);
-        publishTodayState();
-    } catch (error) {
-        TRJ_TODAY_STATE.status = TODAY_STATUS.ERROR;
-        renderError(error);
-        publishTodayState();
-    }
-
+function initContext(){
+    state.context = getContextData();
+    state.analysis = analyseContext(state.context);
+    render();
+    publish();
 }
 
-function getTodayData() {
-
-    if (window.TRJ_TODAY_DATA && typeof window.TRJ_TODAY_DATA === "object") {
-        return normalizeTodayData(window.TRJ_TODAY_DATA, "glide");
-    }
-
-    if (window.KYNEXY_TODAY_DATA && typeof window.KYNEXY_TODAY_DATA === "object") {
-        return normalizeTodayData(window.KYNEXY_TODAY_DATA, "glide");
-    }
-
-    return normalizeTodayData({}, "missing");
-
+function getContextData(){
+    const injected = window.KYNEXY_CONTEXT_DATA || window.AUREL_CONTEXT_DATA || null;
+    if (injected && typeof injected === 'object') return normalizeContext(injected, 'connecté');
+    return normalizeContext(DEFAULT_CONTEXT, 'préparation');
 }
 
-function normalizeTodayData(rawData, source) {
-
-    return {
-        source,
-        patronName: rawData.patronName || "Patron",
-        aurelBrief: rawData.aurelBrief || "",
-        nextJob: rawData.nextJob || null,
-        departure: rawData.departure || null,
-        travel: rawData.travel || null,
-        weather: rawData.weather || null,
-        team: Array.isArray(rawData.team) ? rawData.team : [],
-        risks: Array.isArray(rawData.risks) ? rawData.risks.slice(0, 3) : [],
-        actions: Array.isArray(rawData.actions) ? rawData.actions.slice(0, 3) : [],
-        updatedAt: rawData.updatedAt || new Date().toISOString()
-    };
-
-}
-
-function bindActions() {
-
-    const talkButton = document.getElementById("talkToAurel");
-
-    talkButton.addEventListener("click", () => {
-        emitTodayEvent("aurel_voice_requested", {
-            source: "today",
-            requiresHumanValidation: false
-        });
-
-        talkButton.textContent = "Aurel";
-        document.getElementById("aurelBrief").textContent = "Aurel publie l'intention parler_aurel. La voix sera connectee quand le moteur Aurel sera branche a Glide.";
+function normalizeContext(raw, source){
+    const domains = {};
+    DOMAIN_BLUEPRINT.forEach(domain=>{
+        const input = raw[domain.id] || {};
+        const signals = Array.isArray(input.signals) ? input.signals.filter(Boolean) : [];
+        domains[domain.id] = {
+            ...domain,
+            connected: Boolean(input.connected || signals.length),
+            confidence: clamp(Number(input.confidence ?? (signals.length ? 55 : 0)),0,100),
+            signals,
+            facts: Array.isArray(input.facts) ? input.facts : [],
+            risks: Array.isArray(input.risks) ? input.risks : []
+        };
     });
-
+    return { source, domains, updatedAt: raw.updatedAt || new Date().toISOString() };
 }
 
-function renderToday(data) {
-
-    renderSource(data);
-    renderAurel(data);
-    renderNextJob(data);
-    renderSignals(data);
-    renderRisks(data);
-    renderActions(data);
-    renderFooter(data);
-
+function analyseContext(context){
+    const domains = Object.values(context.domains);
+    const active = domains.filter(d=>d.connected);
+    const confidence = Math.round(domains.reduce((sum,d)=>sum+d.confidence,0)/domains.length);
+    const missing = domains.filter(d=>!d.connected).map(d=>({title:d.name, detail:'Aurel attend : '+d.required.join(', ')+'.'}));
+    const decisions = buildDecisions(context.domains);
+    const automations = buildAutomations(context.domains);
+    return { active, confidence, missing, decisions, automations };
 }
 
-function renderSource(data) {
-
-    const sourceStatus = document.getElementById("sourceStatus");
-    sourceStatus.textContent = data.source === "glide" ? "Glide connecte" : "Glide pret";
-
+function buildDecisions(domains){
+    return [
+        {
+            title:'Prioriser la journée',
+            detail:'Possible quand Temps, Terrain et Clients sont connectés.',
+            ready: domains.planning.connected && domains.terrain.connected && domains.clients.connected
+        },
+        {
+            title:'Détecter un chantier à risque',
+            detail:'Possible quand Aurel relie météo, trajet, équipe et urgence client.',
+            ready: domains.terrain.connected && domains.team.connected && domains.clients.connected
+        },
+        {
+            title:'Préparer une décision financière',
+            detail:'Possible quand factures, planning et contexte client sont cohérents.',
+            ready: domains.finance.connected && domains.planning.connected && domains.clients.connected
+        },
+        {
+            title:'Proposer une automatisation utile',
+            detail:'Possible quand l’action peut être expliquée, validée et tracée.',
+            ready: Object.values(domains).filter(d=>d.connected).length >= 4
+        }
+    ];
 }
 
-function renderAurel(data) {
-
-    document.getElementById("aurelTitle").textContent = "Bonjour " + data.patronName;
-    document.getElementById("aurelBrief").textContent = getAurelBrief(data);
-
+function buildAutomations(domains){
+    return [
+        { title:'Brief du matin', detail:'Résumer les décisions du jour sans ouvrir chaque module.', ready: domains.planning.connected || domains.terrain.connected },
+        { title:'Alerte friction', detail:'Prévenir quand météo, retard, paiement ou client créent un blocage.', ready: domains.terrain.connected && (domains.clients.connected || domains.finance.connected) },
+        { title:'Action préparée', detail:'Préparer appel, relance, facture ou report, puis attendre validation humaine.', ready: Object.values(domains).filter(d=>d.connected).length >= 3 }
+    ];
 }
 
-function getAurelBrief(data) {
-
-    if (data.aurelBrief) {
-        return data.aurelBrief;
-    }
-
-    if (!data.nextJob) {
-        return "Connecte le moteur metier Glide pour que je prepare le prochain chantier, les risques et les actions utiles.";
-    }
-
-    const parts = [
-        "Prochain chantier : " + (data.nextJob.title || "chantier"),
-        data.departure ? "depart conseille " + data.departure.time : "",
-        data.risks.length ? data.risks.length + " point(s) a surveiller" : "aucun risque majeur"
-    ].filter(Boolean);
-
-    return parts.join(". ") + ".";
-
+function render(){
+    renderBrief();
+    renderDomains();
+    renderDecisions();
+    renderMissing();
+    renderAutomations();
+    renderFooter();
 }
 
-function renderNextJob(data) {
-
-    const target = document.getElementById("nextJob");
-
-    if (!data.nextJob) {
-        target.innerHTML = `
-            <div class="empty-state">
-                Aucun prochain chantier charge. rendez-vous, client, site, devis, equipe et trajet.
-            </div>
-        `;
+function renderBrief(){
+    const a = state.analysis;
+    confidenceValue.textContent = a.confidence + '%';
+    if (!a.active.length) {
+        contextBrief.textContent = 'Aurel est prêt, mais aucun domaine fiable n’est encore connecté. La prochaine étape n’est pas une fonctionnalité : c’est brancher des signaux réels.';
+        domainSummary.textContent = '0 domaine actif';
+        decisionSummary.textContent = 'Aucune décision fiable';
         return;
     }
-
-    const job = data.nextJob;
-    target.innerHTML = `
-        <article class="job-main">
-            <span class="job-time">${escapeHtml(job.time || "Heure a confirmer")}</span>
-            <h3>${escapeHtml(job.title || "Chantier")}</h3>
-            <p>${escapeHtml(job.client || "Client a confirmer")} - ${escapeHtml(job.location || "Adresse a confirmer")}</p>
-            <div class="job-buttons">
-                ${renderActionLink("Maps", job.mapsUrl, "primary")}
-                ${renderActionLink("Appeler", job.phoneUrl, "")}
-                ${renderActionButton("Voir devis", "quote_requested", job.quoteId ? "" : "warn")}
-                ${renderActionButton("Chantier", "job_opened", "")}
-            </div>
-        </article>
-    `;
-
-    target.querySelectorAll("[data-today-event]").forEach((button) => {
-        button.addEventListener("click", () => {
-            emitTodayEvent(button.dataset.todayEvent, {
-                source: "today",
-                requiresHumanValidation: true
-            });
-        });
-    });
-
+    const names = a.active.map(d=>d.name).join(', ');
+    contextBrief.textContent = 'Aurel comprend déjà : ' + names + '. Plus les domaines se relient, plus les conseils deviennent précis.';
+    domainSummary.textContent = a.active.length + ' domaine(s) actif(s)';
+    decisionSummary.textContent = a.decisions.filter(d=>d.ready).length + ' décision(s) possible(s)';
 }
 
-function renderSignals(data) {
-
-    setText("departureTime", data.departure ? data.departure.time : "--");
-    setText("departureDetail", data.departure ? data.departure.detail || "Depart conseille" : "En attente du planning");
-
-    setText("travelTime", data.travel ? data.travel.duration : "--");
-    setText("travelDetail", data.travel ? data.travel.detail || "Trajet estime" : "Temps non disponible");
-
-    setText("weatherStatus", data.weather ? data.weather.status : "--");
-    setText("weatherDetail", data.weather ? data.weather.detail || "Meteo chargee" : "Source non connectee");
-
-    const teamText = data.team.length ? data.team.length + " pers." : "--";
-    const teamDetail = data.team.length ? data.team.map((member) => member.name || member).join(", ") : "Aucune equipe chargee";
-    setText("teamStatus", teamText);
-    setText("teamDetail", teamDetail);
-
+function renderDomains(){
+    domainGrid.innerHTML = Object.values(state.context.domains).map(domain=>{
+        const status = domain.connected ? (domain.confidence >= 70 ? 'ready' : 'partial') : 'missing';
+        const label = domain.connected ? domain.confidence + '% fiable' : 'à connecter';
+        const signals = domain.signals.length ? domain.signals.slice(0,3) : domain.required.slice(0,3);
+        return `<article class="domain-card"><div class="domain-top"><h3>${esc(domain.name)}</h3><span class="status-pill ${status}">${esc(label)}</span></div><p>${esc(domain.mission)}</p><div class="signal-row">${signals.map(s=>`<span class="signal-chip">${esc(s)}</span>`).join('')}</div></article>`;
+    }).join('');
 }
 
-function renderRisks(data) {
-
-    const target = document.getElementById("risks");
-
-    if (!data.risks.length) {
-        target.innerHTML = `<div class="empty-state">Aucun risque charge. Aurel affichera ici pluie, retard, urgence ou document manquant.</div>`;
-        return;
-    }
-
-    target.innerHTML = `<div class="risk-list">${data.risks.map(renderRisk).join("")}</div>`;
-
+function renderDecisions(){
+    decisionList.innerHTML = state.analysis.decisions.map((decision,index)=>`<article class="decision-card ${decision.ready?'':'locked'}"><span class="decision-rank">${decision.ready ? index + 1 : '•'}</span><div><h3>${esc(decision.title)}</h3><p>${esc(decision.detail)}</p></div></article>`).join('');
 }
 
-function renderRisk(risk) {
-
-    const level = risk.level || "warn";
-
-    return `
-        <article class="risk-item">
-            <span class="risk-dot ${escapeHtml(level)}">${getRiskSymbol(level)}</span>
-            <div>
-                <strong>${escapeHtml(risk.title || "Risque")}</strong>
-                <span>${escapeHtml(risk.detail || "A verifier")}</span>
-            </div>
-        </article>
-    `;
-
+function renderMissing(){
+    if (!state.analysis.missing.length) { missingList.innerHTML = '<article class="missing-card"><h3>Contexte complet</h3><p>Aurel dispose des domaines essentiels pour produire des recommandations transversales.</p></article>'; return; }
+    missingList.innerHTML = state.analysis.missing.map(item=>`<article class="missing-card"><h3>${esc(item.title)}</h3><p>${esc(item.detail)}</p></article>`).join('');
 }
 
-function renderActions(data) {
-
-    const target = document.getElementById("priorityActions");
-
-    if (!data.actions.length) {
-        target.innerHTML = `<div class="empty-state">Aucune action prioritaire chargee. Aurel limitera cette zone a trois actions maximum.</div>`;
-        return;
-    }
-
-    target.innerHTML = data.actions.map((action, index) => `
-        <button class="action-item" type="button" data-event="${escapeHtml(action.eventType || "action_selected")}">
-            <span class="action-rank">${index + 1}</span>
-            <span>
-                <strong>${escapeHtml(action.title || "Action")}</strong>
-                <span>${escapeHtml(action.detail || "Action preparee par Aurel")}</span>
-            </span>
-        </button>
-    `).join("");
-
-    target.querySelectorAll(".action-item").forEach((button) => {
-        button.addEventListener("click", () => {
-            emitTodayEvent(button.dataset.event, {
-                source: "today",
-                requiresHumanValidation: true
-            });
-        });
-    });
-
+function renderAutomations(){
+    automationList.innerHTML = state.analysis.automations.map(item=>`<article class="automation-card"><div><h3>${esc(item.title)}</h3><p>${esc(item.detail)}</p></div><button class="${item.ready?'ready':''}" type="button" data-automation="${esc(item.title)}">${item.ready?'Préparer':'Verrouillé'}</button></article>`).join('');
+    automationList.querySelectorAll('button.ready').forEach(button=>button.addEventListener('click',()=>emitIntent(button.dataset.automation)));
 }
 
-function renderFooter(data) {
-
-    const date = new Date(data.updatedAt);
-    const text = Number.isNaN(date.getTime()) ? "Mis a jour" : "Mis a jour " + date.toLocaleTimeString("fr-FR", {
-        hour: "2-digit",
-        minute: "2-digit"
-    });
-
-    setText("lastUpdated", text);
-
+function renderFooter(){
+    const date = new Date(state.context.updatedAt);
+    lastUpdated.textContent = Number.isNaN(date.getTime()) ? 'Contexte initialisé' : 'Mis à jour ' + date.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
 }
 
-function renderActionLink(label, href, variant) {
-
-    if (!href) {
-        return `<button class="big-button ${escapeHtml(variant)}" type="button" disabled>${escapeHtml(label)}</button>`;
-    }
-
-    return `<a class="big-button ${escapeHtml(variant)}" href="${escapeAttribute(href)}" target="_blank" rel="noopener">${escapeHtml(label)}</a>`;
-
+function emitIntent(name){
+    state.events.unshift({ id:'intent_'+Date.now(), type:'automation_prepared', name, createdAt:new Date().toISOString(), requiresHumanValidation:true });
+    publish();
 }
 
-function renderActionButton(label, eventType, variant) {
-
-    return `<button class="big-button ${escapeHtml(variant)}" type="button" data-today-event="${escapeAttribute(eventType)}">${escapeHtml(label)}</button>`;
-
+function publish(){
+    window.KynexyContextState = { context:state.context, analysis:state.analysis, events:state.events };
+    window.AurelContextState = window.KynexyContextState;
 }
 
-function emitTodayEvent(type, payload) {
-
-    const event = {
-        eventId: "evt_" + Date.now(),
-        eventType: type,
-        createdAt: new Date().toISOString(),
-        sourceModule: "trj_today",
-        context: "today",
-        payload: payload || {},
-        status: "created"
-    };
-
-    TRJ_TODAY_STATE.events.unshift(event);
-    publishTodayState();
-
-    return event;
-
-}
-
-function publishTodayState() {
-
-    window.TRJTodayState = {
-        status: TRJ_TODAY_STATE.status,
-        data: TRJ_TODAY_STATE.data,
-        events: TRJ_TODAY_STATE.events,
-        engines: Object.keys(TRJ_TODAY_STATE.engines)
-    };
-
-    window.KynexyTodayState = window.TRJTodayState;
-
-}
-
-function renderError(error) {
-
-    document.getElementById("aurelBrief").textContent = "Erreur module Aujourd'hui : " + error.message;
-    document.getElementById("sourceStatus").textContent = "Erreur";
-
-}
-
-function getRiskSymbol(level) {
-
-    if (level === "ok") {
-        return "OK";
-    }
-
-    if (level === "danger") {
-        return "!";
-    }
-
-    return "!";
-
-}
-
-function setText(id, value) {
-
-    const element = document.getElementById(id);
-
-    if (element) {
-        element.textContent = value;
-    }
-
-}
-
-function escapeHtml(value) {
-
-    return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-
-}
-
-function escapeAttribute(value) {
-
-    return escapeHtml(value).replace(/`/g, "&#096;");
-
-}
-
-window.TRJToday = {
-    emit: (eventType, payload) => emitTodayEvent(eventType, payload),
-    refresh: () => {
-        const data = getTodayData();
-        TRJ_TODAY_STATE.data = data;
-        TRJ_TODAY_STATE.status = data.source === "glide" ? TODAY_STATUS.READY : TODAY_STATUS.MISSING_DATA;
-        renderToday(data);
-        publishTodayState();
-    },
-    getState: () => window.TRJTodayState
-};
-
-window.KynexyToday = window.TRJToday;
+function clamp(n,min,max){ return Math.max(min, Math.min(max, Number.isFinite(n)?n:min)); }
+function esc(v){return String(v||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}

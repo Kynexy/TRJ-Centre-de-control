@@ -44,6 +44,7 @@ object-fit:contain;
 border-radius:0;
 background:transparent;
 box-shadow:none;
+mix-blend-mode:screen;
 }
 
 .kx-aurel-presence{

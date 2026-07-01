@@ -1,95 +1,84 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#07182d">
-
-<title>Aujourd'hui</title>
-
+<title>Aurel - Intelligence Kynexy</title>
 <link rel="stylesheet" href="today.css">
-
+<link rel="stylesheet" href="aurel-system.css">
 </head>
-
-<body>
-
-<main class="today-shell" aria-live="polite">
-
-<header class="today-topbar">
+<body data-aurel-page="context">
+<main class="context-shell">
+<header class="hero">
 <div>
-<h1>Aujourd'hui</h1>
+<p class="eyebrow">Aurel</p>
+<h1>Carte de compréhension</h1>
+<p class="hero-copy">Kynexy ne rassemble pas des modules. Il construit une mémoire de contexte pour décider plus vite et éviter les frictions.</p>
 </div>
-<div class="source-pill" id="sourceStatus">Glide pret</div>
+<div class="aurel-signal" aria-label="Présence Aurel"><span></span></div>
 </header>
 
-<section class="aurel-card" aria-labelledby="aurelTitle">
-<div class="aurel-orb">A</div>
-<div class="aurel-copy">
-<p class="eyebrow">Aurel</p>
-<h2 id="aurelTitle">Bonjour Patron</h2>
-<p id="aurelBrief">Je prepare ta journee des que le moteur metier Glide est connecte.</p>
-</div>
-<button class="voice-button" id="talkToAurel" type="button">Parler</button>
-</section>
-
-<section class="next-job-card" id="nextJobCard" aria-labelledby="nextJobTitle">
-<div class="section-heading">
+<section class="brief-card" aria-labelledby="briefTitle">
+<div>
 <p class="eyebrow">Maintenant</p>
-<h2 id="nextJobTitle">Prochain chantier</h2>
+<h2 id="briefTitle">Ce qu'Aurel comprend</h2>
+<p id="contextBrief">Initialisation du contexte.</p>
 </div>
-<div id="nextJob"></div>
-</section>
-
-<section class="signal-grid" aria-label="Signaux de la journee">
-<article class="signal-card">
-<span>Depart</span>
-<strong id="departureTime">--</strong>
-<small id="departureDetail">En attente du planning</small>
-</article>
-<article class="signal-card">
-<span>Trajet</span>
-<strong id="travelTime">--</strong>
-<small id="travelDetail">Temps non disponible</small>
-</article>
-<article class="signal-card">
-<span>Meteo</span>
-<strong id="weatherStatus">--</strong>
-<small id="weatherDetail">Source non connectee</small>
-</article>
-<article class="signal-card">
-<span>Equipe</span>
-<strong id="teamStatus">--</strong>
-<small id="teamDetail">Aucune equipe chargee</small>
-</article>
-</section>
-
-<section class="risk-card" aria-labelledby="riskTitle">
-<div class="section-heading">
-<p class="eyebrow">Attention</p>
-<h2 id="riskTitle">Risques</h2>
+<div class="confidence" aria-label="Niveau de compréhension">
+<span id="confidenceValue">0%</span>
+<small>compréhension</small>
 </div>
-<div id="risks"></div>
 </section>
 
-<section class="actions-card" aria-labelledby="actionsTitle">
-<div class="section-heading">
-<p class="eyebrow">Priorite</p>
-<h2 id="actionsTitle">3 actions maximum</h2>
+<section class="domain-section" aria-labelledby="domainsTitle">
+<div class="section-head">
+<div>
+<p class="eyebrow">Domaines</p>
+<h2 id="domainsTitle">Les sens de Kynexy</h2>
 </div>
-<div class="action-list" id="priorityActions"></div>
+<span id="domainSummary">0 domaine actif</span>
+</div>
+<div class="domain-grid" id="domainGrid"></div>
 </section>
 
-<footer class="today-footer">
+<section class="decision-section" aria-labelledby="decisionTitle">
+<div class="section-head">
+<div>
+<p class="eyebrow">Décisions</p>
+<h2 id="decisionTitle">Ce qui devient possible</h2>
+</div>
+<span id="decisionSummary">En attente</span>
+</div>
+<div class="decision-list" id="decisionList"></div>
+</section>
+
+<section class="missing-section" aria-labelledby="missingTitle">
+<div class="section-head">
+<div>
+<p class="eyebrow">À connecter</p>
+<h2 id="missingTitle">Ce qui manque à Aurel</h2>
+</div>
+</div>
+<div class="missing-list" id="missingList"></div>
+</section>
+
+<section class="automation-section" aria-labelledby="automationTitle">
+<div class="section-head">
+<div>
+<p class="eyebrow">Automatisations</p>
+<h2 id="automationTitle">Actions préparées, jamais simulées</h2>
+</div>
+</div>
+<div class="automation-list" id="automationList"></div>
+</section>
+
+<footer class="context-footer">
 <span id="lastUpdated">Initialisation</span>
-<span>Mission Terrain : supprimer la prochaine friction</span>
+<span>Les modules sont des sources. Aurel est la compréhension.</span>
 </footer>
-
 </main>
-
 <script src="today.js"></script>
-
+<script src="aurel-system.js"></script>
 </body>
-
 </html>

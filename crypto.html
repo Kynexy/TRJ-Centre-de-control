@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#07182d">
+<title>Coffre Kynexy</title>
+<link rel="stylesheet" href="crypto.css">
+<link rel="stylesheet" href="aurel-system.css">
+</head>
+<body>
+<main class="vault-app">
+<header class="vault-hero">
+<div>
+<p class="eyebrow">Coffre Kynexy</p>
+<h1>Crypto & rendement réel</h1>
+<p>Une page de décision, pas un casino ni une fausse banque. Aurel lit les signaux, refuse les illusions et prépare les choix sûrs.</p>
+</div>
+<button class="aurel-toggle" id="aurelToggle" type="button">Aurel</button>
+</header>
+
+<section class="aurel-panel" id="aurelPanel" aria-live="polite">
+<div class="aurel-light" aria-hidden="true"></div>
+<div>
+<p class="eyebrow">Analyse Aurel</p>
+<h2 id="aurelTitle">Je vérifie les sources avant de conseiller.</h2>
+<p id="aurelBrief">Aucun rendement ne sera inventé. Si la source réelle est indisponible, la page le dira clairement.</p>
+</div>
+</section>
+
+<section class="wallet-card">
+<div>
+<p class="eyebrow">Wallet externe</p>
+<h2 id="walletTitle">Lecture seule</h2>
+<p id="walletDetail">Kynexy ne demande jamais de seed phrase et ne signe aucune transaction ici.</p>
+</div>
+<button class="primary" id="connectWallet" type="button">Connecter</button>
+</section>
+
+<section class="metrics" id="metrics">
+<article><span>Source rendement</span><strong id="sourceStatus">Chargement</strong></article>
+<article><span>Meilleur APY filtré</span><strong id="bestApy">--</strong></article>
+<article><span>Pools analysés</span><strong id="poolCount">--</strong></article>
+</section>
+
+<section class="control-card">
+<div>
+<p class="eyebrow">Décision</p>
+<h2>Quel montant veux-tu analyser ?</h2>
+<p>Le calcul est une estimation basée sur l’APY publié par la source. Ce n’est pas une promesse de gain.</p>
+</div>
+<label class="amount-field">
+<span>Montant</span>
+<input id="amountInput" type="number" min="0" step="100" value="1000">
+</label>
+<div class="segmented" role="group" aria-label="Profil de risque">
+<button class="active" data-risk="conservative" type="button">Prudent</button>
+<button data-risk="balanced" type="button">Équilibré</button>
+<button data-risk="opportunistic" type="button">Opportuniste</button>
+</div>
+</section>
+
+<section class="pool-section">
+<div class="section-head">
+<div>
+<p class="eyebrow">Marché réel</p>
+<h2>Rendements filtrés</h2>
+</div>
+<button class="secondary" id="refreshPools" type="button">Actualiser</button>
+</div>
+<div class="pool-list" id="poolList"></div>
+</section>
+
+<section class="guardrails">
+<p class="eyebrow">Règles de sécurité</p>
+<h2>Ce que Kynexy refuse ici</h2>
+<div class="guard-grid">
+<article><strong>Aucune seed</strong><span>Une phrase secrète ne doit jamais entrer dans Kynexy.</span></article>
+<article><strong>Aucun faux solde</strong><span>Sans source réelle, la page affiche l’absence de données.</span></article>
+<article><strong>Aucun envoi</strong><span>Les transactions viendront plus tard via wallet externe et validation humaine.</span></article>
+</div>
+</section>
+</main>
+<script src="crypto.js"></script>
+<script src="aurel-system.js"></script>
+</body>
+</html>
