@@ -2,13 +2,16 @@ const TEAM_STATE = {
     currentDate: startOfDay(new Date()),
     members: [],
     entries: [],
+    advances: [],
     entriesByDate: new Map(),
     entriesByMember: new Map(),
+    advancesByMember: new Map(),
     summaries: new Map(),
     databaseReady: false,
     databaseError: null,
     focusBeforePanel: null,
-    scrollY: 0
+    scrollY: 0,
+    accessMode: getAccessMode()
 };
 
 const DEFAULT_COLORS = ["#2ca9ff", "#5ee37d", "#ff9fb7", "#ffd166", "#b69cff", "#64d8cb"];
@@ -57,18 +60,24 @@ function bindTeamShell() {
 
 async function reloadTeamData() {
     const range = getMonthRange(TEAM_STATE.currentDate);
-    const [members, entries] = await Promise.all([
+    const [members, entries, advances] = await Promise.all([
         window.KynexyTeamDB.listMembers(),
-        window.KynexyTeamDB.listWorkEntries({ from: range.from, to: range.to })
+        window.KynexyTeamDB.listWorkEntries({ from: range.from, to: range.to }),
+        window.KynexyTeamDB.listAdvances({ from: range.from, to: range.to })
     ]);
 
-    TEAM_STATE.members = members.filter((member) => member.active !== false);
-    TEAM_STATE.entries = entries;
-    TEAM_STATE.entriesByDate = groupBy(entries, "date");
-    TEAM_STATE.entriesByMember = groupBy(entries, "memberId");
+    const activeMembers = members.filter((member) => member.active !== false);
+    TEAM_STATE.members = TEAM_STATE.accessMode.role === "employee"
+        ? activeMembers.filter((member) => member.id === TEAM_STATE.accessMode.memberId)
+        : activeMembers;
+    TEAM_STATE.entries = entries.filter((entry) => TEAM_STATE.members.some((member) => member.id === entry.memberId));
+    TEAM_STATE.advances = advances.filter((advance) => TEAM_STATE.members.some((member) => member.id === advance.memberId));
+    TEAM_STATE.entriesByDate = groupBy(TEAM_STATE.entries, "date");
+    TEAM_STATE.entriesByMember = groupBy(TEAM_STATE.entries, "memberId");
+    TEAM_STATE.advancesByMember = groupBy(TEAM_STATE.advances, "memberId");
     TEAM_STATE.summaries = new Map(
         window.KynexyTeamDB
-            .calculateAllSummaries(TEAM_STATE.members, TEAM_STATE.entries, TEAM_STATE.currentDate)
+            .calculateAllSummaries(TEAM_STATE.members, TEAM_STATE.entries, TEAM_STATE.advances, TEAM_STATE.currentDate)
             .map((summary) => [summary.memberId, summary])
     );
     publishTeamContext();
@@ -77,6 +86,7 @@ async function reloadTeamData() {
 function renderTeam() {
     document.getElementById("monthLabel").textContent = formatMonth(TEAM_STATE.currentDate);
     document.getElementById("storageStatus").textContent = getStorageLabel();
+    document.getElementById("addMember").hidden = TEAM_STATE.accessMode.role === "employee";
 
     if (TEAM_STATE.databaseError) {
         renderError();
@@ -98,7 +108,7 @@ function renderPresenceCalendar() {
 
     grid.innerHTML = cells.map((cell) => {
         const entries = getEntriesForDate(cell.isoDate);
-        const presentMemberIds = new Set(entries.filter((entry) => !entry.absent && Number(entry.hours) > 0).map((entry) => entry.memberId));
+        const presentMemberIds = new Set(entries.filter((entry) => Number(entry.hours) > 0).map((entry) => entry.memberId));
         const presentMembers = TEAM_STATE.members.filter((member) => presentMemberIds.has(member.id)).slice(0, 12);
 
         return `
@@ -112,33 +122,38 @@ function renderPresenceCalendar() {
     }).join("");
 
     grid.querySelectorAll("[data-day-date]").forEach((button) => {
-        button.addEventListener("click", () => openDayEditor(button.dataset.dayDate));
+        button.addEventListener("click", () => openDayView(button.dataset.dayDate));
     });
 }
 
 function renderMemberCards() {
     const list = document.getElementById("memberList");
     if (!TEAM_STATE.members.length) {
-        list.innerHTML = `<button class="empty-state" type="button" id="emptyAddMember">Ajoutez le premier salarie pour commencer a suivre les presences.</button>`;
-        document.getElementById("emptyAddMember").addEventListener("click", () => openMemberForm());
+        list.innerHTML = TEAM_STATE.accessMode.role === "employee"
+            ? `<div class="empty-state">Acces salarie indisponible.</div>`
+            : `<button class="empty-state" type="button" id="emptyAddMember">Ajoutez le premier salarie.</button>`;
+        const empty = document.getElementById("emptyAddMember");
+        if (empty) {
+            empty.addEventListener("click", () => openMemberForm());
+        }
         return;
     }
 
     list.innerHTML = TEAM_STATE.members.map((member) => {
         const summary = getSummary(member.id);
         return `
-            <button class="member-card" style="--member-color:${escapeAttribute(member.color)}" type="button" data-member-id="${escapeAttribute(member.id)}">
+            <button class="member-card punch-card" style="--member-color:${escapeAttribute(member.color)}" type="button" data-member-id="${escapeAttribute(member.id)}">
                 <div class="member-main">
                     <div>
                         <div class="member-title">
                             <span class="member-dot" style="--dot-color:${escapeAttribute(member.color)}"></span>
                             <h3>${escapeHtml(member.name)}</h3>
                         </div>
-                        <p>${escapeHtml(member.role || "Poste a definir")} ${member.phone ? " - " + escapeHtml(member.phone) : ""}</p>
+                        <p>${escapeHtml(member.role || "Poste a definir")}${TEAM_STATE.accessMode.role === "owner" && member.phone ? " - " + escapeHtml(member.phone) : ""}</p>
                     </div>
                     <div class="amount-main">${formatMoney(summary.remaining)}</div>
                 </div>
-                ${renderSummaryGrid(summary)}
+                ${renderPunchSummary(summary)}
             </button>
         `;
     }).join("");
@@ -148,15 +163,13 @@ function renderMemberCards() {
     });
 }
 
-function renderSummaryGrid(summary) {
+function renderPunchSummary(summary) {
     return `
-        <div class="summary-grid">
-            ${summaryTile("Heures semaine", formatHours(summary.weekHours))}
-            ${summaryTile("Heures mois", formatHours(summary.monthHours))}
-            ${summaryTile("Salaire calcule", formatMoney(summary.calculatedSalary))}
+        <div class="summary-grid punch-summary">
+            ${summaryTile("Semaine", `${formatHours(summary.weekHours)} · ${formatMoney(summary.weekSalary)}`)}
+            ${summaryTile("Mois", `${formatHours(summary.monthHours)} · ${formatMoney(summary.monthSalary)}`)}
             ${summaryTile("Acomptes", formatMoney(summary.advances))}
-            ${summaryTile("Salaire verse", formatMoney(summary.salaryPaid))}
-            ${summaryTile("Reste a payer", formatMoney(summary.remaining))}
+            ${summaryTile("Reste", formatMoney(summary.remaining))}
         </div>
     `;
 }
@@ -165,8 +178,53 @@ function summaryTile(label, value) {
     return `<div class="summary-tile"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`;
 }
 
+function openMemberProfile(memberId) {
+    const member = TEAM_STATE.members.find((item) => item.id === memberId);
+    if (!member) {
+        return;
+    }
+
+    const summary = getSummary(member.id);
+    const workEntries = (TEAM_STATE.entriesByMember.get(member.id) || []).slice().sort((a, b) => b.date.localeCompare(a.date));
+    const advances = (TEAM_STATE.advancesByMember.get(member.id) || []).slice().sort((a, b) => b.date.localeCompare(a.date));
+    const isOwner = TEAM_STATE.accessMode.role === "owner";
+    document.getElementById("panelTitle").textContent = member.name;
+    document.getElementById("panelContent").innerHTML = `
+        <div class="panel-scroll">
+            <section class="profile-head punch-profile" style="--member-color:${escapeAttribute(member.color)}">
+                <h3>${escapeHtml(member.name)}</h3>
+                <p>${escapeHtml(member.role || "Poste a definir")}${member.phone && isOwner ? " - " + escapeHtml(member.phone) : ""}</p>
+            </section>
+            ${renderPunchSummary(summary)}
+            <div class="quick-actions ${isOwner ? "" : "single"}">
+                <button class="primary-btn big-action" type="button" id="punchToday">Pointer aujourd'hui</button>
+                <button class="secondary-btn big-action" type="button" id="recordAdvance">Acompte recu</button>
+                ${isOwner ? `<button class="secondary-btn big-action subtle-action" type="button" id="editMember">Modifier profil</button>` : ""}
+            </div>
+            <section class="history-block">
+                <h4>Heures</h4>
+                ${workEntries.map((entry) => renderWorkLine(entry, member)).join("") || `<div class="empty-state compact-empty">Aucune heure ce mois-ci.</div>`}
+            </section>
+            <section class="history-block">
+                <h4>Acomptes</h4>
+                ${advances.map(renderAdvanceLine).join("") || `<div class="empty-state compact-empty">Aucun acompte ce mois-ci.</div>`}
+            </section>
+        </div>
+    `;
+
+    openPanel();
+    document.getElementById("punchToday").addEventListener("click", () => openPunchForm(member, toIsoDate(new Date())));
+    document.getElementById("recordAdvance").addEventListener("click", () => openAdvanceForm(member));
+    if (isOwner) {
+        document.getElementById("editMember").addEventListener("click", () => openMemberForm(member));
+    }
+}
+
 function openMemberForm(member = null) {
-    document.getElementById("panelTitle").textContent = member ? "Modifier salarie" : "Nouveau salarie";
+    if (TEAM_STATE.accessMode.role !== "owner") {
+        return;
+    }
+    document.getElementById("panelTitle").textContent = member ? "Modifier profil" : "Nouveau salarie";
     document.getElementById("panelContent").innerHTML = `
         <form class="team-form" id="memberForm">
             <label class="form-row"><span>Nom</span><input name="name" required value="${escapeAttribute(member ? member.name : "")}" placeholder="Nom du salarie"></label>
@@ -188,6 +246,68 @@ function openMemberForm(member = null) {
     if (member) {
         document.getElementById("deleteMember").addEventListener("click", () => deleteMember(member.id));
     }
+}
+
+function openPunchForm(member, isoDate = toIsoDate(new Date())) {
+    const existing = (TEAM_STATE.entriesByMember.get(member.id) || []).find((entry) => entry.date === isoDate);
+    document.getElementById("panelTitle").textContent = "Pointer";
+    document.getElementById("panelContent").innerHTML = `
+        <form class="team-form quick-form" id="punchForm">
+            <section class="profile-head punch-profile" style="--member-color:${escapeAttribute(member.color)}">
+                <h3>${escapeHtml(member.name)}</h3>
+                <p>Taux horaire ${formatMoney(member.hourlyRate)}</p>
+            </section>
+            <label class="form-row"><span>Date</span><input name="date" type="date" required value="${escapeAttribute(isoDate)}"></label>
+            <label class="form-row"><span>Heures travaillees</span><input name="hours" type="number" min="0" step="0.25" required value="${escapeAttribute(existing ? existing.hours : "")}" placeholder="8"></label>
+            <div class="computed-line" id="dailySalary">Salaire du jour : ${formatMoney((existing ? existing.hours : 0) * Number(member.hourlyRate || 0))}</div>
+            <button class="primary-btn big-action" type="submit">Valider</button>
+        </form>
+    `;
+    openPanel();
+    const form = document.getElementById("punchForm");
+    const hoursInput = form.elements.hours;
+    hoursInput.addEventListener("input", () => {
+        document.getElementById("dailySalary").textContent = `Salaire du jour : ${formatMoney(Number(hoursInput.value || 0) * Number(member.hourlyRate || 0))}`;
+    });
+    form.addEventListener("submit", (event) => savePunchForm(event, member));
+    setTimeout(() => hoursInput.focus(), 60);
+}
+
+function openAdvanceForm(member) {
+    document.getElementById("panelTitle").textContent = "Acompte";
+    document.getElementById("panelContent").innerHTML = `
+        <form class="team-form quick-form" id="advanceForm">
+            <section class="profile-head punch-profile" style="--member-color:${escapeAttribute(member.color)}">
+                <h3>${escapeHtml(member.name)}</h3>
+                <p>Historique separe des heures.</p>
+            </section>
+            <label class="form-row"><span>Date</span><input name="date" type="date" required value="${escapeAttribute(toIsoDate(new Date()))}"></label>
+            <label class="form-row"><span>Montant recu</span><input name="amount" type="number" min="0" step="1" required placeholder="10000"></label>
+            <label class="form-row"><span>Note</span><input name="note" placeholder="Optionnel"></label>
+            <button class="primary-btn big-action" type="submit">Enregistrer</button>
+        </form>
+    `;
+    openPanel();
+    const form = document.getElementById("advanceForm");
+    form.addEventListener("submit", (event) => saveAdvanceForm(event, member));
+    setTimeout(() => form.elements.amount.focus(), 60);
+}
+
+function openDayView(isoDate) {
+    const entries = getEntriesForDate(isoDate);
+    document.getElementById("panelTitle").textContent = shortDate(isoDate);
+    document.getElementById("panelContent").innerHTML = `
+        <div class="panel-scroll">
+            <section class="history-block">
+                <h4>Pointage du jour</h4>
+                ${entries.map((entry) => {
+                    const member = TEAM_STATE.members.find((item) => item.id === entry.memberId);
+                    return member ? renderWorkLine(entry, member) : "";
+                }).join("") || `<div class="empty-state compact-empty">Aucun pointage ce jour.</div>`}
+            </section>
+        </div>
+    `;
+    openPanel();
 }
 
 async function saveMemberForm(event, memberId = null) {
@@ -212,6 +332,35 @@ async function saveMemberForm(event, memberId = null) {
     renderTeam();
 }
 
+async function savePunchForm(event, member) {
+    event.preventDefault();
+    const data = Object.fromEntries(new FormData(event.currentTarget).entries());
+    await window.KynexyTeamDB.upsertWorkEntry({
+        memberId: member.id,
+        date: data.date,
+        hours: data.hours
+    });
+    TEAM_STATE.currentDate = new Date(data.date + "T00:00:00");
+    await reloadTeamData();
+    closePanel();
+    renderTeam();
+}
+
+async function saveAdvanceForm(event, member) {
+    event.preventDefault();
+    const data = Object.fromEntries(new FormData(event.currentTarget).entries());
+    await window.KynexyTeamDB.createAdvance({
+        memberId: member.id,
+        date: data.date,
+        amount: data.amount,
+        note: data.note
+    });
+    TEAM_STATE.currentDate = new Date(data.date + "T00:00:00");
+    await reloadTeamData();
+    closePanel();
+    renderTeam();
+}
+
 async function deleteMember(memberId) {
     if (!window.confirm("Supprimer ce salarie et son historique local ?")) {
         return;
@@ -222,145 +371,29 @@ async function deleteMember(memberId) {
     renderTeam();
 }
 
-function openMemberProfile(memberId) {
-    const member = TEAM_STATE.members.find((item) => item.id === memberId);
-    if (!member) {
-        return;
-    }
-
-    const summary = getSummary(member.id);
-    const entries = (TEAM_STATE.entriesByMember.get(member.id) || []).slice().reverse();
-    document.getElementById("panelTitle").textContent = member.name;
-    document.getElementById("panelContent").innerHTML = `
-        <div class="panel-scroll">
-            <section class="profile-head" style="--member-color:${escapeAttribute(member.color)}">
-                <h3>${escapeHtml(member.name)}</h3>
-                <p>${escapeHtml(member.role || "Poste a definir")} ${member.phone ? " - " + escapeHtml(member.phone) : ""}</p>
-            </section>
-            ${renderSummaryGrid(summary)}
-            <div class="panel-actions">
-                <button class="primary-btn" type="button" id="addEntryToday">Saisir aujourd'hui</button>
-                <button class="secondary-btn" type="button" id="editMember">Modifier fiche</button>
-            </div>
-            ${entries.map((entry) => renderHistoryRow(entry)).join("") || `<div class="empty-state">Aucun historique ce mois-ci.</div>`}
-        </div>
-    `;
-
-    openPanel();
-    document.getElementById("editMember").addEventListener("click", () => openMemberForm(member));
-    document.getElementById("addEntryToday").addEventListener("click", () => openDayEditor(toIsoDate(new Date()), member.id));
-}
-
-function renderHistoryRow(entry) {
-    const bits = [];
-    if (entry.absent) {
-        bits.push("Absent");
-    } else {
-        bits.push(formatHours(entry.hours));
-    }
-    if (entry.advance) {
-        bits.push(`Acompte ${formatMoney(entry.advance)}`);
-    }
-    if (entry.salaryPaid) {
-        bits.push(`Verse ${formatMoney(entry.salaryPaid)}`);
-    }
+function renderWorkLine(entry, member) {
+    const salary = Number(entry.hours || 0) * Number(member.hourlyRate || 0);
     return `
-        <article class="history-row">
+        <article class="history-row punch-line">
             <strong>${escapeHtml(shortDate(entry.date))}</strong>
             <div>
-                <strong>${escapeHtml(bits.join(" - "))}</strong>
-                ${entry.note ? `<p>${escapeHtml(entry.note)}</p>` : ""}
+                <strong>${escapeHtml(formatHours(entry.hours))}</strong>
+                <p>${escapeHtml(formatMoney(salary))}</p>
             </div>
         </article>
     `;
 }
 
-function openDayEditor(isoDate, focusMemberId = null) {
-    const entriesByMember = new Map(getEntriesForDate(isoDate).map((entry) => [entry.memberId, entry]));
-    document.getElementById("panelTitle").textContent = shortDate(isoDate);
-    document.getElementById("panelContent").innerHTML = `
-        <form class="team-form" id="dayForm">
-            ${TEAM_STATE.members.map((member) => renderDayMemberForm(member, entriesByMember.get(member.id), focusMemberId === member.id)).join("") || `<div class="empty-state">Ajoutez un salarie avant de saisir une presence.</div>`}
-            ${TEAM_STATE.members.length ? `<button class="primary-btn" type="submit">Enregistrer la journee</button>` : ""}
-        </form>
-    `;
-
-    openPanel();
-    const form = document.getElementById("dayForm");
-    form.addEventListener("submit", (event) => saveDayForm(event, isoDate, entriesByMember));
-    form.querySelectorAll("[data-absent-toggle]").forEach((checkbox) => {
-        checkbox.addEventListener("change", () => toggleAbsentInputs(checkbox.closest(".day-member"), checkbox.checked));
-        toggleAbsentInputs(checkbox.closest(".day-member"), checkbox.checked);
-    });
-    const focused = focusMemberId ? form.querySelector(`[data-member-block="${cssEscape(focusMemberId)}"] input[name$="-hours"]`) : null;
-    if (focused) {
-        setTimeout(() => focused.focus(), 60);
-    }
-}
-
-function renderDayMemberForm(member, entry = null, autofocus = false) {
-    const prefix = member.id;
+function renderAdvanceLine(advance) {
     return `
-        <section class="day-row day-member" style="--member-color:${escapeAttribute(member.color)}" data-member-block="${escapeAttribute(member.id)}">
-            <div class="day-member-title">
-                <strong>${escapeHtml(member.name)}</strong>
-                <label class="toggle-row"><span>Absent</span><input name="${escapeAttribute(prefix)}-absent" type="checkbox" data-absent-toggle ${entry && entry.absent ? "checked" : ""}></label>
+        <article class="history-row advance-line">
+            <strong>${escapeHtml(shortDate(advance.date))}</strong>
+            <div>
+                <strong>${escapeHtml(formatMoney(advance.amount))}</strong>
+                ${advance.note ? `<p>${escapeHtml(advance.note)}</p>` : ""}
             </div>
-            <div class="form-grid">
-                <label><span>Heures</span><input name="${escapeAttribute(prefix)}-hours" type="number" min="0" step="0.25" value="${escapeAttribute(entry ? entry.hours : "")}" ${autofocus ? "autofocus" : ""}></label>
-                <label><span>Acompte</span><input name="${escapeAttribute(prefix)}-advance" type="number" min="0" step="1" value="${escapeAttribute(entry ? entry.advance : "")}"></label>
-            </div>
-            <div class="money-grid">
-                <label><span>Salaire verse</span><input name="${escapeAttribute(prefix)}-salaryPaid" type="number" min="0" step="1" value="${escapeAttribute(entry ? entry.salaryPaid : "")}"></label>
-                <label><span>Note</span><input name="${escapeAttribute(prefix)}-note" value="${escapeAttribute(entry ? entry.note : "")}" placeholder="Note courte"></label>
-            </div>
-        </section>
+        </article>
     `;
-}
-
-function toggleAbsentInputs(block, absent) {
-    if (!block) {
-        return;
-    }
-    const hours = block.querySelector('input[name$="-hours"]');
-    if (hours && absent) {
-        hours.value = "0";
-    }
-    if (hours) {
-        hours.disabled = absent;
-    }
-}
-
-async function saveDayForm(event, isoDate, previousEntries) {
-    event.preventDefault();
-    const data = Object.fromEntries(new FormData(event.currentTarget).entries());
-    const saves = TEAM_STATE.members.map((member) => {
-        const previous = previousEntries.get(member.id);
-        const absent = data[`${member.id}-absent`] === "on";
-        const payload = {
-            id: previous ? previous.id : undefined,
-            memberId: member.id,
-            date: isoDate,
-            hours: absent ? 0 : data[`${member.id}-hours`],
-            advance: data[`${member.id}-advance`],
-            salaryPaid: data[`${member.id}-salaryPaid`],
-            absent,
-            note: data[`${member.id}-note`]
-        };
-        const hasData = absent || Number(payload.hours) > 0 || Number(payload.advance) > 0 || Number(payload.salaryPaid) > 0 || String(payload.note || "").trim();
-        if (!hasData && previous) {
-            return window.KynexyTeamDB.deleteWorkEntry(previous.id);
-        }
-        if (!hasData) {
-            return Promise.resolve();
-        }
-        return window.KynexyTeamDB.upsertWorkEntry(payload);
-    });
-
-    await Promise.all(saves);
-    await reloadTeamData();
-    closePanel();
-    renderTeam();
 }
 
 function changeMonth(delta) {
@@ -383,11 +416,12 @@ function getSummary(memberId) {
     return TEAM_STATE.summaries.get(memberId) || {
         weekHours: 0,
         monthHours: 0,
+        weekSalary: 0,
+        monthSalary: 0,
         calculatedSalary: 0,
         advances: 0,
-        salaryPaid: 0,
         remaining: 0,
-        absences: 0
+        workDays: 0
     };
 }
 
@@ -398,7 +432,16 @@ function getStorageLabel() {
     if (!TEAM_STATE.databaseReady) {
         return "Chargement";
     }
-    return window.KynexyTeamDB.engineType === "indexeddb" ? "Memoire locale" : "Fallback local";
+    return TEAM_STATE.accessMode.role === "employee" ? "Mode salarie" : "Mode patron";
+}
+
+function getAccessMode() {
+    const params = new URLSearchParams(window.location.search);
+    const memberId = params.get("member") || params.get("employee");
+    return {
+        role: params.get("role") === "employee" && memberId ? "employee" : "owner",
+        memberId
+    };
 }
 
 function getCalendarCells(date) {
@@ -500,23 +543,16 @@ function formatDate(value) {
 function shortDate(value) {
     return new Date(value + "T00:00:00").toLocaleDateString("fr-FR", {
         day: "2-digit",
-        month: "short"
+        month: "2-digit"
     });
 }
 
 function formatHours(value) {
-    return `${new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 }).format(Number(value || 0))}h`;
+    return `${new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2 }).format(Number(value || 0))} h`;
 }
 
 function formatMoney(value) {
     return `${new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(Number(value || 0))} F`;
-}
-
-function cssEscape(value) {
-    if (window.CSS && typeof window.CSS.escape === "function") {
-        return window.CSS.escape(value);
-    }
-    return String(value).replace(/["\\]/g, "\\$&");
 }
 
 function escapeHtml(value) {
@@ -536,8 +572,10 @@ function publishTeamContext() {
     window.KynexyTeamState = {
         database: window.KynexyTeamDB ? window.KynexyTeamDB.name : null,
         databaseReady: TEAM_STATE.databaseReady,
+        accessMode: TEAM_STATE.accessMode.role,
         membersCount: TEAM_STATE.members.length,
         entriesCount: TEAM_STATE.entries.length,
+        advancesCount: TEAM_STATE.advances.length,
         month: formatMonth(TEAM_STATE.currentDate),
         summaries: Array.from(TEAM_STATE.summaries.values())
     };
@@ -555,8 +593,10 @@ window.KynexyTeam = {
     getState: () => ({
         currentDate: TEAM_STATE.currentDate.toISOString(),
         databaseReady: TEAM_STATE.databaseReady,
+        accessMode: TEAM_STATE.accessMode,
         members: TEAM_STATE.members.slice(),
         entries: TEAM_STATE.entries.slice(),
+        advances: TEAM_STATE.advances.slice(),
         summaries: Array.from(TEAM_STATE.summaries.values())
     })
 };

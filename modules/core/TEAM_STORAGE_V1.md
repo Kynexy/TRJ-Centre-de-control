@@ -22,9 +22,7 @@ La base locale conserve :
 
 - les fiches salaries ;
 - les heures travaillees par date ;
-- les absences ;
-- les acomptes verses ;
-- les salaires verses ;
+- les acomptes verses dans leur propre historique ;
 - les notes de journee ;
 - un journal `context_events` local.
 
@@ -34,12 +32,15 @@ Les calculs restent volontairement simples :
 
 - heures de la semaine ;
 - heures du mois ;
-- salaire calcule selon le taux horaire ;
+- salaire du jour selon le taux horaire ;
+- salaire de la semaine ;
+- salaire du mois ;
 - total des acomptes ;
-- total deja verse ;
 - reste a payer.
 
 Le module ne gere pas la TVA, les cotisations, les bulletins de paie ou la comptabilite avancee.
+
+Les acomptes ne modifient jamais les heures ni le salaire calcule. Ils sont uniquement deduits du montant restant a payer.
 
 ## Stockage
 

@@ -25,34 +25,43 @@
             memberId: member.id,
             date: "2026-07-01",
             hours: 7.5,
-            advance: 1000,
-            salaryPaid: 2000,
             note: "Matin"
         });
         await window.KynexyTeamDB.upsertWorkEntry({
             memberId: member.id,
             date: "2026-07-02",
-            absent: true,
-            note: "Absent"
+            hours: 6
+        });
+        const advance = await window.KynexyTeamDB.createAdvance({
+            memberId: member.id,
+            date: "2026-07-02",
+            amount: 5000,
+            note: "Acompte recu"
         });
 
         const members = await window.KynexyTeamDB.listMembers();
         const entries = await window.KynexyTeamDB.listWorkEntries({ from: "2026-07-01", to: "2026-07-31" });
-        const summary = window.KynexyTeamDB.calculateSummary(member, entries, "2026-07-01");
+        const advances = await window.KynexyTeamDB.listAdvances({ from: "2026-07-01", to: "2026-07-31" });
+        const summary = window.KynexyTeamDB.calculateSummary(member, entries, advances, "2026-07-01");
         const updated = await window.KynexyTeamDB.updateMember(member.id, { hourlyRate: 2500 });
         await window.KynexyTeamDB.deleteWorkEntry(entry.id);
+        await window.KynexyTeamDB.deleteAdvance(advance.id);
         const afterDelete = await window.KynexyTeamDB.listWorkEntries({ memberId: member.id });
+        const advancesAfterDelete = await window.KynexyTeamDB.listAdvances({ memberId: member.id });
         const events = await window.KynexyTeamDB.listContextEvents();
 
         const pass = members.length === 1
             && entries.length === 2
-            && summary.weekHours === 7.5
-            && summary.calculatedSalary === 15000
-            && summary.advances === 1000
-            && summary.salaryPaid === 2000
-            && summary.remaining === 12000
+            && advances.length === 1
+            && summary.weekHours === 13.5
+            && summary.monthHours === 13.5
+            && summary.weekSalary === 27000
+            && summary.monthSalary === 27000
+            && summary.advances === 5000
+            && summary.remaining === 22000
             && updated.hourlyRate === 2500
             && afterDelete.length === 1
+            && advancesAfterDelete.length === 0
             && events.length >= 5;
 
         await window.KynexyTeamDB.clearForTests();

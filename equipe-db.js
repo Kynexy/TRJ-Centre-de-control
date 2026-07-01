@@ -2,12 +2,14 @@
     "use strict";
 
     const DB_NAME = "kynexy-team-core";
-    const DB_VERSION = 1;
+    const DB_VERSION = 2;
     const STORE_MEMBERS = "members";
     const STORE_ENTRIES = "work_entries";
+    const STORE_ADVANCES = "advance_entries";
     const STORE_EVENTS = "context_events";
     const FALLBACK_MEMBERS_KEY = "kynexy-team-core:members";
     const FALLBACK_ENTRIES_KEY = "kynexy-team-core:work_entries";
+    const FALLBACK_ADVANCES_KEY = "kynexy-team-core:advance_entries";
     const FALLBACK_EVENTS_KEY = "kynexy-team-core:context_events";
 
     let enginePromise = null;
@@ -54,6 +56,12 @@
                     entries.createIndex("memberId", "memberId", { unique: false });
                     entries.createIndex("memberDate", ["memberId", "date"], { unique: true });
                     entries.createIndex("updatedAt", "updatedAt", { unique: false });
+                }
+                if (!database.objectStoreNames.contains(STORE_ADVANCES)) {
+                    const advances = database.createObjectStore(STORE_ADVANCES, { keyPath: "id" });
+                    advances.createIndex("date", "date", { unique: false });
+                    advances.createIndex("memberId", "memberId", { unique: false });
+                    advances.createIndex("updatedAt", "updatedAt", { unique: false });
                 }
                 if (!database.objectStoreNames.contains(STORE_EVENTS)) {
                     const events = database.createObjectStore(STORE_EVENTS, { keyPath: "id" });
@@ -115,13 +123,15 @@
                 });
             },
             deleteMember(id) {
-                return transaction(db, [STORE_MEMBERS, STORE_ENTRIES, STORE_EVENTS], "readwrite", async (stores) => {
+                return transaction(db, [STORE_MEMBERS, STORE_ENTRIES, STORE_ADVANCES, STORE_EVENTS], "readwrite", async (stores) => {
                     const existing = await requestToPromise(stores[STORE_MEMBERS].get(id));
                     if (existing) {
                         const entries = await requestToPromise(stores[STORE_ENTRIES].index("memberId").getAll(id));
+                        const advances = await requestToPromise(stores[STORE_ADVANCES].index("memberId").getAll(id));
                         await Promise.all(entries.map((entry) => requestToPromise(stores[STORE_ENTRIES].delete(entry.id))));
+                        await Promise.all(advances.map((advance) => requestToPromise(stores[STORE_ADVANCES].delete(advance.id))));
                         await requestToPromise(stores[STORE_MEMBERS].delete(id));
-                        await writeContextEvent(stores[STORE_EVENTS], "team.member.deleted", "member", id, { member: existing, entries });
+                        await writeContextEvent(stores[STORE_EVENTS], "team.member.deleted", "member", id, { member: existing, entries, advances });
                     }
                     return true;
                 });
@@ -164,6 +174,41 @@
                         .sort(compareEntries);
                 });
             },
+            createAdvance(input) {
+                const advance = normalizeAdvance(input);
+                return transaction(db, [STORE_ADVANCES, STORE_EVENTS], "readwrite", async (stores) => {
+                    await requestToPromise(stores[STORE_ADVANCES].add(advance));
+                    await writeContextEvent(stores[STORE_EVENTS], "team.advance.created", "advance", advance.id, advance);
+                    return advance;
+                });
+            },
+            deleteAdvance(id) {
+                return transaction(db, [STORE_ADVANCES, STORE_EVENTS], "readwrite", async (stores) => {
+                    const existing = await requestToPromise(stores[STORE_ADVANCES].get(id));
+                    if (existing) {
+                        await requestToPromise(stores[STORE_ADVANCES].delete(id));
+                        await writeContextEvent(stores[STORE_EVENTS], "team.advance.deleted", "advance", id, existing);
+                    }
+                    return true;
+                });
+            },
+            listAdvances(options = {}) {
+                return transaction(db, STORE_ADVANCES, "readonly", async (store) => {
+                    let advances;
+                    if (options.from || options.to) {
+                        const lower = options.from || "0000-01-01";
+                        const upper = options.to || "9999-12-31";
+                        advances = await requestToPromise(store.index("date").getAll(IDBKeyRange.bound(lower, upper)));
+                    } else if (options.memberId) {
+                        advances = await requestToPromise(store.index("memberId").getAll(options.memberId));
+                    } else {
+                        advances = await requestToPromise(store.getAll());
+                    }
+                    return advances
+                        .filter((advance) => !options.memberId || advance.memberId === options.memberId)
+                        .sort(compareEntries);
+                });
+            },
             listContextEvents() {
                 return transaction(db, STORE_EVENTS, "readonly", async (store) => {
                     const events = await requestToPromise(store.getAll());
@@ -171,9 +216,10 @@
                 });
             },
             clearForTests() {
-                return transaction(db, [STORE_MEMBERS, STORE_ENTRIES, STORE_EVENTS], "readwrite", async (stores) => {
+                return transaction(db, [STORE_MEMBERS, STORE_ENTRIES, STORE_ADVANCES, STORE_EVENTS], "readwrite", async (stores) => {
                     await requestToPromise(stores[STORE_MEMBERS].clear());
                     await requestToPromise(stores[STORE_ENTRIES].clear());
+                    await requestToPromise(stores[STORE_ADVANCES].clear());
                     await requestToPromise(stores[STORE_EVENTS].clear());
                 });
             }
@@ -213,9 +259,11 @@
             async deleteMember(id) {
                 const members = readJson(FALLBACK_MEMBERS_KEY, []);
                 const entries = readJson(FALLBACK_ENTRIES_KEY, []);
+                const advances = readJson(FALLBACK_ADVANCES_KEY, []);
                 const existing = members.find((member) => member.id === id);
                 writeJson(FALLBACK_MEMBERS_KEY, members.filter((member) => member.id !== id));
                 writeJson(FALLBACK_ENTRIES_KEY, entries.filter((entry) => entry.memberId !== id));
+                writeJson(FALLBACK_ADVANCES_KEY, advances.filter((advance) => advance.memberId !== id));
                 if (existing) {
                     appendFallbackEvent("team.member.deleted", "member", id, existing);
                 }
@@ -250,12 +298,35 @@
                     .filter((entry) => (!options.memberId || entry.memberId === options.memberId) && (!options.from || entry.date >= options.from) && (!options.to || entry.date <= options.to))
                     .sort(compareEntries);
             },
+            async createAdvance(input) {
+                const advance = normalizeAdvance(input);
+                const advances = readJson(FALLBACK_ADVANCES_KEY, []);
+                advances.push(advance);
+                writeJson(FALLBACK_ADVANCES_KEY, advances.sort(compareEntries));
+                appendFallbackEvent("team.advance.created", "advance", advance.id, advance);
+                return advance;
+            },
+            async deleteAdvance(id) {
+                const advances = readJson(FALLBACK_ADVANCES_KEY, []);
+                const existing = advances.find((advance) => advance.id === id);
+                writeJson(FALLBACK_ADVANCES_KEY, advances.filter((advance) => advance.id !== id));
+                if (existing) {
+                    appendFallbackEvent("team.advance.deleted", "advance", id, existing);
+                }
+                return true;
+            },
+            async listAdvances(options = {}) {
+                return readJson(FALLBACK_ADVANCES_KEY, [])
+                    .filter((advance) => (!options.memberId || advance.memberId === options.memberId) && (!options.from || advance.date >= options.from) && (!options.to || advance.date <= options.to))
+                    .sort(compareEntries);
+            },
             async listContextEvents() {
                 return readJson(FALLBACK_EVENTS_KEY, []).sort((a, b) => a.occurredAt.localeCompare(b.occurredAt));
             },
             async clearForTests() {
                 window.localStorage.removeItem(FALLBACK_MEMBERS_KEY);
                 window.localStorage.removeItem(FALLBACK_ENTRIES_KEY);
+                window.localStorage.removeItem(FALLBACK_ADVANCES_KEY);
                 window.localStorage.removeItem(FALLBACK_EVENTS_KEY);
             }
         };
@@ -340,16 +411,37 @@
             memberId: input.memberId,
             date,
             hours: roundHours(input.hours || 0),
-            advance: roundMoney(input.advance || 0),
-            salaryPaid: roundMoney(input.salaryPaid || 0),
-            absent: Boolean(input.absent),
             note: String(input.note || "").trim(),
             createdAt: input.createdAt || now,
             updatedAt: now
         };
     }
 
-    function calculateSummary(member, entries, referenceDate = new Date()) {
+    function normalizeAdvance(input) {
+        const now = new Date().toISOString();
+        const date = String(input.date || "").slice(0, 10);
+        if (!input.memberId) {
+            throw new Error("Advance memberId is required.");
+        }
+        if (!date) {
+            throw new Error("Advance date is required.");
+        }
+        return {
+            id: input.id || createId("advance"),
+            memberId: input.memberId,
+            date,
+            amount: roundMoney(input.amount || 0),
+            note: String(input.note || "").trim(),
+            createdAt: input.createdAt || now,
+            updatedAt: now
+        };
+    }
+
+    function calculateSummary(member, entries, advances = [], referenceDate = new Date()) {
+        if (!Array.isArray(advances)) {
+            referenceDate = advances || referenceDate;
+            advances = [];
+        }
         const date = asDate(referenceDate);
         const monthStart = toIsoDate(new Date(date.getFullYear(), date.getMonth(), 1));
         const monthEnd = toIsoDate(new Date(date.getFullYear(), date.getMonth() + 1, 0));
@@ -362,26 +454,36 @@
 
         const monthEntries = entries.filter((entry) => entry.memberId === member.id && entry.date >= monthStart && entry.date <= monthEnd);
         const weekEntries = entries.filter((entry) => entry.memberId === member.id && entry.date >= weekStart && entry.date <= weekEnd);
+        const monthAdvances = advances.filter((advance) => advance.memberId === member.id && advance.date >= monthStart && advance.date <= monthEnd);
+        const weekAdvances = advances.filter((advance) => advance.memberId === member.id && advance.date >= weekStart && advance.date <= weekEnd);
         const monthHours = sum(monthEntries, "hours");
         const weekHours = sum(weekEntries, "hours");
-        const calculatedSalary = roundMoney(monthHours * Number(member.hourlyRate || 0));
-        const advances = sum(monthEntries, "advance");
-        const salaryPaid = sum(monthEntries, "salaryPaid");
+        const weekSalary = roundMoney(weekHours * Number(member.hourlyRate || 0));
+        const monthSalary = roundMoney(monthHours * Number(member.hourlyRate || 0));
+        const legacyEntryAdvances = sum(monthEntries, "advance");
+        const advancesTotal = roundMoney(sum(monthAdvances, "amount") + legacyEntryAdvances);
+        const weekAdvancesTotal = sum(weekAdvances, "amount");
 
         return {
             memberId: member.id,
             weekHours,
             monthHours,
-            calculatedSalary,
-            advances,
-            salaryPaid,
-            remaining: roundMoney(calculatedSalary - advances - salaryPaid),
-            absences: monthEntries.filter((entry) => entry.absent).length
+            weekSalary,
+            monthSalary,
+            calculatedSalary: monthSalary,
+            advances: advancesTotal,
+            weekAdvances: weekAdvancesTotal,
+            remaining: roundMoney(monthSalary - advancesTotal),
+            workDays: monthEntries.filter((entry) => Number(entry.hours) > 0).length
         };
     }
 
-    function calculateAllSummaries(members, entries, referenceDate) {
-        return members.map((member) => calculateSummary(member, entries, referenceDate));
+    function calculateAllSummaries(members, entries, advances = [], referenceDate) {
+        if (!Array.isArray(advances)) {
+            referenceDate = advances;
+            advances = [];
+        }
+        return members.map((member) => calculateSummary(member, entries, advances, referenceDate));
     }
 
     function roundHours(value) {
@@ -474,6 +576,15 @@
         },
         listWorkEntries(options) {
             return withEngine("listWorkEntries", options);
+        },
+        createAdvance(input) {
+            return withEngine("createAdvance", input);
+        },
+        deleteAdvance(id) {
+            return withEngine("deleteAdvance", id);
+        },
+        listAdvances(options) {
+            return withEngine("listAdvances", options);
         },
         listContextEvents() {
             return withEngine("listContextEvents");
