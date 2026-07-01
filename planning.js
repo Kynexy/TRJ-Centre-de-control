@@ -6,6 +6,8 @@ const CATEGORY_META = {
     suivi: { label: "Suivi", className: "cat-suivi" }
 };
 
+const ACTIVE_CATEGORY_KEYS = ["chantier", "visite", "devis", "suivi"];
+
 const PLANNING_STATE = {
     currentDate: new Date(2026, 5, 30),
     currentView: "month",
@@ -201,12 +203,15 @@ function renderMonthLabel() {
 
 function renderLegend() {
 
-    document.getElementById("categoryLegend").innerHTML = Object.entries(CATEGORY_META).map(([key, meta]) => `
-        <span class="legend-item ${meta.className}">
-            <span class="legend-dot"></span>
-            ${escapeHtml(meta.label)}
-        </span>
-    `).join("");
+    document.getElementById("categoryLegend").innerHTML = ACTIVE_CATEGORY_KEYS.map((key) => {
+        const meta = CATEGORY_META[key];
+        return `
+            <span class="legend-item ${meta.className}">
+                <span class="legend-dot"></span>
+                ${escapeHtml(meta.label)}
+            </span>
+        `;
+    }).join("");
 
 }
 
@@ -214,12 +219,10 @@ function renderSummary() {
 
     const monthAppointments = getVisibleMonthAppointments();
     const busyDays = new Set(monthAppointments.map((appointment) => appointment.date)).size;
-    const urgent = monthAppointments.filter((appointment) => appointment.category === "urgence").length;
 
     document.getElementById("monthSummary").innerHTML = [
         { label: "Rendez-vous", value: monthAppointments.length },
         { label: "Jours occupés", value: busyDays },
-        { label: "Urgences", value: urgent }
     ].map((item) => `
         <article class="summary-item">
             <span>${escapeHtml(item.label)}</span>
@@ -436,7 +439,10 @@ function openCreateAppointment(isoDate) {
             <div class="detail-row">
                 <span>Catégorie</span>
                 <select name="category">
-                    ${Object.entries(CATEGORY_META).map(([key, meta]) => `<option value="${escapeAttribute(key)}">${escapeHtml(meta.label)}</option>`).join("")}
+                    ${ACTIVE_CATEGORY_KEYS.map((key) => {
+                        const meta = CATEGORY_META[key];
+                        return `<option value="${escapeAttribute(key)}">${escapeHtml(meta.label)}</option>`;
+                    }).join("")}
                 </select>
             </div>
             ${inputRow("Nom du client", "client", "", "text", "Nom client")}
