@@ -1,4 +1,4 @@
-// TRJ OS Aujourd'hui
+// Aujourd'hui
 // Independent terrain-first experience. Glide can inject window.TRJ_TODAY_DATA.
 
 const TODAY_STATUS = {
@@ -142,7 +142,7 @@ function renderNextJob(data) {
     if (!data.nextJob) {
         target.innerHTML = `
             <div class="empty-state">
-                Aucun prochain chantier charge. TRJ OS attend le moteur metier Glide : rendez-vous, client, site, devis, equipe et trajet.
+                Aucun prochain chantier charge. rendez-vous, client, site, devis, equipe et trajet.
             </div>
         `;
         return;

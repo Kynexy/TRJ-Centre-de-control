@@ -22,11 +22,8 @@ function initPlanning() {
 
     document.getElementById("prevMonth").addEventListener("click", () => changeMonth(-1));
     document.getElementById("nextMonth").addEventListener("click", () => changeMonth(1));
-    document.getElementById("todayButton").addEventListener("click", goToToday);
     document.getElementById("closePanel").addEventListener("click", closePanel);
-    document.querySelectorAll("[data-calendar-view]").forEach((button) => {
-        button.addEventListener("click", () => changeView(button.dataset.calendarView));
-    });
+    document.getElementById("viewCycle").addEventListener("click", cycleView);
     document.getElementById("appointmentPanel").addEventListener("click", (event) => {
         if (event.target.id === "appointmentPanel") {
             closePanel();
@@ -183,54 +180,19 @@ function renderPlanning() {
 
     renderMonthLabel();
     renderViewSwitch();
-    renderLegend();
-    renderSummary();
     renderCalendarView();
 
 }
 
 function renderViewSwitch() {
 
-    document.querySelectorAll("[data-calendar-view]").forEach((button) => {
-        button.classList.toggle("active", button.dataset.calendarView === PLANNING_STATE.currentView);
-    });
+    document.getElementById("viewCycle").textContent = getViewLabel(PLANNING_STATE.currentView);
 
 }
 
 function renderMonthLabel() {
 
     document.getElementById("monthLabel").textContent = formatMonth(PLANNING_STATE.currentDate);
-
-}
-
-function renderLegend() {
-
-    document.getElementById("categoryLegend").innerHTML = ACTIVE_CATEGORY_KEYS.map((key) => {
-        const meta = CATEGORY_META[key];
-        return `
-            <span class="legend-item ${meta.className}">
-                <span class="legend-dot"></span>
-                ${escapeHtml(meta.label)}
-            </span>
-        `;
-    }).join("");
-
-}
-
-function renderSummary() {
-
-    const monthAppointments = getVisibleMonthAppointments();
-    const busyDays = new Set(monthAppointments.map((appointment) => appointment.date)).size;
-
-    document.getElementById("monthSummary").innerHTML = [
-        { label: "Rendez-vous", value: monthAppointments.length },
-        { label: "Jours occupés", value: busyDays },
-    ].map((item) => `
-        <article class="summary-item">
-            <span>${escapeHtml(item.label)}</span>
-            <strong>${escapeHtml(item.value)}</strong>
-        </article>
-    `).join("");
 
 }
 
@@ -563,6 +525,20 @@ function changeView(view) {
 
     PLANNING_STATE.currentView = ["month", "week", "day", "agenda"].includes(view) ? view : "month";
     renderPlanning();
+
+}
+
+function cycleView() {
+
+    const views = ["month", "week", "day", "agenda"];
+    const currentIndex = views.indexOf(PLANNING_STATE.currentView);
+    changeView(views[(currentIndex + 1) % views.length]);
+
+}
+
+function getViewLabel(view) {
+
+    return { month: "Mois", week: "Semaine", day: "Jour", agenda: "Agenda" }[view] || "Mois";
 
 }
 

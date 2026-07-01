@@ -874,10 +874,6 @@ font-size:12px;
 border-radius:10px;
 }
 
-#todayButton{
-display:none;
-}
-
 .weekday-row,
 .month-grid{
 min-width:0;
@@ -1067,6 +1063,303 @@ font-size:16px;
 
 .day-number{
 font-size:10px;
+}
+
+.appointment-client{
+font-size:8px;
+}
+}
+
+/* Final mobile-first calendar pass: controls support the month, they do not compete with it. */
+body{
+padding:10px;
+overflow:hidden;
+}
+
+.calendar-shell{
+height:calc(100dvh - 20px);
+width:calc(100vw - 20px);
+max-width:calc(100vw - 20px);
+padding-bottom:0;
+gap:0;
+}
+
+.calendar-card{
+display:flex;
+flex-direction:column;
+flex:1;
+min-height:0;
+width:100%;
+max-width:100%;
+overflow:hidden;
+border-radius:20px;
+padding:10px;
+}
+
+.calendar-toolbar{
+display:flex;
+align-items:center;
+gap:8px;
+margin-bottom:8px;
+min-height:32px;
+position:relative;
+padding-right:0;
+}
+
+.month-picker{
+display:flex;
+align-items:center;
+gap:4px;
+min-width:0;
+}
+
+.month-picker #monthLabel{
+min-width:0;
+flex:1;
+text-align:center;
+font-size:14px;
+font-weight:800;
+line-height:1;
+color:var(--blue-soft);
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+padding:0 4px;
+position:static;
+z-index:auto;
+}
+
+.month-picker .nav-pill{
+border:0;
+width:30px;
+height:30px;
+min-width:30px;
+flex:0 0 30px;
+border-radius:50%;
+background:rgba(255,255,255,.10);
+color:white;
+padding:0;
+font-size:18px;
+line-height:1;
+display:flex;
+align-items:center;
+justify-content:center;
+position:static;
+}
+
+.month-picker #prevMonth,
+.month-picker #nextMonth{
+position:static;
+left:auto;
+right:auto;
+top:auto;
+}
+
+.view-menu{
+display:flex;
+align-items:center;
+gap:6px;
+color:var(--muted);
+font-size:11px;
+white-space:nowrap;
+position:static;
+flex:0 0 auto;
+border:1px solid rgba(255,255,255,.10);
+border-radius:999px;
+background:rgba(255,255,255,.10);
+color:white;
+font-weight:700;
+min-height:30px;
+padding:7px 10px;
+}
+
+.view-menu select{
+appearance:none;
+border:1px solid rgba(255,255,255,.10);
+border-radius:999px;
+background:rgba(255,255,255,.10);
+color:white;
+font:inherit;
+font-weight:700;
+min-height:30px;
+padding:7px 10px;
+}
+
+.view-menu option{
+color:#0f2f58;
+}
+
+.weekday-row{
+flex:0 0 auto;
+margin-bottom:4px;
+gap:3px;
+width:100%;
+max-width:100%;
+grid-template-columns:repeat(7,minmax(0,1fr));
+justify-content:stretch;
+}
+
+.weekday-row span{
+padding:4px 2px;
+font-size:11px;
+}
+
+.month-grid{
+flex:1;
+min-height:0;
+width:100%;
+max-width:100%;
+grid-template-columns:repeat(7,minmax(0,1fr));
+grid-template-rows:repeat(6,minmax(0,1fr));
+gap:3px;
+justify-content:stretch;
+}
+
+.day-cell{
+min-height:0;
+border-radius:10px;
+padding:4px;
+gap:3px;
+}
+
+.day-head{
+min-height:16px;
+}
+
+.day-number{
+font-size:12px;
+}
+
+.day-count{
+font-size:8px;
+}
+
+.appointment-strip{
+border-left-width:3px;
+border-radius:6px;
+padding:3px;
+gap:1px;
+box-shadow:none;
+}
+
+.appointment-client{
+font-size:8.5px;
+line-height:1;
+display:block;
+white-space:nowrap;
+text-overflow:ellipsis;
+overflow:hidden;
+max-width:100%;
+}
+
+.appointment-time{
+display:none;
+}
+
+@media(max-width:720px){
+body{
+padding:4px;
+}
+
+.calendar-shell{
+height:calc(100dvh - 8px);
+width:calc(100vw - 8px);
+max-width:calc(100vw - 8px);
+}
+
+.calendar-card{
+border-radius:14px;
+padding:6px;
+}
+
+.calendar-toolbar{
+display:flex;
+gap:5px;
+margin-bottom:5px;
+min-height:28px;
+padding-right:0;
+}
+
+.month-picker .nav-pill{
+width:26px;
+height:26px;
+min-width:26px;
+flex-basis:26px;
+font-size:16px;
+}
+
+.month-picker #monthLabel{
+font-size:12px;
+}
+
+.view-menu span{
+display:none;
+}
+
+.view-menu select{
+min-height:26px;
+padding:5px 8px;
+font-size:11px;
+max-width:56px;
+}
+
+.view-menu{
+min-height:26px;
+padding:5px 8px;
+font-size:11px;
+max-width:58px;
+overflow:hidden;
+}
+
+#viewCycle{
+display:flex !important;
+position:fixed !important;
+top:8px;
+left:145px;
+right:auto;
+z-index:20;
+width:56px;
+height:26px;
+align-items:center;
+justify-content:center;
+}
+
+.weekday-row{
+gap:2px;
+margin-bottom:3px;
+grid-template-columns:repeat(7,minmax(0,52px));
+justify-content:start;
+}
+
+.weekday-row span{
+font-size:9px;
+padding:2px 1px;
+}
+
+.month-grid{
+grid-template-columns:repeat(7,minmax(0,52px));
+grid-template-rows:repeat(6,minmax(0,1fr));
+gap:2px;
+justify-content:start;
+}
+
+.day-cell{
+border-radius:8px;
+padding:3px 2px;
+gap:2px;
+}
+
+.day-number{
+font-size:10px;
+}
+
+.day-count{
+font-size:7px;
+}
+
+.appointment-strip{
+padding:2px;
+border-radius:5px;
 }
 
 .appointment-client{

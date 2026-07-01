@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 
 <head>
@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#07182d">
 
-<title>Planning - Kynexy TRJ OS</title>
+<title>Planning Kynexy</title>
 
 <link rel="stylesheet" href="planning.css">
 <link rel="stylesheet" href="aurel-system.css">
@@ -18,36 +18,14 @@
 
 <main class="calendar-shell">
 
-<header class="topbar">
-<div class="title">
-<h1>Planning Kynexy</h1>
-<p>Calendrier mensuel des rendez-vous TRJ</p>
-</div>
-<div class="status">
-<button class="pill nav-pill" id="prevMonth" type="button">‹</button>
-<div class="pill" id="monthLabel">Initialisation</div>
-<button class="pill nav-pill" id="nextMonth" type="button">›</button>
-</div>
-</header>
-
-<section class="hero">
-<div>
-<h2>Calendrier mensuel</h2>
-<p>Une vue claire, lisible et rapide pour organiser les rendez-vous de l'entreprise sans bruit inutile.</p>
-</div>
-<div class="month-summary" id="monthSummary"></div>
-</section>
-
 <section class="calendar-card">
 <div class="calendar-toolbar">
-<div class="view-switch" id="viewSwitch" aria-label="Vues du calendrier">
-<button class="active" data-calendar-view="month" type="button">📅 Mois</button>
-<button data-calendar-view="week" type="button">📆 Semaine</button>
-<button data-calendar-view="day" type="button">🗓 Jour</button>
-<button data-calendar-view="agenda" type="button">📋 Agenda</button>
+<div class="month-picker" aria-label="Navigation du mois">
+<button class="nav-pill" id="prevMonth" type="button" aria-label="Mois précédent">&lt;</button>
+<div id="monthLabel">Initialisation</div>
+<button class="nav-pill" id="nextMonth" type="button" aria-label="Mois suivant">&gt;</button>
 </div>
-<div class="legend" id="categoryLegend"></div>
-<button class="ghost-btn" id="todayButton" type="button">Aujourd'hui</button>
+<button class="view-menu" id="viewCycle" type="button">Mois</button>
 </div>
 
 <div class="weekday-row">
@@ -69,7 +47,7 @@
 <div class="panel-card">
 <div class="panel-header">
 <h2>Rendez-vous</h2>
-<button class="icon-btn" id="closePanel" type="button" aria-label="Fermer">×</button>
+<button class="icon-btn" id="closePanel" type="button" aria-label="Fermer">&times;</button>
 </div>
 <div id="appointmentDetails"></div>
 </div>
