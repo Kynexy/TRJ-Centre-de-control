@@ -24,6 +24,11 @@ function initPlanning() {
             closePanel();
         }
     });
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+            closePanel();
+        }
+    });
 
     renderPlanning();
 
@@ -222,7 +227,7 @@ function renderMonthGrid() {
         const extra = appointments.length - visible.length;
 
         return `
-            <article class="day-cell ${cell.isCurrentMonth ? "" : "outside"} ${cell.isToday ? "today" : ""}">
+            <article class="day-cell ${cell.isCurrentMonth ? "" : "outside"} ${cell.isToday ? "today" : ""} ${cell.isSunday ? "sunday" : ""}">
                 <div class="day-head">
                     <span class="day-number">${cell.day}</span>
                     ${appointments.length ? `<span class="day-count">${appointments.length} rdv</span>` : ""}
@@ -288,6 +293,7 @@ function openAppointment(id) {
     const panel = document.getElementById("appointmentPanel");
     panel.classList.add("open");
     panel.setAttribute("aria-hidden", "false");
+    document.body.classList.add("panel-open");
 
 }
 
@@ -296,6 +302,7 @@ function closePanel() {
     const panel = document.getElementById("appointmentPanel");
     panel.classList.remove("open");
     panel.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("panel-open");
 
 }
 
@@ -345,7 +352,8 @@ function getCalendarCells(date) {
             isoDate,
             day: cellDate.getDate(),
             isCurrentMonth: cellDate.getMonth() === month,
-            isToday: isoDate === "2026-06-30"
+            isToday: isoDate === "2026-06-30",
+            isSunday: cellDate.getDay() === 0
         };
     });
 

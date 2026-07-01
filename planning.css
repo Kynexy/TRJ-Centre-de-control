@@ -18,6 +18,7 @@ font-family:Arial,Helvetica,sans-serif;
 --muted:rgba(255,255,255,.72);
 --line:rgba(255,255,255,.12);
 --purple:#b69cff;
+--sunday:#31516f;
 }
 
 body{
@@ -27,6 +28,11 @@ linear-gradient(180deg,#07182d 0%,#07182d 64%,#0f2f58 100%);
 color:var(--text);
 min-height:100vh;
 padding:16px;
+}
+
+body.panel-open{
+overflow:hidden;
+touch-action:none;
 }
 
 button{
@@ -205,6 +211,12 @@ text-align:center;
 padding:7px;
 }
 
+.weekday-row span:last-child{
+color:rgba(255,255,255,.74);
+background:rgba(49,81,111,.42);
+border-radius:999px;
+}
+
 .day-cell{
 min-height:150px;
 background:rgba(255,255,255,.075);
@@ -230,6 +242,25 @@ opacity:.42;
 .day-cell.today{
 border-color:rgba(44,169,255,.72);
 box-shadow:0 0 26px rgba(44,169,255,.20);
+}
+
+.day-cell.sunday{
+background:linear-gradient(180deg,rgba(49,81,111,.58),rgba(49,81,111,.30));
+border-color:rgba(255,255,255,.10);
+}
+
+.day-cell.sunday .appointment-strip{
+padding:6px 4px;
+border-left-width:3px;
+}
+
+.day-cell.sunday .appointment-client{
+font-size:10px;
+line-height:1.05;
+}
+
+.day-cell.sunday .appointment-time{
+display:none;
 }
 
 .day-head{
@@ -318,6 +349,8 @@ align-items:center;
 justify-content:center;
 padding:16px;
 z-index:50;
+overflow:hidden;
+overscroll-behavior:contain;
 }
 
 .appointment-panel.open{
@@ -326,6 +359,10 @@ display:flex;
 
 .panel-card{
 width:min(520px,100%);
+max-height:calc(100dvh - 32px);
+overflow:auto;
+overscroll-behavior:contain;
+scrollbar-width:thin;
 background:linear-gradient(135deg,rgba(15,47,88,.98),rgba(18,61,116,.98));
 border:1px solid rgba(255,255,255,.14);
 border-radius:22px;
@@ -334,11 +371,16 @@ padding:22px;
 }
 
 .panel-header{
+position:sticky;
+top:0;
+z-index:2;
+background:linear-gradient(135deg,rgba(15,47,88,.98),rgba(18,61,116,.98));
 display:flex;
 justify-content:space-between;
 align-items:center;
 gap:12px;
 margin-bottom:18px;
+padding-bottom:12px;
 }
 
 .panel-header h2{
@@ -503,40 +545,258 @@ min-height:132px;
 }
 
 @media(max-width:720px){
+html,
 body{
-padding:10px;
+width:100%;
+max-width:100%;
+min-width:0;
+}
+
+body{
+padding:8px;
+overflow:hidden;
+}
+
+body *{
+min-width:0;
+}
+
+.calendar-shell{
+height:calc(100dvh - 16px);
+padding-bottom:0;
+gap:6px;
+width:calc(100vw - 16px);
+max-width:calc(100vw - 16px);
+overflow:hidden;
 }
 
 .topbar,
 .hero,
 .calendar-card{
-border-radius:20px;
-padding:18px;
+border-radius:18px;
+padding:10px;
+width:100%;
+max-width:100%;
+min-width:0;
+}
+
+.topbar{
+display:grid;
+grid-template-columns:1fr;
+gap:8px;
+}
+
+.title{
+min-width:0;
+}
+
+.title h1{
+font-size:23px;
+}
+
+.title p,
+.hero p{
+font-size:12px;
+line-height:1.3;
+}
+
+.status{
+gap:6px;
+width:100%;
+display:grid;
+grid-template-columns:34px minmax(0,1fr) 34px;
+align-items:center;
+}
+
+#monthLabel{
+text-align:center;
+overflow:hidden;
+text-overflow:ellipsis;
+white-space:nowrap;
+}
+
+.pill{
+padding:7px 10px;
+font-size:12px;
+}
+
+.nav-pill{
+min-width:34px;
+width:34px;
+padding:0;
+font-size:18px;
+}
+
+.hero{
+gap:10px;
+}
+
+.hero h2{
+font-size:20px;
+margin-bottom:5px;
 }
 
 .month-summary{
-grid-template-columns:1fr;
+grid-template-columns:repeat(3,minmax(0,1fr));
+gap:6px;
+min-width:0;
+}
+
+.summary-item{
+border-radius:13px;
+padding:8px;
+}
+
+.summary-item span{
+font-size:10px;
+margin-bottom:4px;
+}
+
+.summary-item strong{
+font-size:20px;
 }
 
 .calendar-card{
-overflow:auto;
+display:flex;
+flex-direction:column;
+min-height:0;
+overflow:hidden;
+padding:8px;
+flex:1;
+}
+
+.calendar-toolbar{
+margin-bottom:6px;
+gap:6px;
+min-width:0;
+display:block;
+}
+
+.legend{
+gap:3px;
+min-width:0;
+display:grid;
+grid-template-columns:repeat(5,minmax(0,1fr));
+}
+
+.legend-item{
+padding:5px 4px;
+font-size:9px;
+gap:5px;
+min-width:0;
+justify-content:center;
+overflow:hidden;
+white-space:nowrap;
+}
+
+.legend-dot{
+width:7px;
+height:7px;
+}
+
+.ghost-btn{
+min-height:30px;
+padding:7px 9px;
+font-size:12px;
+border-radius:10px;
+}
+
+#todayButton{
+display:none;
 }
 
 .weekday-row,
 .month-grid{
-min-width:860px;
+min-width:0;
+gap:3px;
+width:100%;
+grid-template-columns:repeat(7,minmax(0,1fr));
+}
+
+.weekday-row{
+margin-bottom:4px;
+}
+
+.weekday-row span{
+font-size:10px;
+padding:3px;
+}
+
+.month-grid{
+flex:1;
+grid-template-rows:repeat(6,minmax(0,1fr));
+min-height:0;
 }
 
 .day-cell{
-min-height:126px;
+min-height:0;
+border-radius:9px;
+padding:3px;
+gap:2px;
+}
+
+.day-head{
+min-height:14px;
+gap:3px;
+}
+
+.day-number{
+font-size:11px;
+}
+
+.day-count{
+font-size:8px;
+}
+
+.appointments{
+gap:3px;
 }
 
 .appointment-strip{
-padding:7px 8px;
+border-left-width:3px;
+border-radius:6px;
+padding:3px;
+gap:1px;
+box-shadow:none;
+}
+
+.appointment-client{
+font-size:9px;
+line-height:1.05;
+max-width:100%;
+display:-webkit-box;
+-webkit-line-clamp:2;
+-webkit-box-orient:vertical;
+overflow:hidden;
+}
+
+.appointment-time{
+font-size:7px;
+}
+
+.more-pill{
+padding:3px 4px;
+font-size:9px;
 }
 
 .aurel-cloud{
 right:10px;
 bottom:10px;
+}
+
+.appointment-panel{
+padding:10px;
+align-items:stretch;
+}
+
+.panel-card{
+width:100%;
+max-height:calc(100dvh - 20px);
+padding:14px;
+border-radius:20px;
+}
+
+.panel-header{
+margin-bottom:12px;
 }
 }
