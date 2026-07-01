@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#07182d">
+
+<title>Aurel - TRJ OS</title>
+
+<link rel="stylesheet" href="aurel.css">
+
+</head>
+
+<body>
+
+<main class="aurel-shell" data-aurel-state="rest">
+
+<section class="aurel-stage" aria-labelledby="aurelTitle">
+
+<div class="aurel-heading">
+<p class="eyebrow">TRJ OS</p>
+<h1 id="aurelTitle">Bonjour Patron.</h1>
+<p>Je suis Aurel.<br>Ton intelligence opérationnelle.</p>
+</div>
+
+<div class="aurel-presence" aria-label="Aurel">
+<div class="aurel-aura" aria-hidden="true"></div>
+<div class="aurel-cloud">
+<div class="cloud-body" aria-hidden="true">
+<span class="cloud-lobe lobe-one"></span>
+<span class="cloud-lobe lobe-two"></span>
+<span class="cloud-lobe lobe-three"></span>
+<span class="cloud-lobe lobe-four"></span>
+<span class="cloud-lobe lobe-five"></span>
+<span class="cloud-eye left"></span>
+<span class="cloud-eye right"></span>
+<span class="cloud-smile"></span>
+</div>
+<div class="cloud-sparkles" aria-hidden="true"></div>
+</div>
+<div class="state-ring" aria-hidden="true"></div>
+</div>
+
+<p class="aurel-question">Comment puis-je t'aider aujourd'hui ?</p>
+
+</section>
+
+<section class="conversation-card" aria-label="Conversation avec Aurel">
+
+<div class="conversation-header">
+<div>
+<span class="status-dot" aria-hidden="true"></span>
+<strong>Aurel</strong>
+</div>
+<p id="stateLabel">Repos</p>
+</div>
+
+<div class="state-dock" aria-label="États Aurel">
+<button class="state-chip active" type="button" data-state="rest">Repos</button>
+<button class="state-chip" type="button" data-state="listening">Écoute</button>
+<button class="state-chip" type="button" data-state="thinking">Réflexion</button>
+<button class="state-chip" type="button" data-state="answering">Réponse</button>
+<button class="state-chip" type="button" data-state="happy">Content</button>
+<button class="state-chip" type="button" data-state="notification">Notification</button>
+</div>
+
+<div class="conversation-log empty" id="conversationLog" aria-live="polite">
+<div class="empty-conversation">
+<strong>Aurel est prêt.</strong>
+<span>La conversation apparaîtra ici.</span>
+</div>
+</div>
+
+</section>
+
+</main>
+
+<form class="action-bar" id="aurelForm">
+<button class="action-button" type="button" data-action="micro" aria-label="Micro">🎤</button>
+<label class="message-field">
+<span>Message</span>
+<textarea id="messageInput" rows="1" placeholder="Écris à Aurel..."></textarea>
+</label>
+<button class="action-button" type="button" data-action="document" aria-label="Ajouter un document">📎</button>
+<button class="action-button" type="button" data-action="photo" aria-label="Ajouter une photo">📷</button>
+<button class="action-button" type="button" data-action="video" aria-label="Ajouter une vidéo">🎥</button>
+<button class="send-button" type="submit" aria-label="Envoyer">➤</button>
+</form>
+
+<script src="aurel.js"></script>
+
+</body>
+
+</html>
