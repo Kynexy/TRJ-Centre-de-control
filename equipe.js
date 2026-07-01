@@ -149,11 +149,9 @@ function renderMemberCards() {
                             <span class="member-dot" style="--dot-color:${escapeAttribute(member.color)}"></span>
                             <h3>${escapeHtml(member.name)}</h3>
                         </div>
-                        <p>${escapeHtml(member.role || "Poste a definir")}${TEAM_STATE.accessMode.role === "owner" && member.phone ? " - " + escapeHtml(member.phone) : ""}</p>
                     </div>
-                    <div class="amount-main">${formatMoney(summary.remaining)}</div>
                 </div>
-                ${renderPunchSummary(summary)}
+                ${renderDashboardSummary(summary)}
             </button>
         `;
     }).join("");
@@ -163,13 +161,14 @@ function renderMemberCards() {
     });
 }
 
-function renderPunchSummary(summary) {
+function renderDashboardSummary(summary) {
     return `
         <div class="summary-grid punch-summary">
-            ${summaryTile("Semaine", `${formatHours(summary.weekHours)} · ${formatMoney(summary.weekSalary)}`)}
-            ${summaryTile("Mois", `${formatHours(summary.monthHours)} · ${formatMoney(summary.monthSalary)}`)}
+            ${summaryTile("Heures semaine", formatHours(summary.weekHours))}
+            ${summaryTile("Heures mois", formatHours(summary.monthHours))}
+            ${summaryTile("Salaire calcule", formatMoney(summary.monthSalary))}
             ${summaryTile("Acomptes", formatMoney(summary.advances))}
-            ${summaryTile("Reste", formatMoney(summary.remaining))}
+            ${summaryTile("Reste a payer", formatMoney(summary.remaining))}
         </div>
     `;
 }
@@ -184,7 +183,6 @@ function openMemberProfile(memberId) {
         return;
     }
 
-    const summary = getSummary(member.id);
     const workEntries = (TEAM_STATE.entriesByMember.get(member.id) || []).slice().sort((a, b) => b.date.localeCompare(a.date));
     const advances = (TEAM_STATE.advancesByMember.get(member.id) || []).slice().sort((a, b) => b.date.localeCompare(a.date));
     const isOwner = TEAM_STATE.accessMode.role === "owner";
@@ -195,10 +193,9 @@ function openMemberProfile(memberId) {
                 <h3>${escapeHtml(member.name)}</h3>
                 <p>${escapeHtml(member.role || "Poste a definir")}${member.phone && isOwner ? " - " + escapeHtml(member.phone) : ""}</p>
             </section>
-            ${renderPunchSummary(summary)}
             <div class="quick-actions ${isOwner ? "" : "single"}">
-                <button class="primary-btn big-action" type="button" id="punchToday">Pointer aujourd'hui</button>
-                <button class="secondary-btn big-action" type="button" id="recordAdvance">Acompte recu</button>
+                <button class="primary-btn big-action" type="button" id="punchToday">Pointer des heures</button>
+                <button class="secondary-btn big-action" type="button" id="recordAdvance">Ajouter un acompte</button>
                 ${isOwner ? `<button class="secondary-btn big-action subtle-action" type="button" id="editMember">Modifier profil</button>` : ""}
             </div>
             <section class="history-block">
@@ -279,9 +276,8 @@ function openAdvanceForm(member) {
         <form class="team-form quick-form" id="advanceForm">
             <section class="profile-head punch-profile" style="--member-color:${escapeAttribute(member.color)}">
                 <h3>${escapeHtml(member.name)}</h3>
-                <p>Historique separe des heures.</p>
+                <p>Aujourd'hui - historique separe des heures.</p>
             </section>
-            <label class="form-row"><span>Date</span><input name="date" type="date" required value="${escapeAttribute(toIsoDate(new Date()))}"></label>
             <label class="form-row"><span>Montant recu</span><input name="amount" type="number" min="0" step="1" required placeholder="10000"></label>
             <label class="form-row"><span>Note</span><input name="note" placeholder="Optionnel"></label>
             <button class="primary-btn big-action" type="submit">Enregistrer</button>
@@ -351,11 +347,11 @@ async function saveAdvanceForm(event, member) {
     const data = Object.fromEntries(new FormData(event.currentTarget).entries());
     await window.KynexyTeamDB.createAdvance({
         memberId: member.id,
-        date: data.date,
+        date: toIsoDate(new Date()),
         amount: data.amount,
         note: data.note
     });
-    TEAM_STATE.currentDate = new Date(data.date + "T00:00:00");
+    TEAM_STATE.currentDate = startOfDay(new Date());
     await reloadTeamData();
     closePanel();
     renderTeam();
