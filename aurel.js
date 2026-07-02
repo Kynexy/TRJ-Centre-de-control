@@ -36,7 +36,7 @@ async function initAurel() {
         AUREL_STATE.context = await window.AurelDB.getContext();
         AUREL_STATE.messages = await window.AurelDB.listConversation({ limit: 40 });
     } catch (error) {
-        console.error("Aurel core unavailable", error);
+        console.error("KYNEXY core unavailable", error);
         AUREL_STATE.messages = [];
     }
 
@@ -151,7 +151,7 @@ function renderConversation() {
     if (!AUREL_STATE.messages.length) {
         log.innerHTML = `
             <div class="empty-conversation">
-                <strong>Aurel est pret.</strong>
+                <strong>KYNEXY est pret.</strong>
                 <span>Demande le topo pour relier meteo, planning et equipe.</span>
             </div>
         `;
@@ -163,7 +163,7 @@ function renderConversation() {
 }
 
 function renderMessage(message) {
-    const label = message.author === "user" ? "Patron" : "Aurel";
+    const label = message.author === "user" ? "Patron" : "KYNEXY";
     const time = new Date(message.createdAt).toLocaleTimeString("fr-FR", {
         hour: "2-digit",
         minute: "2-digit"
@@ -211,7 +211,7 @@ function getAttachmentMessage(action) {
     const messages = {
         document: "Le connecteur documents sera une source, pas une memoire metier.",
         photo: "La photo pourra enrichir le contexte quand le module terrain sera branche.",
-        video: "La video restera un connecteur remplacable dans le pipeline Aurel."
+        video: "La video restera un connecteur remplacable dans le pipeline KYNEXY."
     };
 
     return messages[action] || "Action preparee pour une connexion future.";

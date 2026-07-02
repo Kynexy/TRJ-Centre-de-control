@@ -1,6 +1,6 @@
-# Aurel Core V1
+# KYNEXY Core V1
 
-Aurel devient la couche d'intelligence de Kynexy.
+KYNEXY devient la couche d'intelligence de Kynexy.
 
 Il ne possede pas les donnees metier. Les modules restent proprietaires :
 
@@ -9,11 +9,11 @@ Il ne possede pas les donnees metier. Les modules restent proprietaires :
 - Meteo possede les informations temps reel.
 - Les futurs modules possederont leurs propres faits metier.
 
-Aurel consulte ces sources en lecture seule, relie les signaux, puis construit une reponse.
+KYNEXY consulte ces sources en lecture seule, relie les signaux, puis construit une reponse.
 
 ## AurelDB
 
-La couche `AurelDB` isole les operations propres a Aurel :
+La couche `AurelDB` isole les operations propres au noyau KYNEXY :
 
 - memoire personnelle ;
 - rappels ;
@@ -24,7 +24,7 @@ La couche `AurelDB` isole les operations propres a Aurel :
 - connecteurs lecture seule ;
 - moteur de brief transverse.
 
-Le HTML d'Aurel ne manipule pas directement ces donnees. Il passe par `AurelDB`.
+Le HTML de KYNEXY ne manipule pas directement ces donnees. Il passe par `AurelDB`.
 
 ## Context Manager
 

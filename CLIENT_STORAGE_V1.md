@@ -5,7 +5,7 @@ Le module Clients / Devis / Factures est volontairement autonome.
 ## Perimetre
 
 - Reserve a l'administrateur.
-- Non connecte a Aurel pour cette version.
+- Non connecte au noyau KYNEXY pour cette version.
 - Non connecte au Planning, a l'Equipe ou aux futurs modules.
 - Concu pour produire rapidement des devis et factures professionnels.
 

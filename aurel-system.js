@@ -32,14 +32,14 @@
 
         const wrapper = document.createElement("aside");
         wrapper.className = "kx-aurel-floating";
-        wrapper.setAttribute("aria-label", "Aurel");
+        wrapper.setAttribute("aria-label", "KYNEXY");
         wrapper.dataset.aurelFloating = "true";
 
         const button = document.createElement("button");
         button.className = "kx-aurel-button";
         button.type = "button";
         button.dataset.aurelState = DEFAULT_STATE;
-        button.setAttribute("aria-label", "Ouvrir Aurel");
+        button.setAttribute("aria-label", "Ouvrir KYNEXY");
         button.appendChild(createAurelAvatar("kx-aurel-avatar"));
         button.addEventListener("click", () => {
             window.dispatchEvent(new CustomEvent("kynexy:aurel:open", {

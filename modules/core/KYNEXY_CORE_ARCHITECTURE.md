@@ -35,15 +35,15 @@ Cette couche est le debut du moteur de connaissances. Elle permet a Kynexy de se
 
 ### 3. Couche intelligence
 
-Aurel n'est pas le proprietaire des donnees.
+KYNEXY n'est pas le proprietaire des donnees.
 
 Il est un moteur d'interpretation branche sur le contexte :
 
-- `intelligence_engines` : moteurs disponibles, dont Aurel aujourd'hui.
+- `intelligence_engines` : moteurs disponibles, dont KYNEXY aujourd'hui.
 - `intelligence_outputs` : analyses, alertes, recommandations et aides a la decision.
 - `automation_intents` : automatisations proposees, confirmees ou executees.
 
-Si un meilleur moteur remplace Aurel demain, les tables metier et le contexte restent valables.
+Si un meilleur moteur remplace KYNEXY demain, les tables metier et le contexte restent valables.
 
 ### 4. Securite et multi-espace
 
@@ -69,7 +69,7 @@ Un modele purement relationnel serait trop court a long terme :
 
 - il relierait mal les domaines ;
 - il garderait l'historique comme un detail secondaire ;
-- il rendrait Aurel dependant de silos applicatifs ;
+- il rendrait KYNEXY dependant de silos applicatifs ;
 - il limiterait les futures recommandations transverses.
 
 Le meilleur compromis est donc :
@@ -86,7 +86,7 @@ Objectif : construire le coeur produit robuste.
 - Evenements transverses.
 - Relations simples entre objets.
 - Historique exploitable.
-- Premiers outputs d'Aurel.
+- Premiers outputs de KYNEXY.
 
 ### V2
 
@@ -118,7 +118,7 @@ Une nouvelle table metier est justifiee quand :
 Une relation transverse est justifiee quand :
 
 - elle relie plusieurs domaines ;
-- elle aide Aurel a expliquer une recommandation ;
+- elle aide KYNEXY a expliquer une recommandation ;
 - elle enrichit l'historique ou la prise de decision.
 
 Une abstraction plus forte est justifiee seulement quand :
@@ -133,4 +133,4 @@ Kynexy ne construit pas plusieurs applications dans une seule interface.
 
 Kynexy construit un contexte professionnel vivant.
 
-Le planning, l'equipe, la finance, les documents et les integrations ne sont pas des modules isoles. Ce sont des sources de contexte. La valeur apparait quand Aurel, ou un futur moteur, comprend les relations entre ces informations et aide l'utilisateur a decider plus vite, mieux, et avec moins d'effort mental.
+Le planning, l'equipe, la finance, les documents et les integrations ne sont pas des modules isoles. Ce sont des sources de contexte. La valeur apparait quand KYNEXY, ou un futur moteur, comprend les relations entre ces informations et aide l'utilisateur a decider plus vite, mieux, et avec moins d'effort mental.

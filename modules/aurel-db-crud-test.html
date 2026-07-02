@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Aurel DB Core Test</title>
+<title>KYNEXY Core Test</title>
 </head>
 <body>
 <pre id="result">RUNNING</pre>
@@ -20,9 +20,11 @@
         await window.KynexyTeamDB.open();
         await window.KynexyTeamDB.clearForTests();
 
+        const today = toLocalIsoDate(new Date());
+
         await window.KynexyPlanningDB.createAppointment({
             client: "Client test",
-            date: new Date().toISOString().slice(0, 10),
+            date: today,
             start: "08:00",
             end: "09:00",
             notes: "Verifier acces"
@@ -35,12 +37,12 @@
         });
         await window.KynexyTeamDB.upsertWorkEntry({
             memberId: member.id,
-            date: new Date().toISOString().slice(0, 10),
+            date: today,
             hours: 8
         });
         await window.KynexyTeamDB.createAdvance({
             memberId: member.id,
-            date: new Date().toISOString().slice(0, 10),
+            date: today,
             amount: 5000
         });
 
@@ -55,28 +57,39 @@
         const team = await window.AurelDB.connectors.team.read();
         const brief = await window.AurelDB.buildOperationalBrief("topo");
 
-        const pass = memory.id
-            && context.page === "aurel"
-            && context.selectedMemberId === member.id
-            && memories.length === 1
-            && conversation.length === 1
-            && planning.status === "ready"
-            && planning.today.length >= 1
-            && team.status === "ready"
-            && team.summaries.length === 1
-            && brief.answer.includes("Topo Kynexy");
+        const checks = {
+            memory: Boolean(memory.id),
+            contextPage: context.page === "aurel",
+            selectedMember: context.selectedMemberId === member.id,
+            memories: memories.length === 1,
+            conversation: conversation.length === 1,
+            planningReady: planning.status === "ready",
+            planningToday: planning.today.length >= 1,
+            teamReady: team.status === "ready",
+            teamSummary: team.summaries.length === 1,
+            brief: brief.answer.includes("Topo Kynexy")
+        };
+
+        const pass = Object.values(checks).every(Boolean);
 
         await window.AurelDB.clearForTests();
         await window.KynexyPlanningDB.clearForTests();
         await window.KynexyTeamDB.clearForTests();
 
         result.textContent = pass
-            ? "PASS AurelDB memory/context/connectors/brief"
-            : "FAIL AurelDB " + JSON.stringify({ context, memories, conversation, planning, team, brief }, null, 2);
+            ? "PASS KYNEXY memory/context/connectors/brief"
+            : "FAIL KYNEXY " + JSON.stringify({ checks, context, memories, conversation, planning, team, brief }, null, 2);
     } catch (error) {
         result.textContent = "ERROR " + (error && error.stack ? error.stack : error);
     }
 }());
+
+function toLocalIsoDate(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+}
 </script>
 </body>
 </html>

@@ -1,6 +1,6 @@
-# Configuration Aurel Cockpit Scroll V1
+# Configuration KYNEXY Cockpit Scroll V1
 
-Ce document explique comment connecter les sources externes d'Aurel.
+Ce document explique comment connecter les sources externes de KYNEXY.
 
 Toutes les valeurs se renseignent dans `config.js`, dans l'objet :
 
@@ -66,7 +66,7 @@ api: {
 }
 ```
 
-Sans cette cle, Aurel affiche un lien vers la recherche YouTube officielle et n'invente aucun resultat.
+Sans cette cle, KYNEXY affiche un lien vers la recherche YouTube officielle et n'invente aucun resultat.
 
 ## Messenger TRJ
 
@@ -148,7 +148,7 @@ photo: {
 }
 ```
 
-Sans `imageUrl`, Aurel indique clairement que la source photo reste a connecter.
+Sans `imageUrl`, KYNEXY indique clairement que la source photo reste a connecter.
 
 ## Actualites
 
@@ -169,7 +169,7 @@ Etapes :
 2. Modifier `query` pour cibler d'autres actualites.
 3. Modifier `fallbackUrl` pour pointer vers une source fiable : Tahiti Infos, TNTV, Polynesie la 1ere, Google News, etc.
 
-Si la source automatique est bloquee, Aurel affiche le lien direct de secours.
+Si la source automatique est bloquee, KYNEXY affiche le lien direct de secours.
 
 ## Circulation
 
@@ -188,9 +188,9 @@ Waze est deja connecte. Pour changer la zone, modifier `lat`, `lon` et `zoom` da
 
 Apres modification de `config.js` :
 
-1. Recharger Aurel.
+1. Recharger KYNEXY.
 2. Verifier que la carte concernee affiche la vraie source.
-3. Verifier que le Rapport Aurel mentionne la source comme disponible.
+3. Verifier que le rapport KYNEXY mentionne la source comme disponible.
 4. Ouvrir la console navigateur et verifier qu'il n'y a pas d'erreur.
 
 Une connexion correcte ne doit jamais afficher de fausse donnee.

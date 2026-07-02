@@ -25,7 +25,7 @@
                 return engine;
             })
             .catch((error) => {
-                console.warn("IndexedDB unavailable, using Aurel fallback storage.", error);
+                console.warn("IndexedDB unavailable, using KYNEXY fallback storage.", error);
                 activeEngineType = "localstorage-fallback";
                 return createLocalStorageEngine();
             });
@@ -42,7 +42,7 @@
         }
 
         const db = await new Promise((resolve, reject) => {
-            const timeout = window.setTimeout(() => reject(new Error("Aurel database opening timed out.")), 3500);
+            const timeout = window.setTimeout(() => reject(new Error("KYNEXY database opening timed out.")), 3500);
             const request = indexedDB.open(DB_NAME, DB_VERSION);
 
             request.onupgradeneeded = () => {
@@ -71,11 +71,11 @@
             };
             request.onerror = () => {
                 window.clearTimeout(timeout);
-                reject(request.error || new Error("Unable to open Aurel database."));
+                reject(request.error || new Error("Unable to open KYNEXY database."));
             };
             request.onblocked = () => {
                 window.clearTimeout(timeout);
-                reject(new Error("Aurel database upgrade is blocked by another open tab."));
+                reject(new Error("KYNEXY database upgrade is blocked by another open tab."));
             };
         });
 
@@ -386,15 +386,15 @@
     function completeTransaction(tx) {
         return new Promise((resolve, reject) => {
             tx.oncomplete = () => resolve();
-            tx.onerror = () => reject(tx.error || new Error("Aurel database transaction failed."));
-            tx.onabort = () => reject(tx.error || new Error("Aurel database transaction aborted."));
+            tx.onerror = () => reject(tx.error || new Error("KYNEXY database transaction failed."));
+            tx.onabort = () => reject(tx.error || new Error("KYNEXY database transaction aborted."));
         });
     }
 
     function requestToPromise(request) {
         return new Promise((resolve, reject) => {
             request.onsuccess = () => resolve(request.result);
-            request.onerror = () => reject(request.error || new Error("Aurel database request failed."));
+            request.onerror = () => reject(request.error || new Error("KYNEXY database request failed."));
         });
     }
 
@@ -562,7 +562,7 @@
             const value = window.localStorage.getItem(key);
             return value ? JSON.parse(value) : fallback;
         } catch (error) {
-            console.warn("Unable to read Aurel fallback storage.", error);
+            console.warn("Unable to read KYNEXY fallback storage.", error);
             return fallback;
         }
     }

@@ -38,7 +38,7 @@ V1 :
 - Index par date, date+heure et categorie.
 - Fallback localStorage si IndexedDB est indisponible.
 - Journal `context_events` local pour chaque creation, modification et suppression.
-- Exposition du contexte Planning a Aurel via `window.AurelState.planning`.
+- Exposition du contexte Planning au noyau KYNEXY via `window.AurelState.planning`.
 
 V2 :
 
@@ -47,4 +47,4 @@ V2 :
 - sauvegarde multi-appareil ;
 - alimentation de `context_events` dans Kynexy Core.
 
-La regle reste la meme : le Planning possede ses faits metier, le noyau contexte conserve l'historique transversal, et Aurel interprete les donnees sans les posseder.
+La regle reste la meme : le Planning possede ses faits metier, le noyau contexte conserve l'historique transversal, et KYNEXY interprete les donnees sans les posseder.

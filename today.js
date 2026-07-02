@@ -52,7 +52,7 @@ function analyseContext(context){
     const domains = Object.values(context.domains);
     const active = domains.filter(d=>d.connected);
     const confidence = Math.round(domains.reduce((sum,d)=>sum+d.confidence,0)/domains.length);
-    const missing = domains.filter(d=>!d.connected).map(d=>({title:d.name, detail:'Aurel attend : '+d.required.join(', ')+'.'}));
+    const missing = domains.filter(d=>!d.connected).map(d=>({title:d.name, detail:'KYNEXY attend : '+d.required.join(', ')+'.'}));
     const decisions = buildDecisions(context.domains);
     const automations = buildAutomations(context.domains);
     return { active, confidence, missing, decisions, automations };
@@ -67,7 +67,7 @@ function buildDecisions(domains){
         },
         {
             title:'Détecter un chantier à risque',
-            detail:'Possible quand Aurel relie météo, trajet, équipe et urgence client.',
+            detail:'Possible quand KYNEXY relie météo, trajet, équipe et urgence client.',
             ready: domains.terrain.connected && domains.team.connected && domains.clients.connected
         },
         {
@@ -104,13 +104,13 @@ function renderBrief(){
     const a = state.analysis;
     confidenceValue.textContent = a.confidence + '%';
     if (!a.active.length) {
-        contextBrief.textContent = 'Aurel est prêt, mais aucun domaine fiable n’est encore connecté. La prochaine étape n’est pas une fonctionnalité : c’est brancher des signaux réels.';
+        contextBrief.textContent = 'KYNEXY est prêt, mais aucun domaine fiable n’est encore connecté. La prochaine étape n’est pas une fonctionnalité : c’est brancher des signaux réels.';
         domainSummary.textContent = '0 domaine actif';
         decisionSummary.textContent = 'Aucune décision fiable';
         return;
     }
     const names = a.active.map(d=>d.name).join(', ');
-    contextBrief.textContent = 'Aurel comprend déjà : ' + names + '. Plus les domaines se relient, plus les conseils deviennent précis.';
+    contextBrief.textContent = 'KYNEXY comprend déjà : ' + names + '. Plus les domaines se relient, plus les conseils deviennent précis.';
     domainSummary.textContent = a.active.length + ' domaine(s) actif(s)';
     decisionSummary.textContent = a.decisions.filter(d=>d.ready).length + ' décision(s) possible(s)';
 }
@@ -129,7 +129,7 @@ function renderDecisions(){
 }
 
 function renderMissing(){
-    if (!state.analysis.missing.length) { missingList.innerHTML = '<article class="missing-card"><h3>Contexte complet</h3><p>Aurel dispose des domaines essentiels pour produire des recommandations transversales.</p></article>'; return; }
+    if (!state.analysis.missing.length) { missingList.innerHTML = '<article class="missing-card"><h3>Contexte complet</h3><p>KYNEXY dispose des domaines essentiels pour produire des recommandations transversales.</p></article>'; return; }
     missingList.innerHTML = state.analysis.missing.map(item=>`<article class="missing-card"><h3>${esc(item.title)}</h3><p>${esc(item.detail)}</p></article>`).join('');
 }
 

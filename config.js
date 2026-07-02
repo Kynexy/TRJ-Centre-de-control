@@ -1,11 +1,11 @@
 // =====================================
-// AUREL - CONFIGURATION CENTRALE
+// KYNEXY - CONFIGURATION CENTRALE
 // =====================================
 
 window.AUREL_CONFIG = {
     version: "1.0",
     app: {
-        name: "Aurel",
+        name: "KYNEXY",
         owner: "Tahiti Renov' Jardin"
     },
     api: {
