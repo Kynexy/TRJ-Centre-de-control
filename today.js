@@ -19,6 +19,8 @@ const state = { context:null, analysis:null, events:[] };
 document.addEventListener('DOMContentLoaded', initContext);
 
 function initContext(){
+    bindSharedContext();
+    refreshSharedContextIfAvailable();
     state.context = getContextData();
     state.analysis = analyseContext(state.context);
     render();
@@ -26,9 +28,69 @@ function initContext(){
 }
 
 function getContextData(){
+    const shared = getSharedContext();
+    if (shared) return normalizeSharedContext(shared);
     const injected = window.KYNEXY_CONTEXT_DATA || window.AUREL_CONTEXT_DATA || null;
     if (injected && typeof injected === 'object') return normalizeContext(injected, 'connecté');
     return normalizeContext(DEFAULT_CONTEXT, 'préparation');
+}
+
+function bindSharedContext(){
+    window.addEventListener('kynexy:shared-context:updated', event=>{
+        const shared = event.detail && event.detail.context ? event.detail.context : getSharedContext();
+        if (!shared) return;
+        state.context = normalizeSharedContext(shared);
+        state.analysis = analyseContext(state.context);
+        render();
+        publish();
+    });
+}
+
+function refreshSharedContextIfAvailable(){
+    if (window.KynexyContextHub && typeof window.KynexyContextHub.refresh === 'function') {
+        window.KynexyContextHub.refresh();
+    }
+}
+
+function getSharedContext(){
+    if (window.KynexySharedContext && window.KynexySharedContext.domains) return window.KynexySharedContext;
+    if (window.KynexyContextHub && typeof window.KynexyContextHub.getContext === 'function') {
+        const context = window.KynexyContextHub.getContext();
+        if (context && context.domains) return context;
+    }
+    return null;
+}
+
+function normalizeSharedContext(shared){
+    const raw = {
+        planning: mapSharedDomain(shared.domains.planning),
+        terrain: mapSharedDomain(shared.domains.weather),
+        clients: mapSharedDomain(shared.domains.crm),
+        team: mapSharedDomain(shared.domains.team),
+        finance: mapSharedDomain(shared.domains.crypto),
+        updatedAt: shared.generatedAt
+    };
+    return normalizeContext(raw, 'contexte partagé');
+}
+
+function mapSharedDomain(domain){
+    if (!domain || domain.status === 'unavailable' || domain.status === 'error') {
+        return { connected:false, signals:[], facts:[], risks:[] };
+    }
+    return {
+        connected: domain.status === 'ready' || domain.status === 'partial',
+        confidence: domain.status === 'ready' ? 80 : 45,
+        signals: buildSharedSignals(domain),
+        facts: domain.facts || [],
+        risks: domain.risks || []
+    };
+}
+
+function buildSharedSignals(domain){
+    const signals = [];
+    if (domain.summary) signals.push(domain.summary);
+    (domain.facts || []).slice(0,2).forEach(fact=>signals.push(String(fact.type || 'signal') + ' : ' + String(fact.value ?? '')));
+    return signals.filter(Boolean);
 }
 
 function normalizeContext(raw, source){

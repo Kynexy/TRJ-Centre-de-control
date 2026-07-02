@@ -20,6 +20,7 @@ const AUREL_STATE = {
     mode: AUREL_STATES.REST,
     messages: [],
     context: null,
+    sharedContext: null,
     voice: createVoicePipeline()
 };
 
@@ -29,6 +30,7 @@ async function initAurel() {
     bindStateDock();
     bindComposer();
     bindAttachmentButtons();
+    bindSharedContext();
 
     try {
         assertAurelDatabase();
@@ -42,6 +44,7 @@ async function initAurel() {
 
     renderConversation();
     publishAurelState();
+    refreshSharedContextIfAvailable();
 }
 
 function assertAurelDatabase() {
@@ -90,6 +93,33 @@ function bindAttachmentButtons() {
             await addAurelMessage(getAttachmentMessage(action));
         });
     });
+}
+
+function bindSharedContext() {
+    window.addEventListener("kynexy:shared-context:updated", (event) => {
+        AUREL_STATE.sharedContext = event.detail && event.detail.context ? event.detail.context : getSharedContext();
+        publishAurelState();
+    });
+}
+
+function refreshSharedContextIfAvailable() {
+    if (window.KynexyContextHub && typeof window.KynexyContextHub.refresh === "function") {
+        AUREL_STATE.sharedContext = window.KynexyContextHub.refresh();
+        publishAurelState();
+        return;
+    }
+    AUREL_STATE.sharedContext = getSharedContext();
+}
+
+function getSharedContext() {
+    if (window.KynexySharedContext && window.KynexySharedContext.domains) {
+        return window.KynexySharedContext;
+    }
+    if (window.KynexyContextHub && typeof window.KynexyContextHub.getContext === "function") {
+        const context = window.KynexyContextHub.getContext();
+        return context && context.domains ? context : null;
+    }
+    return null;
 }
 
 async function sendMessage(text) {
@@ -227,11 +257,13 @@ function publishAurelState() {
         mode: AUREL_STATE.mode,
         messages: AUREL_STATE.messages.slice(),
         context: window.KynexyAurelContext || AUREL_STATE.context,
+        sharedContext: AUREL_STATE.sharedContext,
         integrations: {
             memory: window.AurelDB ? window.AurelDB.engineType : "unavailable",
             planning: Boolean(window.KynexyPlanningDB),
             team: Boolean(window.KynexyTeamDB),
             weather: "connector-ready",
+            sharedContext: Boolean(AUREL_STATE.sharedContext),
             voice: "pipeline-ready",
             responseEngine: "provider-neutral"
         }
